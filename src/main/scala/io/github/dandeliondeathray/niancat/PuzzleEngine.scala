@@ -20,17 +20,17 @@ class PuzzleEngine {
 
 /** A PuzzleCommand is a command sent by a user to Niancat. */
 sealed trait PuzzleCommand {
-  def apply(engine: PuzzleEngine)
+  def apply(engine: PuzzleEngine): Response
 }
 
 case class Set(puzzle: Puzzle) extends PuzzleCommand {
-  def apply(engine: PuzzleEngine): Unit = {
+  def apply(engine: PuzzleEngine): Response = {
     engine.set(puzzle)
   }
 }
 
 case class Get() extends PuzzleCommand {
-  def apply(engine: PuzzleEngine) = engine.get()
+  def apply(engine: PuzzleEngine): Response = engine.get()
 }
 
 //case class CheckSolution(word: Word, user: User) extends PuzzleCommand

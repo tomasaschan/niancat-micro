@@ -7,8 +7,8 @@ import org.scalatest.{FlatSpec, Matchers}
   */
 class PuzzleEngineSpec extends FlatSpec with Matchers {
   "When getting a puzzle which is not set, the engine" should "reply that it's not set" in {
-    var engine = PuzzleEngine()
+    val engine = new PuzzleEngine()
     val response = Get()(engine)
-    response should be NoPuzzleSet()
+    response should matchPattern { case NoPuzzleSet() => }
   }
 }
