@@ -15,6 +15,8 @@ case class User(name: String)
 
 class PuzzleEngine(var puzzle: Option[Puzzle] = None) {
   def set(p: Puzzle): Response = {
+    puzzle = Some(p)
+
     CompositeResponse(Vector(NewPuzzle {
       p
     }))

@@ -1,7 +1,6 @@
 package io.github.dandeliondeathray.niancat
 
 import org.scalatest._
-import Inside._
 import matchers._
 
 trait ResponseMatchers {
@@ -37,6 +36,14 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with ResponseMatchers {
     val response = SetPuzzle(Puzzle("ABCDEFGHI"))(engine)
 
     response should containResponse (NewPuzzle(Puzzle("ABCDEFGHI")))
+  }
+
+  it should "store the new puzzle" in {
+    val puzzle = Puzzle("ABCDEFGHI")
+    val engine = new PuzzleEngine()
+    SetPuzzle(puzzle)(engine)
+
+    engine.puzzle shouldBe Some(puzzle)
   }
 
   "An engine with a puzzle set" should "reply with the puzzle, when asked for the puzzle" in {
