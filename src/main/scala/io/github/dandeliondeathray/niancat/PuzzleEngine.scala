@@ -13,9 +13,14 @@ case class Word(letters: String)
 /** A User is of course a user in the chat room. */
 case class User(name: String)
 
-class PuzzleEngine {
-  def set(puzzle: Puzzle): Response = DummyReply()
-  def get(): Response = DummyReply()
+class PuzzleEngine(var puzzle: Option[Puzzle] = None) {
+  def set(p: Puzzle): Response = DummyReply()
+  def get(): Response = {
+    puzzle match {
+      case None => NoPuzzleSet()
+      case Some(p: Puzzle) => GetReply(p)
+    }
+  }
 }
 
 /** A PuzzleCommand is a command sent by a user to Niancat. */
@@ -43,5 +48,6 @@ trait Notification extends Response
 
 case class NoPuzzleSet() extends Reply
 case class DummyReply() extends Reply
+case class GetReply(puzzle: Puzzle) extends Reply
 
 
