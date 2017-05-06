@@ -14,7 +14,12 @@ case class Word(letters: String)
 case class User(name: String)
 
 class PuzzleEngine(var puzzle: Option[Puzzle] = None) {
-  def set(p: Puzzle): Response = DummyReply()
+  def set(p: Puzzle): Response = {
+    CompositeResponse(Vector(NewPuzzle {
+      p
+    }))
+  }
+
   def get(): Response = {
     puzzle match {
       case None => NoPuzzleSet()
@@ -45,6 +50,8 @@ case class Get() extends PuzzleCommand {
 trait Response
 trait Reply extends Response
 trait Notification extends Response
+
+case class CompositeResponse(responses: Vector[Response]) extends Response
 
 case class NoPuzzleSet() extends Reply
 case class DummyReply() extends Reply

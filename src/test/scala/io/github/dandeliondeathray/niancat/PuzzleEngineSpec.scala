@@ -4,13 +4,17 @@ import org.scalatest._
 import Inside._
 import matchers._
 
-trait ReplyMatchers {
+trait ResponseMatchers {
   class ContainsResponseMatcher(expectedResponse: Response) extends Matcher[Response] {
-    def apply(reply: Response) = {
+    def apply(response: Response) = {
+      val hasOrIsExpectedResponse = response match {
+        case CompositeResponse(responses: Vector[Response]) => responses contains expectedResponse
+        case r: Response => r == expectedResponse
+      }
       MatchResult(
-        false,
-        s"""Reply $reply did not container expected reply $expectedResponse""",
-        s"""Reply $reply contained expected reply $expectedResponse"""
+        hasOrIsExpectedResponse,
+        s"""Response $response did not contain expected reply $expectedResponse""",
+        s"""Response $response contained expected reply $expectedResponse"""
       )
     }
   }
@@ -21,11 +25,11 @@ trait ReplyMatchers {
 /**
   * Created by Erik Edin on 2017-05-01.
   */
-class PuzzleEngineSpec extends FlatSpec with Matchers with ReplyMatchers {
+class PuzzleEngineSpec extends FlatSpec with Matchers with ResponseMatchers {
   "An engine with no puzzle set" should "reply that no puzzle is set, when asked for the puzzle" in {
     val engine = new PuzzleEngine()
     val response = Get()(engine)
-    response should matchPattern { case NoPuzzleSet() => }
+    response shouldBe NoPuzzleSet()
   }
 
   it should "notify that a new puzzle is set" in {
@@ -39,8 +43,6 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with ReplyMatchers {
     val puzzle = Puzzle("ABCDEFGHI")
     val engine = new PuzzleEngine(Some(puzzle))
     val response = Get()(engine)
-    inside(response) {
-      case GetReply(puzzleInReply: Puzzle) => puzzleInReply should be (puzzle)
-    }
+    response shouldBe GetReply(puzzle)
   }
 }
