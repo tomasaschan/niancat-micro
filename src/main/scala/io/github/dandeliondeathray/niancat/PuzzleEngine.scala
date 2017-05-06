@@ -28,7 +28,7 @@ sealed trait PuzzleCommand {
   def apply(engine: PuzzleEngine): Response
 }
 
-case class Set(puzzle: Puzzle) extends PuzzleCommand {
+case class SetPuzzle(puzzle: Puzzle) extends PuzzleCommand {
   def apply(engine: PuzzleEngine): Response = {
     engine.set(puzzle)
   }
@@ -50,4 +50,5 @@ case class NoPuzzleSet() extends Reply
 case class DummyReply() extends Reply
 case class GetReply(puzzle: Puzzle) extends Reply
 
+case class NewPuzzle(puzzle: Puzzle) extends Notification
 
