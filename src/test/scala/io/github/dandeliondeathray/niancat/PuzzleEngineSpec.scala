@@ -28,10 +28,22 @@ trait ResponseMatchers {
 class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with ResponseMatchers {
   val defaultPuzzle = Puzzle("VIVANSART")
   val defaultWord = Word("VANTRIVAS")
-  /** Make a PuzzleEngine instance that accepts all words as correct. */
-  def makeAcceptingPuzzleEngine(puzzle: Option[Puzzle] = None): PuzzleEngine = {
+
+  def acceptingDictionary: Dictionary = {
     val dictionary = stub[Dictionary]
     (dictionary.has _) when(*) returns(true) anyNumberOfTimes()
+    dictionary
+  }
+
+  def rejectingDictionary: Dictionary = {
+    val dictionary = stub[Dictionary]
+    (dictionary.has _) when(*) returns(false) anyNumberOfTimes()
+    dictionary
+  }
+
+  /** Make a PuzzleEngine instance that accepts all words as correct. */
+  def makeAcceptingPuzzleEngine(puzzle: Option[Puzzle] = None): PuzzleEngine = {
+    val dictionary = acceptingDictionary
     new PuzzleEngine(dictionary, puzzle)
   }
 
@@ -75,8 +87,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   }
 
   it should "reply that a word is not in the dictionary, when a user checks a word" in {
-    val dictionary = stub[Dictionary]
-    (dictionary.has _) when(defaultWord) returns(false) anyNumberOfTimes()
+    val dictionary = rejectingDictionary
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
 
     val response = CheckSolution(defaultWord, User("foo"))(engine)
@@ -85,14 +96,11 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   }
 
   it should "reply that a word is correct, if the word is in the dictionary" in {
-    val dictionary = stub[Dictionary]
-    (dictionary.has _) when(defaultWord) returns(true) anyNumberOfTimes()
+    val dictionary = acceptingDictionary
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
 
     val response = CheckSolution(defaultWord, User("foo"))(engine)
 
     response should containResponse (CorrectSolution(defaultWord))
   }
-
-
 }
