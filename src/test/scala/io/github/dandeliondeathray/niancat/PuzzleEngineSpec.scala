@@ -60,6 +60,14 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     engine.puzzle shouldBe Some(defaultPuzzle)
   }
 
+  it should "reply that no puzzle is set, when a user checks a solution" in {
+    val engine = makeAcceptingPuzzleEngine()
+
+    val response = CheckSolution(defaultWord, User("foo"))(engine)
+
+    response shouldBe NoPuzzleSet()
+  }
+
   "An engine with a puzzle set" should "reply with the puzzle, when asked for the puzzle" in {
     val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
     val response = Get()(engine)
@@ -85,4 +93,6 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     response should containResponse (CorrectSolution(defaultWord))
   }
+
+
 }

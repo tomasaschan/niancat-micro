@@ -30,6 +30,13 @@ class PuzzleEngine(val dictionary: Dictionary, var puzzle: Option[Puzzle] = None
   }
 
   def check(word: Word): Response = {
+    puzzle match {
+      case None => NoPuzzleSet()
+      case Some(p: Puzzle) => checkSolution(word)
+    }
+  }
+
+  private def checkSolution(word: Word): Response = {
     if (dictionary has word) {
       CorrectSolution(word)
     } else {
