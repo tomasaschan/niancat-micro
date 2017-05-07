@@ -103,4 +103,14 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     response should containResponse (CorrectSolution(defaultWord))
   }
+
+  it should "reply with a mismatch if the word does not match the puzzle" in {
+    val dictionary = rejectingDictionary
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
+
+    val mismatchingWord = Word("NOTRIGHT")
+    val response = CheckSolution(mismatchingWord, User("foo"))(engine)
+
+    response shouldBe a [WordAndPuzzleMismatch]
+  }
 }

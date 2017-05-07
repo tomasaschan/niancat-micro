@@ -32,16 +32,23 @@ class PuzzleEngine(val dictionary: Dictionary, var puzzle: Option[Puzzle] = None
   def check(word: Word): Response = {
     puzzle match {
       case None => NoPuzzleSet()
-      case Some(_) => checkSolution(word)
+      case Some(p: Puzzle) => checkSolution(word, p)
     }
   }
 
-  private def checkSolution(word: Word): Response = {
+  private def checkSolution(word: Word, puzzle: Puzzle): Response = {
+    if (!matchWordAgainstPuzzle(word, puzzle)) {
+      return WordAndPuzzleMismatch(word, puzzle)
+    }
     if (dictionary has word) {
       CorrectSolution(word)
     } else {
       NotInTheDictionary(word)
     }
+  }
+
+  private def matchWordAgainstPuzzle(word: Word, puzzle: Puzzle): Boolean = {
+    word.letters.sorted == puzzle.letters.sorted
   }
 }
 
@@ -78,6 +85,7 @@ case class NoPuzzleSet() extends Reply
 case class GetReply(puzzle: Puzzle) extends Reply
 case class NotInTheDictionary(word: Word) extends Reply
 case class CorrectSolution(word: Word) extends Reply
+case class WordAndPuzzleMismatch(word: Word, puzzle: Puzzle) extends Reply
 
 case class NewPuzzle(puzzle: Puzzle) extends Notification
 
