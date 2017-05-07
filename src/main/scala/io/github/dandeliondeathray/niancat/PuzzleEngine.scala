@@ -37,6 +37,12 @@ class PuzzleEngine(val dictionary: Dictionary, var puzzle: Option[Puzzle] = None
   }
 
   private def checkSolution(word: Word, puzzle: Puzzle): Response = {
+    import WritingSystemHelper._
+
+    if (!(word isNineLetters)) {
+      return IncorrectLength(word)
+    }
+
     if (!matchWordAgainstPuzzle(word, puzzle)) {
       return WordAndPuzzleMismatch(word, puzzle)
     }
@@ -86,6 +92,7 @@ case class GetReply(puzzle: Puzzle) extends Reply
 case class NotInTheDictionary(word: Word) extends Reply
 case class CorrectSolution(word: Word) extends Reply
 case class WordAndPuzzleMismatch(word: Word, puzzle: Puzzle) extends Reply
+case class IncorrectLength(word: Word) extends Reply
 
 case class NewPuzzle(puzzle: Puzzle) extends Notification
 

@@ -108,9 +108,19 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = rejectingDictionary
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
 
-    val mismatchingWord = Word("NOTRIGHT")
+    val mismatchingWord = Word("NOTRIGHTX")
     val response = CheckSolution(mismatchingWord, User("foo"))(engine)
 
     response shouldBe a [WordAndPuzzleMismatch]
+  }
+
+  it should "reply with incorrect length if the word is not nine letters long" in {
+    val dictionary = rejectingDictionary
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
+
+    val wordIsWrongLength = Word("ABCDEF")
+    val response = CheckSolution(wordIsWrongLength, User("foo"))(engine)
+
+    response shouldBe IncorrectLength(wordIsWrongLength)
   }
 }
