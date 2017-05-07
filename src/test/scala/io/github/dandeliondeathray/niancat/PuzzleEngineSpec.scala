@@ -2,6 +2,7 @@ package io.github.dandeliondeathray.niancat
 
 import org.scalatest._
 import matchers._
+import org.scalamock.scalatest._
 
 trait ResponseMatchers {
   class ContainsResponseMatcher(expectedResponse: Response) extends Matcher[Response] {
@@ -24,32 +25,64 @@ trait ResponseMatchers {
 /**
   * Created by Erik Edin on 2017-05-01.
   */
-class PuzzleEngineSpec extends FlatSpec with Matchers with ResponseMatchers {
+class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with ResponseMatchers {
+  val defaultPuzzle = Puzzle("VIVANSART")
+  val defaultWord = Word("VANTRIVAS")
+  /** Make a PuzzleEngine instance that accepts all words as correct. */
+  def makeAcceptingPuzzleEngine(puzzle: Option[Puzzle] = None): PuzzleEngine = {
+    val dictionary = stub[Dictionary]
+    (dictionary.has _) when(*) returns(true) anyNumberOfTimes()
+    new PuzzleEngine(dictionary, puzzle)
+  }
+
+  def makePuzzleEngine(dictionary: Dictionary,
+                       puzzle: Option[Puzzle] = None): PuzzleEngine = {
+    new PuzzleEngine(dictionary, puzzle)
+  }
+
   "An engine with no puzzle set" should "reply that no puzzle is set, when asked for the puzzle" in {
-    val engine = new PuzzleEngine()
+    val engine = makeAcceptingPuzzleEngine()
     val response = Get()(engine)
     response shouldBe NoPuzzleSet()
   }
 
   it should "notify that a new puzzle is set" in {
-    val engine = new PuzzleEngine()
-    val response = SetPuzzle(Puzzle("ABCDEFGHI"))(engine)
+    val engine = makeAcceptingPuzzleEngine()
+    val response = SetPuzzle(defaultPuzzle)(engine)
 
-    response should containResponse (NewPuzzle(Puzzle("ABCDEFGHI")))
+    response should containResponse (NewPuzzle(defaultPuzzle))
   }
 
   it should "store the new puzzle" in {
-    val puzzle = Puzzle("ABCDEFGHI")
-    val engine = new PuzzleEngine()
-    SetPuzzle(puzzle)(engine)
+    val engine = makeAcceptingPuzzleEngine()
+    SetPuzzle(defaultPuzzle)(engine)
 
-    engine.puzzle shouldBe Some(puzzle)
+    engine.puzzle shouldBe Some(defaultPuzzle)
   }
 
   "An engine with a puzzle set" should "reply with the puzzle, when asked for the puzzle" in {
-    val puzzle = Puzzle("ABCDEFGHI")
-    val engine = new PuzzleEngine(Some(puzzle))
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
     val response = Get()(engine)
-    response shouldBe GetReply(puzzle)
+    response shouldBe GetReply(defaultPuzzle)
+  }
+
+  it should "reply that a word is not in the dictionary, when a user checks a word" in {
+    val dictionary = stub[Dictionary]
+    (dictionary.has _) when(defaultWord) returns(false) anyNumberOfTimes()
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
+
+    val response = CheckSolution(defaultWord, User("foo"))(engine)
+
+    response shouldBe NotInTheDictionary(defaultWord)
+  }
+
+  it should "reply that a word is correct, if the word is in the dictionary" in {
+    val dictionary = stub[Dictionary]
+    (dictionary.has _) when(defaultWord) returns(true) anyNumberOfTimes()
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
+
+    val response = CheckSolution(defaultWord, User("foo"))(engine)
+
+    response should containResponse (CorrectSolution(defaultWord))
   }
 }

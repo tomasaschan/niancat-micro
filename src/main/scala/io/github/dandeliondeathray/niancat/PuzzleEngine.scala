@@ -13,7 +13,7 @@ case class Word(letters: String)
 /** A User is of course a user in the chat room. */
 case class User(name: String)
 
-class PuzzleEngine(var puzzle: Option[Puzzle] = None) {
+class PuzzleEngine(val dictionary: Dictionary, var puzzle: Option[Puzzle] = None) {
   def set(p: Puzzle): Response = {
     puzzle = Some(p)
 
@@ -26,6 +26,14 @@ class PuzzleEngine(var puzzle: Option[Puzzle] = None) {
     puzzle match {
       case None => NoPuzzleSet()
       case Some(p: Puzzle) => GetReply(p)
+    }
+  }
+
+  def check(word: Word): Response = {
+    if (dictionary has word) {
+      CorrectSolution(word)
+    } else {
+      NotInTheDictionary(word)
     }
   }
 }
@@ -45,7 +53,11 @@ case class Get() extends PuzzleCommand {
   def apply(engine: PuzzleEngine): Response = engine.get()
 }
 
-//case class CheckSolution(word: Word, user: User) extends PuzzleCommand
+case class CheckSolution(word: Word, user: User) extends PuzzleCommand {
+  def apply(engine: PuzzleEngine): Response = {
+    engine.check(word)
+  }
+}
 //case class AddUnsolution(unsolution: String, user: User) extends PuzzleCommand
 //case class ListUnsolutions(user: User) extends PuzzleCommand
 
@@ -56,8 +68,9 @@ trait Notification extends Response
 case class CompositeResponse(responses: Vector[Response]) extends Response
 
 case class NoPuzzleSet() extends Reply
-case class DummyReply() extends Reply
 case class GetReply(puzzle: Puzzle) extends Reply
+case class NotInTheDictionary(word: Word) extends Reply
+case class CorrectSolution(word: Word) extends Reply
 
 case class NewPuzzle(puzzle: Puzzle) extends Notification
 
