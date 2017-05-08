@@ -165,17 +165,16 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "notify the channel about yesterdays puzzle when a new one is set" in {
     val dictionary = acceptingDictionary
-    val result = defaultSolutionResult
 
     // Return defaultWord as the solution to defaultPuzzle
     val puzzleSolution = stub[PuzzleSolution]
-    (puzzleSolution.result _) when() returns(Some(result)) anyNumberOfTimes()
+    (puzzleSolution.result _) when() returns(Some(defaultSolutionResult)) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
     val response = SetPuzzle(Puzzle("ABCDEFGHI"))(engine)
 
-    response should containResponse (YesterdaysPuzzle(result))
+    response should containResponseOfType (classTag[YesterdaysPuzzle].runtimeClass)
   }
 
   it should "reset the puzzle solution when a new one is set" in {
