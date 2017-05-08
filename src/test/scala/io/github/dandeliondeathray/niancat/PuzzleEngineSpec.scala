@@ -3,6 +3,7 @@ package io.github.dandeliondeathray.niancat
 import org.scalatest._
 import matchers._
 import org.scalamock.scalatest._
+import scala.reflect._
 
 trait ResponseMatchers {
   class ContainsResponseMatcher(expectedResponse: Response) extends Matcher[Response] {
@@ -13,13 +14,31 @@ trait ResponseMatchers {
       }
       MatchResult(
         hasOrIsExpectedResponse,
-        s"""Response $response did not contain expected reply $expectedResponse""",
-        s"""Response $response contained expected reply $expectedResponse"""
+        s"""Response $response did not contain expected response $expectedResponse""",
+        s"""Response $response contained expected response $expectedResponse"""
+      )
+    }
+  }
+
+  class ContainsResponseTypeMatcher(responseType: Class[_]) extends Matcher[Response] {
+    def apply(response: Response) = {
+      val hasOrIsExpectedType = response match {
+        case CompositeResponse(responses: Vector[Response]) => {
+          responses exists (responseType == _.getClass)
+        }
+        case r: Response => responseType == r.getClass
+      }
+
+      MatchResult(
+        hasOrIsExpectedType,
+        s"""Response $response did not contain a response of type $responseType""",
+        s"""Response $response did contain a response of type $responseType"""
       )
     }
   }
 
   def containResponse(expectedResponse: Response) = new ContainsResponseMatcher(expectedResponse)
+  def containResponseOfType(responseType: Class[_]) = new ContainsResponseTypeMatcher(responseType)
 }
 
 /**
@@ -41,15 +60,25 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     dictionary
   }
 
+  def emptyPuzzleSolution: PuzzleSolution = {
+    val puzzleSolution = stub[PuzzleSolution]
+    (puzzleSolution.solution _) when() returns(None) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+
+    puzzleSolution
+  }
+
   /** Make a PuzzleEngine instance that accepts all words as correct. */
-  def makeAcceptingPuzzleEngine(puzzle: Option[Puzzle] = None): PuzzleEngine = {
+  def makeAcceptingPuzzleEngine(puzzle: Option[Puzzle] = None,
+                                puzzleSolution: Option[PuzzleSolution] = None): PuzzleEngine = {
     val dictionary = acceptingDictionary
-    new PuzzleEngine(dictionary, puzzle)
+    new PuzzleEngine(dictionary, puzzleSolution getOrElse emptyPuzzleSolution, puzzle)
   }
 
   def makePuzzleEngine(dictionary: Dictionary,
-                       puzzle: Option[Puzzle] = None): PuzzleEngine = {
-    new PuzzleEngine(dictionary, puzzle)
+                       puzzle: Option[Puzzle] = None,
+                       puzzleSolution: Option[PuzzleSolution] = None): PuzzleEngine = {
+    new PuzzleEngine(dictionary, puzzleSolution getOrElse emptyPuzzleSolution, puzzle)
   }
 
   "An engine with no puzzle set" should "reply that no puzzle is set, when asked for the puzzle" in {
@@ -78,6 +107,14 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val response = CheckSolution(defaultWord, User("foo"))(engine)
 
     response shouldBe NoPuzzleSet()
+  }
+
+  it should "not reply with a previous puzzle when a new one is set" in {
+    val engine = makeAcceptingPuzzleEngine()
+
+    val response = SetPuzzle(defaultPuzzle)(engine)
+
+    response should not (containResponseOfType (classTag[YesterdaysPuzzle].runtimeClass))
   }
 
   "An engine with a puzzle set" should "reply with the puzzle, when asked for the puzzle" in {
@@ -122,5 +159,32 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val response = CheckSolution(wordIsWrongLength, User("foo"))(engine)
 
     response shouldBe IncorrectLength(wordIsWrongLength)
+  }
+
+  it should "notify the channel about yesterdays puzzle when a new one is set" in {
+    val dictionary = acceptingDictionary
+
+    // Return defaultWord as the solution to defaultPuzzle
+    val puzzleSolution = stub[PuzzleSolution]
+    (puzzleSolution.solution _) when() returns(Some(defaultWord)) anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val response = SetPuzzle(Puzzle("ABCDEFGHI"))(engine)
+
+    response should containResponse (YesterdaysPuzzle(defaultWord))
+  }
+
+  it should "reset the puzzle solution when a new one is set" in {
+    val dictionary = acceptingDictionary
+    val newPuzzle = Puzzle("ABCDEFGHI")
+
+    val puzzleSolution = mock[PuzzleSolution]
+    (puzzleSolution.solution _) expects() returning(Some(defaultWord)) anyNumberOfTimes()
+    (puzzleSolution.reset _) expects (newPuzzle)
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val response = SetPuzzle(newPuzzle)(engine)
   }
 }

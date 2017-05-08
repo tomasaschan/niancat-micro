@@ -13,13 +13,20 @@ case class Word(letters: String)
 /** A User is of course a user in the chat room. */
 case class User(name: String)
 
-class PuzzleEngine(val dictionary: Dictionary, var puzzle: Option[Puzzle] = None) {
+class PuzzleEngine(val dictionary: Dictionary,
+                   val puzzleSolution: PuzzleSolution,
+                   var puzzle: Option[Puzzle] = None) {
   def set(p: Puzzle): Response = {
     puzzle = Some(p)
 
-    CompositeResponse(Vector(NewPuzzle {
-      p
-    }))
+    val responses: Vector[Option[Response]] = Vector(
+      Some(NewPuzzle { p }),
+      puzzleSolution.solution map (YesterdaysPuzzle(_))
+    )
+
+    puzzleSolution.reset(p)
+
+    CompositeResponse(responses.flatten)
   }
 
   def get(): Response = {
@@ -94,5 +101,6 @@ case class CorrectSolution(word: Word) extends Reply
 case class WordAndPuzzleMismatch(word: Word, puzzle: Puzzle) extends Reply
 case class IncorrectLength(word: Word) extends Reply
 
-case class NewPuzzle(puzzle: Puzzle) extends Notification
 
+case class NewPuzzle(puzzle: Puzzle) extends Notification
+case class YesterdaysPuzzle(word: Word) extends Notification
