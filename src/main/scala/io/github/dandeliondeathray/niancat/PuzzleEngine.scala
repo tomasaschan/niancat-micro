@@ -21,7 +21,7 @@ class PuzzleEngine(val dictionary: Dictionary,
 
     val responses: Vector[Option[Response]] = Vector(
       Some(NewPuzzle { p }),
-      puzzleSolution.solution map (YesterdaysPuzzle(_))
+      puzzleSolution.result map (YesterdaysPuzzle(_))
     )
 
     puzzleSolution.reset(p)
@@ -103,4 +103,4 @@ case class IncorrectLength(word: Word) extends Reply
 
 
 case class NewPuzzle(puzzle: Puzzle) extends Notification
-case class YesterdaysPuzzle(word: Word) extends Notification
+case class YesterdaysPuzzle(result: SolutionResult) extends Notification

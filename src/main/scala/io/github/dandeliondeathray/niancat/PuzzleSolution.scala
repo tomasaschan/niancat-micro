@@ -1,6 +1,8 @@
 package io.github.dandeliondeathray.niancat
 
+case class SolutionResult()
+
 trait PuzzleSolution {
-  def solution: Option[Word]
+  def result: Option[SolutionResult]
   def reset(puzzle: Puzzle)
 }

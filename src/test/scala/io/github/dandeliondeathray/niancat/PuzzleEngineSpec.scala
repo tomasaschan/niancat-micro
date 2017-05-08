@@ -48,6 +48,8 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   val defaultPuzzle = Puzzle("VIVANSART")
   val defaultWord = Word("VANTRIVAS")
 
+  def defaultSolutionResult = SolutionResult()
+
   def acceptingDictionary: Dictionary = {
     val dictionary = stub[Dictionary]
     (dictionary.has _) when(*) returns(true) anyNumberOfTimes()
@@ -62,7 +64,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   def emptyPuzzleSolution: PuzzleSolution = {
     val puzzleSolution = stub[PuzzleSolution]
-    (puzzleSolution.solution _) when() returns(None) anyNumberOfTimes()
+    (puzzleSolution.result _) when() returns(None) anyNumberOfTimes()
     (puzzleSolution.reset _) when(*) anyNumberOfTimes()
 
     puzzleSolution
@@ -163,16 +165,17 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "notify the channel about yesterdays puzzle when a new one is set" in {
     val dictionary = acceptingDictionary
+    val result = defaultSolutionResult
 
     // Return defaultWord as the solution to defaultPuzzle
     val puzzleSolution = stub[PuzzleSolution]
-    (puzzleSolution.solution _) when() returns(Some(defaultWord)) anyNumberOfTimes()
+    (puzzleSolution.result _) when() returns(Some(result)) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
     val response = SetPuzzle(Puzzle("ABCDEFGHI"))(engine)
 
-    response should containResponse (YesterdaysPuzzle(defaultWord))
+    response should containResponse (YesterdaysPuzzle(result))
   }
 
   it should "reset the puzzle solution when a new one is set" in {
@@ -180,11 +183,11 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val newPuzzle = Puzzle("ABCDEFGHI")
 
     val puzzleSolution = mock[PuzzleSolution]
-    (puzzleSolution.solution _) expects() returning(Some(defaultWord)) anyNumberOfTimes()
+    (puzzleSolution.result _) expects() returning(Some(defaultSolutionResult)) anyNumberOfTimes()
     (puzzleSolution.reset _) expects (newPuzzle)
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val response = SetPuzzle(newPuzzle)(engine)
+    SetPuzzle(newPuzzle)(engine)
   }
 }
