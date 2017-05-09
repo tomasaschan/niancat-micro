@@ -243,4 +243,36 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     engine.puzzle shouldBe Some(defaultPuzzle)
   }
+
+  it should "let the users know if a puzzle has more than one solution" in {
+    val dictionary = acceptingDictionary
+    val newPuzzle = Puzzle("ABCDEFGHI")
+
+    val puzzleSolution = stub[PuzzleSolution]
+    (puzzleSolution.result _) when() returning(Some(defaultSolutionResult)) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.noOfSolutions _) when(newPuzzle) returning(7) anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val response = SetPuzzle(newPuzzle)(engine)
+
+    response should containResponse (MultipleSolutions(7))
+  }
+
+  it should "not mention multiple solutions if there is only one" in {
+    val dictionary = acceptingDictionary
+    val newPuzzle = Puzzle("ABCDEFGHI")
+
+    val puzzleSolution = stub[PuzzleSolution]
+    (puzzleSolution.result _) when() returning(Some(defaultSolutionResult)) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.noOfSolutions _) when(newPuzzle) returning(1) anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val response = SetPuzzle(newPuzzle)(engine)
+
+    response should not (containResponseOfType (classTag[MultipleSolutions].runtimeClass))
+  }
 }

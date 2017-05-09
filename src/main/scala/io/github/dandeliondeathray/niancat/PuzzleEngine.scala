@@ -26,7 +26,8 @@ class PuzzleEngine(val dictionary: Dictionary,
 
     val responses: Vector[Option[Response]] = Vector(
       Some(NewPuzzle { p }),
-      puzzleSolution.result map (YesterdaysPuzzle(_))
+      puzzleSolution.result map (YesterdaysPuzzle(_)),
+      Some(noOfSolutions) filter (_ > 1) map (MultipleSolutions(_))
     )
 
     puzzleSolution.reset(p)
@@ -109,3 +110,4 @@ case class InvalidPuzzle(puzzle: Puzzle) extends Reply
 
 case class NewPuzzle(puzzle: Puzzle) extends Notification
 case class YesterdaysPuzzle(result: SolutionResult) extends Notification
+case class MultipleSolutions(n: Int) extends Notification
