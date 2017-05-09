@@ -19,6 +19,11 @@ class PuzzleEngine(val dictionary: Dictionary,
   def set(p: Puzzle): Response = {
     puzzle = Some(p)
 
+    val noOfSolutions = puzzleSolution.noOfSolutions(p)
+    if (noOfSolutions == 0) {
+      return InvalidPuzzle(p)
+    }
+
     val responses: Vector[Option[Response]] = Vector(
       Some(NewPuzzle { p }),
       puzzleSolution.result map (YesterdaysPuzzle(_))
@@ -100,7 +105,7 @@ case class NotInTheDictionary(word: Word) extends Reply
 case class CorrectSolution(word: Word) extends Reply
 case class WordAndPuzzleMismatch(word: Word, puzzle: Puzzle) extends Reply
 case class IncorrectLength(word: Word) extends Reply
-
+case class InvalidPuzzle(puzzle: Puzzle) extends Reply
 
 case class NewPuzzle(puzzle: Puzzle) extends Notification
 case class YesterdaysPuzzle(result: SolutionResult) extends Notification

@@ -66,6 +66,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val puzzleSolution = stub[PuzzleSolution]
     (puzzleSolution.result _) when() returns(None) anyNumberOfTimes()
     (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
 
     puzzleSolution
   }
@@ -169,6 +170,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     // Return defaultWord as the solution to defaultPuzzle
     val puzzleSolution = stub[PuzzleSolution]
     (puzzleSolution.result _) when() returns(Some(defaultSolutionResult)) anyNumberOfTimes()
+    (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
@@ -184,9 +186,44 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val puzzleSolution = mock[PuzzleSolution]
     (puzzleSolution.result _) expects() returning(Some(defaultSolutionResult)) anyNumberOfTimes()
     (puzzleSolution.reset _) expects (newPuzzle)
+    (puzzleSolution.noOfSolutions _) expects(*) returning(1) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
     SetPuzzle(newPuzzle)(engine)
   }
+
+  it should "respond that a puzzle is invalid if there are no solutions for it" in {
+    val dictionary = acceptingDictionary
+    val invalidPuzzle = Puzzle("ABCDEFGHI")
+
+    val puzzleSolution = stub[PuzzleSolution]
+    (puzzleSolution.noOfSolutions _) when(invalidPuzzle) returns(0) anyNumberOfTimes()
+    // If we don't stub the result method, then this fails because of a NullPointerException,
+    // which is not wrong, but misleading.
+    (puzzleSolution.result _) when() returns(Some(SolutionResult())) anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val response = SetPuzzle(invalidPuzzle)(engine)
+
+    response shouldBe InvalidPuzzle(invalidPuzzle)
+  }
+
+  it should "not reset the puzzle if the new puzzle is invalid" in {
+    val dictionary = acceptingDictionary
+    val invalidPuzzle = Puzzle("ABCDEFGHI")
+
+    val puzzleSolution = mock[PuzzleSolution]
+    // PuzzleSolution.result should be a non-mutable method, so it doesn't matter if
+    // it's being called or not.
+    (puzzleSolution.result _) expects() returning(Some(SolutionResult())) anyNumberOfTimes()
+    (puzzleSolution.reset _) expects(invalidPuzzle) never()
+    (puzzleSolution.noOfSolutions _) expects(*) returning(0) anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    SetPuzzle(invalidPuzzle)(engine)
+  }
+
 }
