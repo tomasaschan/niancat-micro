@@ -42,14 +42,14 @@ class PuzzleEngine(val dictionary: Dictionary,
     }
   }
 
-  def check(word: Word): Response = {
+  def check(user: User, word: Word): Response = {
     puzzle match {
       case None => NoPuzzleSet()
-      case Some(p: Puzzle) => checkSolution(word, p)
+      case Some(p: Puzzle) => checkSolution(user, word, p)
     }
   }
 
-  private def checkSolution(word: Word, puzzle: Puzzle): Response = {
+  private def checkSolution(user: User, word: Word, puzzle: Puzzle): Response = {
     import WritingSystemHelper._
 
     if (!(word isNineLetters)) {
@@ -60,6 +60,7 @@ class PuzzleEngine(val dictionary: Dictionary,
       return WordAndPuzzleMismatch(word, puzzle)
     }
     if (dictionary has word) {
+      puzzleSolution.solved(user, word)
       CorrectSolution(word)
     } else {
       NotInTheDictionary(word)
@@ -88,7 +89,7 @@ case class Get() extends PuzzleCommand {
 
 case class CheckSolution(word: Word, user: User) extends PuzzleCommand {
   def apply(engine: PuzzleEngine): Response = {
-    engine.check(word)
+    engine.check(user, word)
   }
 }
 //case class AddUnsolution(unsolution: String, user: User) extends PuzzleCommand

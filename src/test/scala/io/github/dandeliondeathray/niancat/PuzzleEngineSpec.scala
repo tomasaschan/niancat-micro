@@ -67,6 +67,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     (puzzleSolution.result _) when() returns(None) anyNumberOfTimes()
     (puzzleSolution.reset _) when(*) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
+    (puzzleSolution.solved _) when(*, *) anyNumberOfTimes()
 
     puzzleSolution
   }
@@ -249,7 +250,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val newPuzzle = Puzzle("ABCDEFGHI")
 
     val puzzleSolution = stub[PuzzleSolution]
-    (puzzleSolution.result _) when() returning(Some(defaultSolutionResult)) anyNumberOfTimes()
+    (puzzleSolution.result _) when() returns(Some(defaultSolutionResult)) anyNumberOfTimes()
     (puzzleSolution.reset _) when(*) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(newPuzzle) returning(7) anyNumberOfTimes()
 
@@ -265,7 +266,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val newPuzzle = Puzzle("ABCDEFGHI")
 
     val puzzleSolution = stub[PuzzleSolution]
-    (puzzleSolution.result _) when() returning(Some(defaultSolutionResult)) anyNumberOfTimes()
+    (puzzleSolution.result _) when() returns(Some(defaultSolutionResult)) anyNumberOfTimes()
     (puzzleSolution.reset _) when(*) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(newPuzzle) returning(1) anyNumberOfTimes()
 
@@ -274,5 +275,27 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val response = SetPuzzle(newPuzzle)(engine)
 
     response should not (containResponseOfType (classTag[MultipleSolutions].runtimeClass))
+  }
+
+  it should "store a solution" in {
+    val dictionary = acceptingDictionary
+
+    val puzzleSolution = mock[PuzzleSolution]
+    (puzzleSolution.solved _) expects(User("foo"), defaultWord)
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val response = CheckSolution(defaultWord, User("foo"))(engine)
+  }
+
+  it should "not store an invalid solution" in {
+    val dictionary = rejectingDictionary
+
+    val puzzleSolution = mock[PuzzleSolution]
+    (puzzleSolution.solved _) expects(User("foo"), defaultWord) never()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val response = CheckSolution(defaultWord, User("foo"))(engine)
   }
 }

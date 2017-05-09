@@ -6,4 +6,5 @@ trait PuzzleSolution {
   def result: Option[SolutionResult]
   def reset(puzzle: Puzzle)
   def noOfSolutions(puzzle: Puzzle): Int
+  def solved(user: User, word: Word)
 }
