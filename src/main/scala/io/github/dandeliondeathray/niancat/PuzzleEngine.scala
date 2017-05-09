@@ -17,12 +17,12 @@ class PuzzleEngine(val dictionary: Dictionary,
                    val puzzleSolution: PuzzleSolution,
                    var puzzle: Option[Puzzle] = None) {
   def set(p: Puzzle): Response = {
-    puzzle = Some(p)
-
     val noOfSolutions = puzzleSolution.noOfSolutions(p)
     if (noOfSolutions == 0) {
       return InvalidPuzzle(p)
     }
+
+    puzzle = Some(p)
 
     val responses: Vector[Option[Response]] = Vector(
       Some(NewPuzzle { p }),

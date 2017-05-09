@@ -226,4 +226,21 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     SetPuzzle(invalidPuzzle)(engine)
   }
 
+  it should "not set the puzzle if the puzzle has no solutions" in {
+    val dictionary = acceptingDictionary
+    val invalidPuzzle = Puzzle("ABCDEFGHI")
+
+    val puzzleSolution = mock[PuzzleSolution]
+    // PuzzleSolution.result should be a non-mutable method, so it doesn't matter if
+    // it's being called or not.
+    (puzzleSolution.result _) expects() returning(Some(SolutionResult())) anyNumberOfTimes()
+    (puzzleSolution.reset _) expects(invalidPuzzle) never()
+    (puzzleSolution.noOfSolutions _) expects(*) returning(0) anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    SetPuzzle(invalidPuzzle)(engine)
+
+    engine.puzzle shouldBe Some(defaultPuzzle)
+  }
 }
