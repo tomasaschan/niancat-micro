@@ -8,7 +8,8 @@ import WritingSystemHelper._
 class NineLetterDictionary(strings: Seq[String]) extends Dictionary {
   val dictionary = strings map(Word(_)) filter (_.isNineLetters) toSet
 
-  def has(word: Word): Boolean = dictionary.contains(word)
+  override def has(word: Word): Boolean = dictionary.contains(word)
+  override def toSeq: Seq[Word] = dictionary.toSeq
 }
 
 object NineLetterDictionary {
