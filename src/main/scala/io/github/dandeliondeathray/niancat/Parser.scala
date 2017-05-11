@@ -25,6 +25,13 @@ case class Ignored() extends PuzzleCommand {
   def apply(engine: PuzzleEngine): Response = NoResponse()
 }
 
+sealed trait InvalidCommandError
+case class UnknownCommand(command: String) extends InvalidCommandError
+
+case class InvalidCommand(msg: String, errorType: InvalidCommandError) extends PuzzleCommand {
+  def apply(engine: PuzzleEngine): Response = InvalidCommandReply(msg, errorType)
+}
+
 //case class AddUnsolution(unsolution: String, user: User) extends PuzzleCommand
 //case class ListUnsolutions(user: User) extends PuzzleCommand
 
@@ -53,6 +60,6 @@ class SlackParser extends Parser {
       return SetPuzzle(Puzzle(words(1)))
     }
 
-    Get()
+    InvalidCommand(msg, UnknownCommand(words(0)))
   }
 }

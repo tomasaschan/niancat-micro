@@ -35,4 +35,12 @@ class ParserSpec extends FlatSpec with Matchers {
 
     command shouldBe SetPuzzle(Puzzle("ABCDEFGHI"))
   }
+
+  it should "response with invalid command if it's unrecognized" in {
+    val parser = new SlackParser()
+
+    val command = parser.parse("!notacommand", User("foo"), PublicChannel())
+
+    command shouldBe InvalidCommand("!notacommand", UnknownCommand("!notacommand"))
+  }
 }

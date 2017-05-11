@@ -86,6 +86,7 @@ case class CorrectSolution(word: Word) extends Reply
 case class WordAndPuzzleMismatch(word: Word, puzzle: Puzzle) extends Reply
 case class IncorrectLength(word: Word) extends Reply
 case class InvalidPuzzle(puzzle: Puzzle) extends Reply
+case class InvalidCommandReply(msg: String, invalidCommandError: InvalidCommandError) extends Reply
 
 case class NewPuzzle(puzzle: Puzzle) extends Notification
 case class YesterdaysPuzzle(result: SolutionResult) extends Notification
