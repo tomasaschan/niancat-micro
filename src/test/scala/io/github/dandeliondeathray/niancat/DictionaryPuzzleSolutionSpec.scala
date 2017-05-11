@@ -76,4 +76,20 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
 
     solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo")))))
   }
+
+  "a DictionaryPuzzleSolution with several solutions" should "return all of them" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("DATORLESP")) // DATORSPEL, SPELDATOR, LEDARPOST, REPSOLDAT
+
+    solution.solved(User("foo"), Word("DATORSPEL"))
+    solution.solved(User("bar"), Word("DATORSPEL"))
+    solution.solved(User("foo"), Word("SPELDATOR"))
+    solution.solved(User("baz"), Word("LEDARPOST"))
+
+    solution.result shouldBe Some(SolutionResult(
+      Map(Word("DATORSPEL") -> Seq(User("foo"), User("bar")),
+          Word("SPELDATOR") -> Seq(User("foo")),
+          Word("LEDARPOST") -> Seq(User("baz")),
+          Word("REPSOLDAT") -> Seq())))
+  }
 }

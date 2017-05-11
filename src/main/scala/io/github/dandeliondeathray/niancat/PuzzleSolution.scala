@@ -16,7 +16,10 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
 
   override def result: Option[SolutionResult] = {
     if (puzzle == None) return None;
-    Some(SolutionResult(solvedList.distinct groupBy (_._1) mapValues (_.map(_._2))))
+    val allSolutions: Seq[String] = puzzle map (p => solutions.getOrElse(sortByCodePoints(p.letters), Seq())) getOrElse(Seq())
+    val allSolutionsMap: Map[Word, Seq[User]] = (allSolutions map (Word(_) -> Seq[User]())).toMap
+    val resultMap = allSolutionsMap ++ (solvedList.distinct groupBy (_._1) mapValues (_.map(_._2)))
+    Some(SolutionResult(resultMap))
   }
 
   override def reset(p: Puzzle): Unit = puzzle = Some(p)
