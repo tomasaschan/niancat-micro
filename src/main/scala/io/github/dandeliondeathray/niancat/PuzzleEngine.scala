@@ -72,34 +72,12 @@ class PuzzleEngine(val dictionary: Dictionary,
   }
 }
 
-/** A PuzzleCommand is a command sent by a user to Niancat. */
-sealed trait PuzzleCommand {
-  def apply(engine: PuzzleEngine): Response
-}
-
-case class SetPuzzle(puzzle: Puzzle) extends PuzzleCommand {
-  def apply(engine: PuzzleEngine): Response = {
-    engine.set(puzzle)
-  }
-}
-
-case class Get() extends PuzzleCommand {
-  def apply(engine: PuzzleEngine): Response = engine.get()
-}
-
-case class CheckSolution(word: Word, user: User) extends PuzzleCommand {
-  def apply(engine: PuzzleEngine): Response = {
-    engine.check(user, word)
-  }
-}
-//case class AddUnsolution(unsolution: String, user: User) extends PuzzleCommand
-//case class ListUnsolutions(user: User) extends PuzzleCommand
-
 trait Response
 trait Reply extends Response
 trait Notification extends Response
 
 case class CompositeResponse(responses: Vector[Response]) extends Response
+case class NoResponse() extends Response
 
 case class NoPuzzleSet() extends Reply
 case class GetReply(puzzle: Puzzle) extends Reply
