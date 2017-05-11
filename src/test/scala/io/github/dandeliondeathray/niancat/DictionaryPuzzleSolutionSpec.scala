@@ -45,4 +45,35 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
 
     solution.noOfSolutions(Puzzle("NOSUCHWRD")) shouldBe 0
   }
+
+  "a DictionaryPuzzleSolution with a puzzle set" should "store a solution" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("TRIVASVAN")) // VANTRIVAS
+
+    solution.solved(User("foo"), Word("VANTRIVAS"))
+
+    solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo")))))
+  }
+
+  it should "return solutions in the order in which they are found" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("TRIVASVAN")) // VANTRIVAS
+
+    solution.solved(User("foo"), Word("VANTRIVAS"))
+    solution.solved(User("bar"), Word("VANTRIVAS"))
+    solution.solved(User("baz"), Word("VANTRIVAS"))
+
+    solution.result shouldBe
+      Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo"), User("bar"), User("baz")))))
+  }
+
+  it should "only list one solution if a user solves the same word several times" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("TRIVASVAN")) // VANTRIVAS
+
+    solution.solved(User("foo"), Word("VANTRIVAS"))
+    solution.solved(User("foo"), Word("VANTRIVAS"))
+
+    solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo")))))
+  }
 }
