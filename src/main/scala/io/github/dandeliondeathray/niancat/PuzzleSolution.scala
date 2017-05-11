@@ -22,7 +22,10 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
     Some(SolutionResult(resultMap))
   }
 
-  override def reset(p: Puzzle): Unit = puzzle = Some(p)
+  override def reset(p: Puzzle): Unit = {
+    puzzle = Some(p)
+    solvedList = Seq()
+  }
 
   override def noOfSolutions(puzzle: Puzzle): Int =
     solutions.getOrElse(sortByCodePoints(puzzle.letters), Seq()).size
