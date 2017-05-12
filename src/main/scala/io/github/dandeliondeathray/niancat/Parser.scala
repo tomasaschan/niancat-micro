@@ -27,6 +27,7 @@ case class Ignored() extends PuzzleCommand {
 
 sealed trait InvalidCommandError
 case class UnknownCommand(command: String) extends InvalidCommandError
+case class WrongArguments(actualNoOfArgs: Int, expectedNoOfArgs: Int) extends InvalidCommandError
 
 case class InvalidCommand(msg: String, errorType: InvalidCommandError) extends PuzzleCommand {
   def apply(engine: PuzzleEngine): Response = InvalidCommandReply(msg, errorType)
@@ -52,14 +53,19 @@ class SlackParser extends Parser {
     }
     val words = msg.split(" ", 2)
 
-    if (words(0) == "!get") {
+    if (words(0) == "!nian") {
       return Get()
     }
 
     if (words(0) == "!setnian") {
+      if (words.size != 2) return InvalidCommand(msg, WrongArguments(words.size - 1, 1))
       return SetPuzzle(Puzzle(words(1)))
     }
 
-    InvalidCommand(msg, UnknownCommand(words(0)))
+    if (visibility == PublicChannel()) {
+      return Ignored()
+    } else {
+      return InvalidCommand(msg, UnknownCommand(words(0)))
+    }
   }
 }
