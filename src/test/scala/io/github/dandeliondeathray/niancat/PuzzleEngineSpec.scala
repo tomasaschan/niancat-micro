@@ -298,4 +298,31 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val response = CheckSolution(defaultWord, User("foo"))(engine)
   }
+
+  it should "not reset the puzzle if the new puzzle is the same as the old" in {
+    val dictionary = acceptingDictionary
+
+    val puzzleSolution = mock[PuzzleSolution]
+    (puzzleSolution.reset _) expects(*) never()
+    (puzzleSolution.noOfSolutions _) expects(*) never()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    SetPuzzle(defaultPuzzle)(engine)
+  }
+
+  it should "respond with SamePuzzle if the new puzzle is the same as the old" in {
+    val dictionary = acceptingDictionary
+
+    val puzzleSolution = stub[PuzzleSolution]
+    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
+    (puzzleSolution.result _) when() returns(Some(SolutionResult())) anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val response = SetPuzzle(defaultPuzzle)(engine)
+
+    response shouldBe SamePuzzle(defaultPuzzle)
+  }
 }

@@ -17,6 +17,10 @@ class PuzzleEngine(val dictionary: Dictionary,
                    val puzzleSolution: PuzzleSolution,
                    var puzzle: Option[Puzzle] = None) {
   def set(p: Puzzle): Response = {
+    if (Some(p) == puzzle) {
+      return SamePuzzle(p)
+    }
+
     val noOfSolutions = puzzleSolution.noOfSolutions(p)
     if (noOfSolutions == 0) {
       return InvalidPuzzle(p)
@@ -87,6 +91,7 @@ case class WordAndPuzzleMismatch(word: Word, puzzle: Puzzle) extends Reply
 case class IncorrectLength(word: Word) extends Reply
 case class InvalidPuzzle(puzzle: Puzzle) extends Reply
 case class InvalidCommandReply(msg: String, invalidCommandError: InvalidCommandError) extends Reply
+case class SamePuzzle(puzzle: Puzzle) extends Reply
 
 case class NewPuzzle(puzzle: Puzzle) extends Notification
 case class YesterdaysPuzzle(result: SolutionResult) extends Notification
