@@ -29,4 +29,19 @@ class SwedishResponderSpec extends FlatSpec with Matchers {
     msgResponses.loneElement.channel shouldBe (privateChannel)
     msgResponses.loneElement.msg shouldBe "ABC DEF GHI"
   }
+
+  it should "ignore a NoResponse" in {
+    val msgResponses = swedishResponder.messageResponses(NoResponse(), privateChannel)
+
+    msgResponses shouldBe Seq()
+  }
+
+  it should "return a list of responses if it's a composite response" in {
+    val msgResponses = swedishResponder.messageResponses(
+      CompositeResponse(Vector(NoPuzzleSet(), MultipleSolutions(3))), privateChannel
+    )
+
+    msgResponses(0) should have ('channel (privateChannel))
+    msgResponses(1) should have ('channel (notificationChannel))
+  }
 }

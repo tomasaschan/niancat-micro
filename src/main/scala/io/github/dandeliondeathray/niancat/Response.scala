@@ -1,8 +1,8 @@
 package io.github.dandeliondeathray.niancat
 
-trait Response
-trait Reply extends Response
-trait Notification extends Response
+sealed trait Response
+sealed trait Reply extends Response
+sealed trait Notification extends Response
 
 case class CompositeResponse(responses: Vector[Response]) extends Response
 case class NoResponse() extends Response
@@ -20,7 +20,7 @@ case class InvalidCommandReply(msg: String, invalidCommandError: InvalidCommandE
 case class SamePuzzle(puzzle: Puzzle) extends Reply
 
 case class NewPuzzle(puzzle: Puzzle) extends Notification {
-  override def toString(): String = {
+  override def toString: String = {
     val puzzleString = PuzzleHelper.displayPuzzle(puzzle)
     s"Dagens nian är $puzzleString"
   }
