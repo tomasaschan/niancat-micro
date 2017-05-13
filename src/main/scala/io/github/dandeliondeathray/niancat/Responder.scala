@@ -1,6 +1,14 @@
 package io.github.dandeliondeathray.niancat
 
-case class Channel(id: String)
+case class Channel(id: String) {
+  def visibility: ChannelVisibility = {
+    if (id startsWith("D")) {
+      PrivateChannel()
+    } else {
+      PublicChannel()
+    }
+  }
+}
 case class MessageResponse(channel: Channel, msg: String)
 
 trait Responder {

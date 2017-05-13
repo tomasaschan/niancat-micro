@@ -44,4 +44,12 @@ class SwedishResponderSpec extends FlatSpec with Matchers {
     msgResponses(0) should have ('channel (privateChannel))
     msgResponses(1) should have ('channel (notificationChannel))
   }
+
+  "a Channel" should "be private if it starts with D" in {
+    Channel("D01234").visibility shouldBe PrivateChannel()
+  }
+
+  it should "be public if it doesn't start with a D" in {
+    Channel("C01345").visibility shouldBe PublicChannel()
+  }
 }
