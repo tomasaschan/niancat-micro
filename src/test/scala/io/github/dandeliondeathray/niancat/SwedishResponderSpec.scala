@@ -21,4 +21,12 @@ class SwedishResponderSpec extends FlatSpec with Matchers {
 
     msgResponses.loneElement.msg should include ("ABC DEF GHI")
   }
+
+  it should "reply with the puzzle for a Get response" in {
+    val msgResponses =
+      swedishResponder.messageResponses(GetReply(Puzzle("ABCDEFGHI")), privateChannel)
+
+    msgResponses.loneElement.channel shouldBe (privateChannel)
+    msgResponses.loneElement.msg shouldBe "ABC DEF GHI"
+  }
 }

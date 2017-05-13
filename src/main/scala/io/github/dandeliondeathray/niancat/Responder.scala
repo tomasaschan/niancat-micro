@@ -12,10 +12,25 @@ class SwedishResponder(val notificationChannel: Channel) extends Responder {
   def messageResponses(response: Response,
                        receivedInChannel: Channel): Seq[MessageResponse] = {
     response match {
+      case n:Notification =>
+        Seq(MessageResponse(notificationChannel, displayNotification(n)))
+      case r:Reply =>
+        Seq(MessageResponse(receivedInChannel, displayReply(r)))
+      }
+    }
+
+  private def displayNotification(n: Notification): String = {
+    n match {
       case NewPuzzle(p: Puzzle) => {
         val puzzleString = displayPuzzle(p)
-        Seq(MessageResponse(notificationChannel, s"Dagens nian är $puzzleString"))
+        s"Dagens nian är $puzzleString"
       }
+    }
+  }
+
+  private def displayReply(r: Reply): String = {
+    r match {
+      case GetReply(p: Puzzle) => displayPuzzle(p)
     }
   }
 
