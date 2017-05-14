@@ -10,5 +10,6 @@ lazy val root = (project in file(".")).
     name := "Hello",
     libraryDependencies += scalaTest % Test,
     libraryDependencies += scalactic,
-    libraryDependencies += scalaMock
+    libraryDependencies += scalaMock,
+    libraryDependencies += slack
   )
