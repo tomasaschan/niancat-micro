@@ -1,5 +1,18 @@
 package io.github.dandeliondeathray.niancat
 
+import org.scalactic._
+import NormMethods._
+import java.text.Normalizer
+
+object StringNormalizer {
+  implicit val stringNormalizer = new Normalization[String] {
+    def normalized(s: String): String =
+      Normalizer.normalize(s, Normalizer.Form.NFKD).replaceAll("[\u0301\u0341]", "").toUpperCase
+  }
+}
+
+import StringNormalizer._
+
 /**
   * Created by Erik Edin on 2017-04-30.
   */
@@ -8,7 +21,11 @@ package io.github.dandeliondeathray.niancat
 case class Puzzle(letters: String)
 
 /** A Word is a potential solution to a Puzzle, but can be any length. */
-case class Word(letters: String)
+case class Word(letters: String) {
+  def matches(p: Puzzle): Boolean = {
+    letters.norm.sorted == p.letters.norm.sorted
+  }
+}
 
 /** A User is of course a user in the chat room. */
 case class User(name: String)
@@ -60,7 +77,7 @@ class PuzzleEngine(val dictionary: Dictionary,
       return IncorrectLength(word)
     }
 
-    if (!matchWordAgainstPuzzle(word, puzzle)) {
+    if (!(word matches puzzle)) {
       return WordAndPuzzleMismatch(word, puzzle)
     }
     if (dictionary has word) {
@@ -69,10 +86,6 @@ class PuzzleEngine(val dictionary: Dictionary,
     } else {
       NotInTheDictionary(word)
     }
-  }
-
-  private def matchWordAgainstPuzzle(word: Word, puzzle: Puzzle): Boolean = {
-    word.letters.sorted == puzzle.letters.sorted
   }
 }
 
