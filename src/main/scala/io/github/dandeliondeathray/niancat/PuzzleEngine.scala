@@ -92,7 +92,9 @@ class PuzzleEngine(val dictionary: Dictionary,
     }
     if (dictionary has word) {
       puzzleSolution.solved(user, word)
-      CorrectSolution(word)
+      CompositeResponse(Vector(
+        CorrectSolution(word),
+        SolutionNotification(user)))
     } else {
       NotInTheDictionary(word)
     }

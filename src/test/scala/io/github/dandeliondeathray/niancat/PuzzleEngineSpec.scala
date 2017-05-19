@@ -325,4 +325,13 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     response shouldBe SamePuzzle(defaultPuzzle)
   }
+
+  it should "notify the main channel if a user solves the puzzle" in {
+    val dictionary = acceptingDictionary
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
+
+    val response = CheckSolution(defaultWord, User("foo"))(engine)
+
+    response should containResponse (SolutionNotification(User("foo")))
+  }
 }
