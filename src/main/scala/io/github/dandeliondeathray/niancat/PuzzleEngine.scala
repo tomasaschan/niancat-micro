@@ -6,12 +6,22 @@ import java.text.Normalizer
 
 object StringNormalizer {
   implicit val stringNormalizer = new Normalization[String] {
-    def normalized(s: String): String =
-      Normalizer.normalize(s, Normalizer.Form.NFKD).replaceAll("[\u0301\u0341]", "").toUpperCase
+    def normalized(s: String): String = {
+      val decomposed = Normalizer.normalize(s, Normalizer.Form.NFKD).replaceAll("[\u0301\u0341]", "").toUpperCase
+      Normalizer.normalize(decomposed, Normalizer.Form.NFKC)
+    }
+  }
+}
+import StringNormalizer._
+
+object WordNormalizer {
+  implicit val wordNormalizer = new Normalization[Word] {
+    def normalized(word: Word): Word = {
+      Word(stringNormalizer.normalized(word.letters))
+    }
   }
 }
 
-import StringNormalizer._
 
 /**
   * Created by Erik Edin on 2017-04-30.
