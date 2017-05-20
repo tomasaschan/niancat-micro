@@ -28,4 +28,8 @@ class ResponseSpec extends FlatSpec with Matchers {
     yesterdaysAsString should include ("foo, bar")
     yesterdaysAsString should include ("baz")
   }
+
+  "MultipleSolutions" should "show the number of solutions" in {
+    MultipleSolutions(3).toString should include ("3")
+  }
 }

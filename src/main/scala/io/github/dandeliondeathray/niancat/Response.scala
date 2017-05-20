@@ -70,7 +70,7 @@ case class YesterdaysPuzzle(result: SolutionResult) extends Notification {
   }
 }
 case class MultipleSolutions(n: Int) extends Notification {
-  override def toString = "Dagens nian har $n lösningar."
+  override def toString = s"Dagens nian har $n lösningar."
 }
 
 case class SolutionNotification(user: User) extends Notification {
