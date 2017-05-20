@@ -35,8 +35,11 @@ case class NotInTheDictionary(word: Word) extends Reply {
 case class CorrectSolution(word: Word) extends Reply {
   override def toString: String = s"Ordet ${word.letters} är korrekt!"
 }
-case class WordAndPuzzleMismatch(word: Word, puzzle: Puzzle) extends Reply {
-  override def toString: String = s"Ordet ${word.letters} matchar inte nian ${puzzle show}"
+case class WordAndPuzzleMismatch(word: Word, puzzle: Puzzle, tooMany: String, tooFew: String) extends Reply {
+  override def toString: String =
+    s"Ordet ${word.letters} matchar inte nian ${puzzle show}. " +
+    s"För många $tooMany. För få $tooFew"
+
 }
 case class IncorrectLength(word: Word) extends Reply {
   override def toString: String = s"${word.letters} är inte nio tecken långt."

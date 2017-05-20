@@ -88,7 +88,9 @@ class PuzzleEngine(val dictionary: Dictionary,
     }
 
     if (!(word matches puzzle)) {
-      return WordAndPuzzleMismatch(word, puzzle)
+      val tooMany = word.letters.norm diff puzzle.letters.norm
+      val tooFew = puzzle.letters.norm diff word.letters.norm
+      return WordAndPuzzleMismatch(word, puzzle, tooMany, tooFew)
     }
     if (dictionary has word) {
       puzzleSolution.solved(user, word)
