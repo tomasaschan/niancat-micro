@@ -8,7 +8,7 @@ class NiancatSlack(val token: String, val dictionary: Dictionary, notificationCh
   implicit val ec = system.dispatcher
 
   val client = SlackRtmClient(token)
-  val selfId = client.state.self.id
+  val selfUser = User(client.state.self.name)
 
   val puzzleSolution = new DictionaryPuzzleSolution(dictionary)
   val parser = new SlackParser
@@ -17,7 +17,7 @@ class NiancatSlack(val token: String, val dictionary: Dictionary, notificationCh
 
   val sendMessage: (Channel, String) => Unit = (channel, msg) => client.sendMessage(channel.id, msg)
 
-  val messageHandler = new MessageHandler(parser, engine, responder, sendMessage)
+  val messageHandler = new MessageHandler(parser, engine, responder, sendMessage, selfUser)
 
   client.onMessage { message =>
     client.state.getUserById(message.user).foreach(user =>
