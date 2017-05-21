@@ -32,7 +32,7 @@ class NineLetterDictionarySpec extends FlatSpec with Matchers {
     dictionary.has(Word("ABCDEFGHIJKL")) shouldBe false
   }
 
-  ignore should "normalize words in constructor and lookup" in {
-    // TODO
+  it should "normalize words in constructor and lookup" in {
+    dictionary.has(Word("piketröja")) shouldBe true
   }
 }
