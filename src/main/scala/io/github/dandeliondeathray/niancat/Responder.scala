@@ -21,9 +21,9 @@ class SwedishResponder(val notificationChannel: Channel) extends Responder {
                        receivedInChannel: Channel): Seq[MessageResponse] = {
     response match {
       case n:Notification =>
-        Seq(MessageResponse(notificationChannel, n toString()))
+        Seq(MessageResponse(notificationChannel, n toResponse))
       case r:Reply =>
-        Seq(MessageResponse(receivedInChannel, r toString()))
+        Seq(MessageResponse(receivedInChannel, r toResponse))
       case NoResponse() => Seq()
       case CompositeResponse(v: Vector[Response]) =>
         v flatMap (messageResponses(_, receivedInChannel))

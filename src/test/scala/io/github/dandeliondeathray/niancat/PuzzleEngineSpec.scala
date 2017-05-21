@@ -68,6 +68,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     (puzzleSolution.reset _) when(*) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
     (puzzleSolution.solved _) when(*, *) anyNumberOfTimes()
+    (puzzleSolution.solutionId _) when (*) returns(Some(1)) anyNumberOfTimes()
 
     puzzleSolution
   }
@@ -308,6 +309,8 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val puzzleSolution = mock[PuzzleSolution]
     (puzzleSolution.solved _) expects(User("foo"), defaultWord)
+    (puzzleSolution.noOfSolutions _) expects(*) returns (1) anyNumberOfTimes()
+    (puzzleSolution.solutionId _) expects(*) returns(Some(1)) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
@@ -358,6 +361,32 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val response = CheckSolution(defaultWord, User("foo"))(engine)
 
-    response should containResponse (SolutionNotification(User("foo")))
+    response should containResponse (SolutionNotification(User("foo"), None))
+  }
+
+  it should "not include solution id in the solution notification is there is only one solution" in {
+    val dictionary = acceptingDictionary
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
+
+    val response = CheckSolution(defaultWord, User("foo"))(engine)
+
+    response should containResponse (SolutionNotification(User("foo"), None))
+  }
+
+  it should "include the solution if there are multiple solutions" in {
+    val dictionary = acceptingDictionary
+    val solutionId = 3
+
+    val puzzleSolution = stub[PuzzleSolution]
+    (puzzleSolution.result _) when() returns(Some(defaultSolutionResult)) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.noOfSolutions _) when(*) returning(7) anyNumberOfTimes()
+    (puzzleSolution.solutionId _) when(*) returning(Some(solutionId)) anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val response = CheckSolution(defaultWord, User("foo"))(engine)
+
+    response should containResponse (SolutionNotification(User("foo"), Some(solutionId)))
   }
 }

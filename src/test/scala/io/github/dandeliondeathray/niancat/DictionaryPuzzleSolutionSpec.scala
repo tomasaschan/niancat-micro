@@ -3,6 +3,11 @@ package io.github.dandeliondeathray.niancat
 import org.scalatest._
 import org.scalamock.scalatest._
 
+import org.scalactic._
+import NormMethods._
+import StringNormalizer._
+import WordNormalizer._
+
 /**
   * Created by Erik Edin on 2017-05-09.
   */
@@ -23,7 +28,7 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
   def defaultDictionaryStub: Dictionary = {
     val dictionary = stub[Dictionary]
     (dictionary.has _) when(*) returns(false) never()
-    (dictionary.toSeq _) when() returns(defaultWordSeq)
+    (dictionary.toSeq _) when() returns(defaultWordSeq map (_.norm))
 
     dictionary
   }
@@ -89,6 +94,33 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
     solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq())))
   }
 
+  it should "normalize the puzzle on reset" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    val puzzle = Puzzle("piketröja")
+
+    solution.reset(puzzle)
+
+    solution.puzzle shouldBe Some(puzzle.norm)
+  }
+
+  it should "normalize words that users solve" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+
+    solution.reset(Puzzle("PIKÉTRÖJA"))
+    val word = Word("pikétröja")
+    solution.solved(User("foo"), word)
+
+    solution.result shouldBe Some(SolutionResult(Map(word.norm -> Seq(User("foo")))))
+  }
+
+  it should "find a single solution even for a non-normalized puzzle" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+
+    solution.reset(Puzzle("PIKÉTRÖJA"))
+
+    solution.noOfSolutions(Puzzle("piketröja")) shouldBe 1
+  }
+
   "a DictionaryPuzzleSolution with several solutions" should "return all of them" in {
     val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
     solution.reset(Puzzle("DATORLESP")) // DATORSPEL, SPELDATOR, LEDARPOST, REPSOLDAT
@@ -103,5 +135,40 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
           Word("SPELDATOR") -> Seq(User("foo")),
           Word("LEDARPOST") -> Seq(User("baz")),
           Word("REPSOLDAT") -> Seq())))
+  }
+
+  it should "return the same solution id for a given word every time" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("DATORLESP")) // DATORSPEL, SPELDATOR, LEDARPOST, REPSOLDAT
+    val word = Word("DATORSPEL")
+
+    val solutionIds = 1 until 10 map (_ => solution.solutionId(word))
+    val first = solutionIds.head
+
+    assert (solutionIds forall (_ == first))
+  }
+
+  it should "return solution ids 1-4 in some order, if it has four solutions" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("DATORLESP")) // DATORSPEL, SPELDATOR, LEDARPOST, REPSOLDAT
+
+    val words = List(Word("DATORSPEL"), Word("SPELDATOR"), Word("LEDARPOST"), Word("REPSOLDAT"))
+    val solutionIds = words map (solution.solutionId(_)) flatten
+
+    assert (Set(solutionIds: _*) == Set(1, 2, 3, 4))
+  }
+
+  it should "return the solution id even if there is only one solution" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("VANTRIVSA")) // VANTRIVAS
+
+    solution.solutionId(Word("VANTRIVAS")) shouldBe Some(1)
+  }
+
+  it should "normalize words to find the solution id" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("PIKÉTRÖAJ")) // PIKÉTRÖJA
+
+    solution.solutionId(Word("piketröja")) shouldBe Some(1)
   }
 }

@@ -11,6 +11,9 @@ object StringNormalizer {
       Normalizer.normalize(decomposed, Normalizer.Form.NFKC)
     }
   }
+  implicit val puzzleNormalizer = new Normalization[Puzzle] {
+    def normalized(puzzle: Puzzle): Puzzle = Puzzle(puzzle.letters.norm)
+  }
 }
 import StringNormalizer._
 
@@ -21,7 +24,6 @@ object WordNormalizer {
     }
   }
 }
-
 
 /**
   * Created by Erik Edin on 2017-04-30.
@@ -94,9 +96,11 @@ class PuzzleEngine(val dictionary: Dictionary,
     }
     if (dictionary has word) {
       puzzleSolution.solved(user, word)
+      val noOfSolutions = puzzleSolution.noOfSolutions(puzzle)
+      val solutionId: Option[Int] = puzzleSolution.solutionId(word) filter(_ => noOfSolutions > 1)
       CompositeResponse(Vector(
         CorrectSolution(word),
-        SolutionNotification(user)))
+        SolutionNotification(user, solutionId)))
     } else {
       NotInTheDictionary(word)
     }

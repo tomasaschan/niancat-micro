@@ -1,5 +1,10 @@
 package io.github.dandeliondeathray.niancat
 
+import org.scalactic._
+import NormMethods._
+import WordNormalizer._
+import StringNormalizer._
+
 case class SolutionResult(wordsAndSolvers: Map[Word, Seq[User]] = Map())
 
 trait PuzzleSolution {
@@ -7,6 +12,7 @@ trait PuzzleSolution {
   def reset(puzzle: Puzzle)
   def noOfSolutions(puzzle: Puzzle): Int
   def solved(user: User, word: Word)
+  def solutionId(word: Word): Option[Int]
 }
 
 class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolution {
@@ -23,14 +29,19 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
   }
 
   override def reset(p: Puzzle): Unit = {
-    puzzle = Some(p)
+    puzzle = Some(p.norm)
     solvedList = Seq()
   }
 
   override def noOfSolutions(puzzle: Puzzle): Int =
-    solutions.getOrElse(sortByCodePoints(puzzle.letters), Seq()).size
+    solutions.getOrElse(sortByCodePoints(puzzle.norm.letters), Seq()).size
 
-  override def solved(user: User, word: Word): Unit = solvedList = solvedList :+ (word, user)
+  override def solved(user: User, word: Word): Unit = solvedList = solvedList :+ (word.norm, user)
+
+  override def solutionId(word: Word): Option[Int] = {
+    val allSolutionsForThisWord = solutions.getOrElse(sortByCodePoints(word.norm.letters), Seq())
+    Some(allSolutionsForThisWord indexOf (word.norm.letters)) filter (_ != -1) map (_ + 1)
+  }
 
   private def sortByCodePoints(s: String): String = {
     val codePoints = s.codePoints() sorted() toArray
