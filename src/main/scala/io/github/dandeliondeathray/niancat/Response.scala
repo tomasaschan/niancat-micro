@@ -76,6 +76,13 @@ case class MultipleSolutions(n: Int) extends Notification {
   override def toString = s"Dagens nian har $n lösningar."
 }
 
-case class SolutionNotification(user: User) extends Notification {
-  override def toString = s"${user.name} löste nian!"
+case class SolutionNotification(user: User, solutionId: Option[Int] = None) extends Notification {
+  override def toString = {
+    val parts = List(
+      Some(s"${user.name} löste nian"),
+      solutionId map(n => s", ord $n"),
+      Some("!")
+    )
+    parts.flatten.mkString
+  }
 }

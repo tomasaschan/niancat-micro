@@ -32,4 +32,12 @@ class ResponseSpec extends FlatSpec with Matchers {
   "MultipleSolutions" should "show the number of solutions" in {
     MultipleSolutions(3).toString should include ("3")
   }
+
+  "Solution notification" should "not include a solution id if not set" in {
+    SolutionNotification(User("foo"), None).toString should not (include ("ord "))
+  }
+
+  it should "include id if set" in {
+    SolutionNotification(User("foo"), Some(42)).toString should include ("ord 42")
+  }
 }
