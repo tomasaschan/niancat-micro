@@ -38,7 +38,10 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
 
   override def solved(user: User, word: Word): Unit = solvedList = solvedList :+ (word.norm, user)
 
-  override def solutionId(word: Word): Option[Int] = None
+  override def solutionId(word: Word): Option[Int] = {
+    val allSolutionsForThisWord = solutions.getOrElse(sortByCodePoints(word.norm.letters), Seq())
+    Some(allSolutionsForThisWord indexOf (word.norm.letters)) filter (_ != -1) map (_ + 1)
+  }
 
   private def sortByCodePoints(s: String): String = {
     val codePoints = s.codePoints() sorted() toArray
