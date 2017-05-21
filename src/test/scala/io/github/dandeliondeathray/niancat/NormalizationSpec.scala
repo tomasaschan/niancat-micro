@@ -23,6 +23,18 @@ class NormalizationSpec extends FlatSpec with Matchers {
     Word("PIKETROJA") matches Puzzle("PIKETRÖJA") shouldBe false
   }
 
+  it should "ignore spaces" in {
+    Word("ABC DEF GHI") matches Puzzle("ABCDEFGHI") shouldBe true
+  }
+
+  it should "ignore underscores" in {
+    Word("ABC_DEF_GHI") matches Puzzle("ABCDEFGHI") shouldBe true
+  }
+
+  it should "ignore hyphens" in {
+    Word("ABC-DEFGHI") matches Puzzle("ABCDEFGHI") shouldBe true
+  }
+
   val dictionary = NineLetterDictionary("PIKÉTRÖJA", "datorspel")
 
   "a dictionary" should "be case insensitive" in {

@@ -7,7 +7,7 @@ import java.text.Normalizer
 object StringNormalizer {
   implicit val stringNormalizer = new Normalization[String] {
     def normalized(s: String): String = {
-      val decomposed = Normalizer.normalize(s, Normalizer.Form.NFKD).replaceAll("[\u0301\u0341]", "").toUpperCase
+      val decomposed = Normalizer.normalize(s, Normalizer.Form.NFKD).replaceAll("[- _\u0301\u0341]", "").toUpperCase
       Normalizer.normalize(decomposed, Normalizer.Form.NFKC)
     }
   }
