@@ -7,6 +7,7 @@ trait PuzzleSolution {
   def reset(puzzle: Puzzle)
   def noOfSolutions(puzzle: Puzzle): Int
   def solved(user: User, word: Word)
+  def solutionId(word: Word): Option[Int]
 }
 
 class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolution {
@@ -31,6 +32,8 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
     solutions.getOrElse(sortByCodePoints(puzzle.letters), Seq()).size
 
   override def solved(user: User, word: Word): Unit = solvedList = solvedList :+ (word, user)
+
+  override def solutionId(word: Word): Option[Int] = None
 
   private def sortByCodePoints(s: String): String = {
     val codePoints = s.codePoints() sorted() toArray

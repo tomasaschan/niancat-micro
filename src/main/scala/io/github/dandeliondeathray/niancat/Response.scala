@@ -16,6 +16,7 @@ object DisplayHelper {
 
 import DisplayHelper._
 
+// TODO: Use toResponse instead of toString, so that the default case class toString can be used
 sealed trait Response
 sealed trait Reply extends Response
 sealed trait Notification extends Response
