@@ -5,6 +5,10 @@ import matchers._
 import org.scalamock.scalatest._
 import scala.reflect._
 
+import org.scalactic._
+import NormMethods._
+import StringNormalizer._
+
 trait ResponseMatchers {
   class ContainsResponseMatcher(expectedResponse: Response) extends Matcher[Response] {
     def apply(response: Response) = {
@@ -99,11 +103,27 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     response should containResponse (NewPuzzle(defaultPuzzle))
   }
 
+  it should "normalize the puzzle when notifying that a new one is set" in {
+    val engine = makeAcceptingPuzzleEngine()
+    val puzzle = Puzzle("pikétröja")
+    val response = SetPuzzle(puzzle)(engine)
+
+    response should containResponse (NewPuzzle(puzzle.norm))
+  }
+
   it should "store the new puzzle" in {
     val engine = makeAcceptingPuzzleEngine()
     SetPuzzle(defaultPuzzle)(engine)
 
     engine.puzzle shouldBe Some(defaultPuzzle)
+  }
+
+  it should "normalize the puzzle when storing it" in {
+    val engine = makeAcceptingPuzzleEngine()
+    val puzzle = Puzzle("pikétröja")
+    SetPuzzle(puzzle)(engine)
+
+    engine.puzzle shouldBe Some(puzzle.norm)
   }
 
   it should "reply that no puzzle is set, when a user checks a solution" in {
@@ -353,6 +373,22 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val response = SetPuzzle(defaultPuzzle)(engine)
 
     response shouldBe SamePuzzle(defaultPuzzle)
+  }
+
+  it should "normalize the puzzle when seeing if it's the same one" in {
+    val dictionary = acceptingDictionary
+    val puzzle = Puzzle("PIKETRÖJA")
+
+    val puzzleSolution = stub[PuzzleSolution]
+    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
+    (puzzleSolution.result _) when() returns(Some(SolutionResult())) anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(puzzle), Some(puzzleSolution))
+
+    val response = SetPuzzle(Puzzle("pikétröja"))(engine)
+
+    response shouldBe SamePuzzle(puzzle)
   }
 
   it should "notify the main channel if a user solves the puzzle" in {

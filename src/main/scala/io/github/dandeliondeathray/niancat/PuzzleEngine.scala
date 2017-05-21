@@ -45,7 +45,8 @@ case class User(name: String)
 class PuzzleEngine(val dictionary: Dictionary,
                    val puzzleSolution: PuzzleSolution,
                    var puzzle: Option[Puzzle] = None) {
-  def set(p: Puzzle): Response = {
+  def set(nonNormalizedPuzzle: Puzzle): Response = {
+    val p = nonNormalizedPuzzle.norm
     if (Some(p) == puzzle) {
       return SamePuzzle(p)
     }
