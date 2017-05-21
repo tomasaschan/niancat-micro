@@ -16,40 +16,45 @@ object DisplayHelper {
 
 import DisplayHelper._
 
-// TODO: Use toResponse instead of toString, so that the default case class toString can be used
-sealed trait Response
+sealed trait Response {
+  def toResponse: String
+}
 sealed trait Reply extends Response
 sealed trait Notification extends Response
 
-case class CompositeResponse(responses: Vector[Response]) extends Response
-case class NoResponse() extends Response
+case class CompositeResponse(responses: Vector[Response]) extends Response {
+  override def toResponse: String = ""
+}
+case class NoResponse() extends Response {
+  override def toResponse: String = ""
+}
 
 case class NoPuzzleSet() extends Reply {
-  override def toString: String = "Nian är inte satt."
+  override def toResponse: String = "Nian är inte satt."
 }
 case class GetReply(puzzle: Puzzle) extends Reply {
-  override def toString: String = puzzle show
+  override def toResponse: String = puzzle show
 }
 case class NotInTheDictionary(word: Word) extends Reply {
-  override def toString: String = s"Ordet ${word.letters} finns inte med i SAOL."
+  override def toResponse: String = s"Ordet ${word.letters} finns inte med i SAOL."
 }
 case class CorrectSolution(word: Word) extends Reply {
-  override def toString: String = s"Ordet ${word.letters} är korrekt!"
+  override def toResponse: String = s"Ordet ${word.letters} är korrekt!"
 }
 case class WordAndPuzzleMismatch(word: Word, puzzle: Puzzle, tooMany: String, tooFew: String) extends Reply {
-  override def toString: String =
+  override def toResponse: String =
     s"Ordet ${word.letters} matchar inte nian ${puzzle show}. " +
     s"För många $tooMany. För få $tooFew"
 
 }
 case class IncorrectLength(word: Word) extends Reply {
-  override def toString: String = s"${word.letters} är inte nio tecken långt."
+  override def toResponse: String = s"${word.letters} är inte nio tecken långt."
 }
 case class InvalidPuzzle(puzzle: Puzzle) extends Reply {
-  override def toString: String = s"Pusslet ${puzzle show} är inte giltigt!"
+  override def toResponse: String = s"Pusslet ${puzzle show} är inte giltigt!"
 }
 case class InvalidCommandReply(msg: String, invalidCommandError: InvalidCommandError) extends Reply {
-  override def toString = {
+  override def toResponse = {
     invalidCommandError match {
       case UnknownCommand(cmd: String) => s"Okänt kommando $cmd"
       case WrongArguments(actual: Int, expected: Int) =>
@@ -58,27 +63,27 @@ case class InvalidCommandReply(msg: String, invalidCommandError: InvalidCommandE
   }
 }
 case class SamePuzzle(puzzle: Puzzle) extends Reply {
-  override def toString = s"Pusslet ${puzzle show} är redan satt!"
+  override def toResponse = s"Pusslet ${puzzle show} är redan satt!"
 }
 
 case class NewPuzzle(puzzle: Puzzle) extends Notification {
-  override def toString: String = {
+  override def toResponse: String = {
     s"Dagens nian är ${puzzle show}"
   }
 }
 case class YesterdaysPuzzle(result: SolutionResult) extends Notification {
-  override def toString: String = {
+  override def toResponse: String = {
     val lines = Seq("**Gårdagens lösningar:**") ++ result.display
 
     lines mkString("\n")
   }
 }
 case class MultipleSolutions(n: Int) extends Notification {
-  override def toString = s"Dagens nian har $n lösningar."
+  override def toResponse = s"Dagens nian har $n lösningar."
 }
 
 case class SolutionNotification(user: User, solutionId: Option[Int] = None) extends Notification {
-  override def toString = {
+  override def toResponse = {
     val parts = List(
       Some(s"${user.name} löste nian"),
       solutionId map(n => s", ord $n"),
