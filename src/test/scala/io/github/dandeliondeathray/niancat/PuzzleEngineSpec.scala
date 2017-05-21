@@ -309,6 +309,8 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val puzzleSolution = mock[PuzzleSolution]
     (puzzleSolution.solved _) expects(User("foo"), defaultWord)
+    (puzzleSolution.noOfSolutions _) expects(*) returns (1) anyNumberOfTimes()
+    (puzzleSolution.solutionId _) expects(*) returns(Some(1)) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
