@@ -11,6 +11,9 @@ object StringNormalizer {
       Normalizer.normalize(decomposed, Normalizer.Form.NFKC)
     }
   }
+  implicit val puzzleNormalizer = new Normalization[Puzzle] {
+    def normalized(puzzle: Puzzle): Puzzle = Puzzle(puzzle.letters.norm)
+  }
 }
 import StringNormalizer._
 
@@ -21,7 +24,6 @@ object WordNormalizer {
     }
   }
 }
-
 
 /**
   * Created by Erik Edin on 2017-04-30.
