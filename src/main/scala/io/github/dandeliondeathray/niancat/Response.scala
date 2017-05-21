@@ -9,7 +9,7 @@ object DisplayHelper {
     def display: Seq[String] = s.wordsAndSolvers.map(kv => showWordAndSolution(kv._1, kv._2)) toSeq
 
     private def showWordAndSolution(w: Word, solvers: Seq[User]): String = {
-      s"**${w.letters}**: " ++ solvers.map(_.name).mkString(", ")
+      s"*${w.letters}*: " ++ solvers.map(_.name).mkString(", ")
     }
   }
 }
@@ -67,7 +67,7 @@ case class NewPuzzle(puzzle: Puzzle) extends Notification {
 }
 case class YesterdaysPuzzle(result: SolutionResult) extends Notification {
   override def toString: String = {
-    val lines = Seq("**Gårdagens lösningar:**") ++ result.display
+    val lines = Seq("*Gårdagens lösningar:*") ++ result.display
 
     lines mkString("\n")
   }

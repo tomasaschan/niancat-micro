@@ -23,8 +23,8 @@ class ResponseSpec extends FlatSpec with Matchers {
 
     val yesterdaysAsString = YesterdaysPuzzle(solutionResult).toString
 
-    yesterdaysAsString should include ("**ABCDEFGHI**:")
-    yesterdaysAsString should include ("**DEFGHIABC**:")
+    yesterdaysAsString should include ("*ABCDEFGHI*:")
+    yesterdaysAsString should include ("*DEFGHIABC*:")
     yesterdaysAsString should include ("foo, bar")
     yesterdaysAsString should include ("baz")
   }
