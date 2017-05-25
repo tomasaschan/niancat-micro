@@ -8,10 +8,17 @@ import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 object NiancatSlackApp extends App {
+  if (args.size == 2 && args(0) == "filter") {
+    filter(args(1))
+    System.exit(0)
+  }
+
   if (args.size != 3) {
     println(
       """
-         Usage: NiancatSlack <token name> <dictionary> <notification channel>
+         Usage: niancatslack <token name> <dictionary> <notification channel>
+                    or
+                niancatslack filter <dictionary>
       """.stripMargin)
     System.exit(1)
   }
@@ -60,4 +67,22 @@ object NiancatSlackApp extends App {
   }
 
   new NiancatSlack(token, dictionary, notificationChannel)
+
+  def filter(dictionaryFile: String): Unit = {
+    val maybeDictionary: Try[NineLetterDictionary] = Try {
+      val lines = Source.fromFile(dictionaryFile).getLines().toSeq
+      new NineLetterDictionary(lines)
+    }
+
+    val filtered: Dictionary = maybeDictionary match {
+      case Failure(e) => {
+        println(s"Could not read dictionary in file $dictionaryFile: Got exception $e")
+        System.exit(1)
+        NineLetterDictionary()
+      }
+      case Success(d: NineLetterDictionary) => d
+    }
+
+    (filtered.toSeq map ((w: Word) => w.letters) sorted) foreach (println(_))
+  }
 }
