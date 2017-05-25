@@ -6,6 +6,7 @@ import slack.models
 
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
+import scala.concurrent.duration._
 
 object NiancatSlackApp extends App {
   if (args.size == 2 && args(0) == "filter") {
@@ -55,7 +56,7 @@ object NiancatSlackApp extends App {
   }
 
   implicit val system = ActorSystem("slack")
-  val client = BlockingSlackApiClient(token)
+  val client = BlockingSlackApiClient(token, 20.seconds)
   val maybeNotificationChannel: Option[models.Channel] = client.listChannels().filter(_.name == notificationChannelName).headOption
   val notificationChannel: Channel = maybeNotificationChannel match {
     case None => {

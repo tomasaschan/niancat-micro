@@ -2,12 +2,13 @@ package io.github.dandeliondeathray.niancat
 
 import akka.actor.ActorSystem
 import slack.rtm.SlackRtmClient
+import scala.concurrent.duration._
 
 class NiancatSlack(val token: String, val dictionary: Dictionary, notificationChannel: Channel) {
   implicit val system = ActorSystem("slack")
   implicit val ec = system.dispatcher
 
-  val client = SlackRtmClient(token)
+  val client = SlackRtmClient(token, 20.seconds)
   val selfUser = User(client.state.self.name)
 
   val puzzleSolution = new DictionaryPuzzleSolution(dictionary)
