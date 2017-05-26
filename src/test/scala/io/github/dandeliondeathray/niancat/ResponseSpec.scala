@@ -40,4 +40,20 @@ class ResponseSpec extends FlatSpec with Matchers {
   it should "include id if set" in {
     SolutionNotification(User("foo"), Some(42)).toResponse should include ("ord 42")
   }
+
+  "All unsolutions" should "contain the names of users and the texts" in {
+    val text1 = "text1"
+    val text2 = "text2"
+    val text3 = "text3"
+
+    val allUnsolutionsResponse = AllUnsolutions(Map(
+      User("foo") -> List(text1, text2),
+      User("bar") -> List(text3))).toResponse
+
+    allUnsolutionsResponse should include ("foo")
+    allUnsolutionsResponse should include ("bar")
+    allUnsolutionsResponse should include (text1)
+    allUnsolutionsResponse should include (text2)
+    allUnsolutionsResponse should include (text3)
+  }
 }

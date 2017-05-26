@@ -3,6 +3,7 @@ package io.github.dandeliondeathray.niancat
 import org.scalactic._
 import NormMethods._
 import java.text.Normalizer
+import scala.collection.mutable
 
 object StringNormalizer {
   implicit val stringNormalizer = new Normalization[String] {
@@ -45,6 +46,9 @@ case class User(name: String)
 class PuzzleEngine(val dictionary: Dictionary,
                    val puzzleSolution: PuzzleSolution,
                    var puzzle: Option[Puzzle] = None) {
+
+  val unsolutions: mutable.Map[User, List[String]] = mutable.Map()
+
   def set(nonNormalizedPuzzle: Puzzle): Response = {
     val p = nonNormalizedPuzzle.norm
     if (Some(p) == puzzle) {
@@ -58,13 +62,19 @@ class PuzzleEngine(val dictionary: Dictionary,
 
     puzzle = Some(p)
 
+    val orderedUnsolutions = unsolutions.toMap mapValues (_ reverse)
+    val maybeUnsolutions: Option[Map[User, List[String]]] =
+      if (orderedUnsolutions.isEmpty) None else Some(orderedUnsolutions)
+
     val responses: Vector[Option[Response]] = Vector(
       Some(NewPuzzle { p }),
       puzzleSolution.result map (YesterdaysPuzzle(_)),
-      Some(noOfSolutions) filter (_ > 1) map (MultipleSolutions(_))
+      Some(noOfSolutions) filter (_ > 1) map (MultipleSolutions(_)),
+      maybeUnsolutions map (AllUnsolutions(_))
     )
 
     puzzleSolution.reset(p)
+    unsolutions.clear()
 
     CompositeResponse(responses.flatten)
   }
@@ -80,6 +90,26 @@ class PuzzleEngine(val dictionary: Dictionary,
     puzzle match {
       case None => NoPuzzleSet()
       case Some(p: Puzzle) => checkSolution(user, word, p)
+    }
+  }
+
+  def addUnsolution(unsolution: String, user: User): Response = {
+    if (puzzle.isEmpty) {
+      return NoPuzzleSet()
+    }
+
+    val unsolutionsForUser: List[String] = unsolutions.getOrElse(user, List[String]())
+    unsolutions(user) = unsolution :: unsolutionsForUser
+
+    NoResponse()
+  }
+
+  def listUnsolutions(user: User): Response = {
+    val unsolutionsForUser = unsolutions.get(user)
+
+    unsolutionsForUser match {
+      case Some(texts) => Unsolutions(texts reverse)
+      case None => NoUnsolutions()
     }
   }
 

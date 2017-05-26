@@ -66,6 +66,27 @@ case class SamePuzzle(puzzle: Puzzle) extends Reply {
   override def toResponse = s"Pusslet ${puzzle show} är redan satt!"
 }
 
+case class Unsolutions(texts: List[String]) extends Reply {
+  override def toResponse = texts mkString("\n")
+}
+
+case class NoUnsolutions() extends Reply {
+  override def toResponse = "Inga olösningar sparade."
+}
+
+case class AllUnsolutions(unsolutionsForEachUser: Map[User, List[String]]) extends Reply {
+  private def usersUnsolutionToString(entry: (User, List[String])): String = {
+    val name = entry._1.name
+    val unsolutions = entry._2.mkString(", ")
+    s"$name: $unsolutions"
+  }
+
+  override def toResponse = {
+    val unsolutionsAsString = unsolutionsForEachUser.toSeq map (usersUnsolutionToString(_)) mkString("\n")
+    s"*Olösningar*:\n$unsolutionsAsString"
+  }
+}
+
 case class NewPuzzle(puzzle: Puzzle) extends Notification {
   override def toResponse: String = {
     s"Dagens nian är ${puzzle show}"

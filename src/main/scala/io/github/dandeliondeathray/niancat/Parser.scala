@@ -33,8 +33,12 @@ case class InvalidCommand(msg: String, errorType: InvalidCommandError) extends P
   def apply(engine: PuzzleEngine): Response = InvalidCommandReply(msg, errorType)
 }
 
-//case class AddUnsolution(unsolution: String, user: User) extends PuzzleCommand
-//case class ListUnsolutions(user: User) extends PuzzleCommand
+case class AddUnsolution(unsolution: String, user: User) extends PuzzleCommand {
+  def apply(engine: PuzzleEngine): Response = engine.addUnsolution(unsolution, user)
+}
+case class ListUnsolutions(user: User) extends PuzzleCommand {
+  def apply(engine: PuzzleEngine): Response = engine.listUnsolutions(user)
+}
 
 sealed trait ChannelVisibility
 case class PrivateChannel() extends ChannelVisibility

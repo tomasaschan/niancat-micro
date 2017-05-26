@@ -142,6 +142,14 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     response should not (containResponseOfType (classTag[YesterdaysPuzzle].runtimeClass))
   }
 
+  it should "reply that no puzzle is set if a user tries to store an unsolution" in {
+    val engine = makeAcceptingPuzzleEngine()
+
+    val response = AddUnsolution("Some unsolution", User("foo"))(engine)
+
+    response shouldBe NoPuzzleSet()
+  }
+
   "An engine with a puzzle set" should "reply with the puzzle, when asked for the puzzle" in {
     val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
     val response = Get()(engine)
@@ -424,5 +432,80 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val response = CheckSolution(defaultWord, User("foo"))(engine)
 
     response should containResponse (SolutionNotification(User("foo"), Some(solutionId)))
+  }
+
+  it should "not send a response when adding an unsolution" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+
+    val response = AddUnsolution("Some unsolution", User("foo"))(engine)
+
+    response shouldBe NoResponse()
+  }
+
+  it should "store an unsolution for later listing" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+    val unsolutionText = "Some unsolution"
+
+    AddUnsolution(unsolutionText, User("foo"))(engine)
+    val response = ListUnsolutions(User("foo"))(engine)
+
+    response shouldBe Unsolutions(List(unsolutionText))
+  }
+
+  it should "separate unsolutions based on users" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+
+    AddUnsolution("Some unsolution", User("foo"))(engine)
+    val response = ListUnsolutions(User("otheruser"))(engine)
+
+    response shouldBe NoUnsolutions()
+  }
+
+  it should "be able to store multiple unsolutions, in order" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+    val unsolutionText1 = "Some unsolution"
+    val unsolutionText2 = "Other unsolution"
+
+    AddUnsolution(unsolutionText1, User("foo"))(engine)
+    AddUnsolution(unsolutionText2, User("foo"))(engine)
+    val response = ListUnsolutions(User("foo"))(engine)
+
+    response should have ('texts (List(unsolutionText1, unsolutionText2)))
+  }
+
+  it should "clear all unsolutions when a new puzzle is set" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+
+    AddUnsolution("Some unsolution", User("foo"))(engine)
+    SetPuzzle(Puzzle("DATORSPEL"))(engine)
+
+    val response = ListUnsolutions(User("foo"))(engine)
+
+    response shouldBe NoUnsolutions()
+  }
+
+  it should "reply with all unsolutions if a new puzzle is set" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+    val textFoo1 = "Some text"
+    val textFoo2 = "Some other text"
+    val textBar1 = "Some text for another user"
+
+    AddUnsolution(textFoo1, User("foo"))(engine)
+    AddUnsolution(textFoo2, User("foo"))(engine)
+    AddUnsolution(textBar1, User("bar"))(engine)
+
+    val response = SetPuzzle(Puzzle("DATORSPEL"))(engine)
+
+    response should containResponse (AllUnsolutions(
+      Map(User("foo") -> List(textFoo1, textFoo2),
+          User("bar") -> List(textBar1))))
+  }
+
+  it should "not mention unsolutions when a new puzzle is set, if there are no unsolutions" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+
+    val response = SetPuzzle(Puzzle("DATORSPEL"))(engine)
+
+    response shouldNot containResponseOfType(classTag[AllUnsolutions].runtimeClass)
   }
 }
