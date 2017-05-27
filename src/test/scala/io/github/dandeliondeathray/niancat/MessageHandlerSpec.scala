@@ -27,7 +27,7 @@ class MessageHandlerSpec extends FlatSpec with Matchers with MockFactory {
 
     val messageHandler = new MessageHandler(parser, engine, responder, sendMessage, botUser)
 
-    messageHandler.handle(privateChannel, user, "!setnian DEFGHIABC")
+    messageHandler.handle(privateChannel, user, "!sättnian DEFGHIABC")
     messageHandler.handle(privateChannel, user, "!nian")
   }
 
@@ -50,7 +50,7 @@ class MessageHandlerSpec extends FlatSpec with Matchers with MockFactory {
 
     val messageHandler = new MessageHandler(parser, engine, responder, sendMessage, botUser)
 
-    messageHandler.handle(privateChannel, botUser, "!setnian DEFGHIABC")
+    messageHandler.handle(privateChannel, botUser, "!sättnian DEFGHIABC")
     messageHandler.handle(privateChannel, botUser, "!nian")
     messageHandler.handle(privateChannel, botUser, "This is not a solution")
 

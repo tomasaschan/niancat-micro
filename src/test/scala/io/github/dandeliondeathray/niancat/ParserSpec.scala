@@ -28,10 +28,10 @@ class ParserSpec extends FlatSpec with Matchers {
     command shouldBe CheckSolution(Word(msg), User("foo"))
   }
 
-  it should "make a SetPuzzle command for !setnian" in {
+  it should "make a SetPuzzle command for !sättnian" in {
     val parser = new SlackParser()
 
-    val command = parser.parse("!setnian ABCDEFGHI", User("foo"), PublicChannel())
+    val command = parser.parse("!sättnian ABCDEFGHI", User("foo"), PublicChannel())
 
     command shouldBe SetPuzzle(Puzzle("ABCDEFGHI"))
   }
@@ -44,14 +44,14 @@ class ParserSpec extends FlatSpec with Matchers {
     command shouldBe InvalidCommand("!notacommand", UnknownCommand("!notacommand"))
   }
 
-  it should "return invalid command, wrong no of args when !setnian is called with zero args" in {
+  it should "return invalid command, wrong no of args when !sättnian is called with zero args" in {
     val parser = new SlackParser()
 
-    val command = parser.parse("!setnian", User("foo"), PublicChannel())
+    val command = parser.parse("!sättnian", User("foo"), PublicChannel())
 
     val gotArgs = 0
     val expectedArgs = 1
-    command shouldBe InvalidCommand("!setnian", WrongArguments(gotArgs, expectedArgs))
+    command shouldBe InvalidCommand("!sättnian", WrongArguments(gotArgs, expectedArgs))
   }
 
   it should "ignore commands it doesn't understand when in public" in {

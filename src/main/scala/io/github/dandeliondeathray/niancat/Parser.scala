@@ -61,7 +61,7 @@ class SlackParser extends Parser {
       return Get()
     }
 
-    if (words(0) == "!setnian") {
+    if (words(0) == "!sättnian") {
       if (words.size != 2) return InvalidCommand(msg, WrongArguments(words.size - 1, 1))
       return SetPuzzle(Puzzle(words(1)))
     }
