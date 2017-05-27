@@ -66,6 +66,15 @@ class SlackParser extends Parser {
       return SetPuzzle(Puzzle(words(1)))
     }
 
+    if (words(0) == "!olösning") {
+      if (words.size != 2) return InvalidCommand(msg, WrongArguments(words.size - 1, 1))
+      return AddUnsolution(words(1), user)
+    }
+
+    if (words(0) == "!olösningar") {
+      return if (visibility == PrivateChannel()) ListUnsolutions(user) else Ignored()
+    }
+
     if (visibility == PublicChannel()) {
       return Ignored()
     } else {

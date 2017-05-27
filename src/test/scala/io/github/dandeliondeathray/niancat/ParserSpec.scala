@@ -61,4 +61,46 @@ class ParserSpec extends FlatSpec with Matchers {
 
     command shouldBe Ignored()
   }
+
+  it should "make an AddUnsolution for !olösning in public" in {
+    val parser = new SlackParser()
+
+    val command = parser.parse("!olösning ABC DEF", User("foo"), PublicChannel())
+
+    command shouldBe AddUnsolution("ABC DEF", User("foo"))
+  }
+
+  it should "make AddUnsolution in private as well" in {
+    val parser = new SlackParser()
+
+    val command = parser.parse("!olösning ABC DEF", User("foo"), PublicChannel())
+
+    command shouldBe AddUnsolution("ABC DEF", User("foo"))
+  }
+
+  it should "require an argument to !olösning" in {
+    val parser = new SlackParser()
+
+    val command = parser.parse("!olösning", User("foo"), PrivateChannel())
+
+    val gotArgs = 0
+    val expectedArgs = 1
+    command shouldBe InvalidCommand("!olösning", WrongArguments(gotArgs, expectedArgs))
+  }
+
+  it should "make ListUnsolutions from !olösningar in private" in {
+    val parser = new SlackParser()
+
+    val command = parser.parse("!olösningar", User("foo"), PrivateChannel())
+
+    command shouldBe ListUnsolutions(User("foo"))
+  }
+
+  it should "ignore !olösningar in public" in {
+    val parser = new SlackParser()
+
+    val command = parser.parse("!olösningar", User("foo"), PublicChannel())
+
+    command shouldBe Ignored()
+  }
 }
