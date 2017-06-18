@@ -1,0 +1,29 @@
+swagger: "2.0"
+
+info:
+  version: 1.0.0
+  title: Niancat
+  description: API for the Niancat service.
+
+schemes:
+  - http
+basePath: /v1
+
+paths:
+  /nian:
+    get:
+      summary: Get todays puzzle
+      description: The puzzle consists of nine letters, which make up some word
+                   in Swedish.
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Todays puzzle
+          schema:
+            type: string
+            example: ABCDEFGHI
+        404:
+          description: Todays puzzle is not set.
+        default:
+          description: Unknown error
