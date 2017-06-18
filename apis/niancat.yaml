@@ -16,7 +16,7 @@ paths:
       description: The puzzle consists of nine letters, which make up some word
                    in Swedish.
       produces:
-        - text/plain
+        - application/json
       responses:
         200:
           description: Todays puzzle
@@ -25,3 +25,5 @@ paths:
             example: ABCDEFGHI
         404:
           description: Todays puzzle is not set.
+        default:
+          description: Unknown error
