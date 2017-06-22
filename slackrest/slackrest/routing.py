@@ -7,11 +7,22 @@ A response is a message sent back to the Slack user or channel. A response can b
 - Reply: send the response to the same channel or user that the incoming message originated from.
 - Notification: send the response to a defined "main" channel.
 - Direct: send the response to a user or channel directly set in the message.
+
+Messages come in two forms:
+
+- Incoming messages from Slack
+- Outgoing messages to Slack
 """
 
 class InvalidResponseType(Exception):
     def __init__(self):
         Exception.__init__(self)
+
+class IncomingMessage(object):
+    def __init__(self, message, channel_id, user_id):
+        self.message = message
+        self.channel_id = channel_id
+        self.user_id = user_id
 
 class RouteContext(object):
     """
