@@ -9,13 +9,18 @@ A response is a message sent back to the Slack user or channel. A response can b
 - Direct: send the response to a user or channel directly set in the message.
 """
 
+class InvalidResponseType(Exception):
+    def __init__(self):
+        Exception.__init__(self)
+
 class RouteContext(object):
     """
     A RouteContext is a class which encapsulates all the context needed to route a response to the right channel/user.
     """
-    def __init__(self, outbound_message_queue, incoming_message):
+    def __init__(self, outbound_message_queue, incoming_message, notification_channel_id):
         self.outbound_message_queue = outbound_message_queue
         self.incoming_message = incoming_message
+        self.notification_channel_id = notification_channel_id
 
     def route(self, response):
         """
@@ -25,5 +30,12 @@ class RouteContext(object):
 
         :param response: a dict with keys `response_type`, `message`, and optionally `channel_id`.
         """
-        response_channel = self.incoming_message.user_id
+        response_type = response['response_type']
+        if response_type == 'reply':
+            response_channel = self.incoming_message.user_id
+        elif response_type == 'notification':
+            response_channel = self.notification_channel_id
+        else:
+            raise InvalidResponseType()
+
         self.outbound_message_queue.enqueue(response['message'], response_channel)
