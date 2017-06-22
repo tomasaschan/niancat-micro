@@ -1,9 +1,9 @@
 swagger: "2.0"
 
 info:
-  version: 1.0.1
+  version: 1.0.0
   title: Niancat
-  description: API for the Niancat service.
+  description: API for the Niancat chat service.
 
 schemes:
   - http
@@ -12,7 +12,7 @@ basePath: /v1
 paths:
   /puzzle:
     get:
-      summary: Get todays puzzle
+      summary: Send a chat message to get todays puzzle
       description: The puzzle consists of nine letters, which make up some word
                    in Swedish.
       produces:
@@ -21,47 +21,19 @@ paths:
         200:
           description: Todays puzzle
           schema:
-            type: string
-            example: ABCDEFGHI
-        404:
-          description: Todays puzzle is not set.
+            $ref: '#/definitions/Message'
         default:
           description: Unknown error
     post:
       summary: Set todays puzzle
       description: Setting the puzzle returns the last puzzle solution
-      consumes:
-        - application/json
       produces:
         - application/json
-      parameters:
-      - name: puzzle
-        in: body
-        description: The new puzzle.
-        required: true
-        schema:
-          type: string
       responses:
         200:
           description: The puzzle was set and the last days puzzle is returned
           schema:
-            type: object
-            required:
-              - puzzle
-            properties:
-              puzzle:
-                type: string
-              no_of_solutions:
-                type: integer
-              yesterdays_solution:
-                type: array
-                items:
-                  $ref: '#/definitions/PreviousSolution'
-              unsolutions:
-                type: array
-                items:
-                  $ref: '#/definitions/UsersUnsolutions'
-
+            $ref: '#/definitions/Message'
   /unsolution/{user}:
     get:
       summary: List all unsolutions for a user
@@ -75,9 +47,7 @@ paths:
         200:
           description: Returns a list of all unsolutions
           schema:
-            type: array
-            items:
-              type: string
+            $ref: '#/definitions/Message'
 
     post:
       summary: Store an unsolution for a user
@@ -96,23 +66,19 @@ paths:
       responses:
         200:
           description: Response stored.
+          schema:
+            $ref: '#/definitions/Message'
 
 definitions:
-  UsersUnsolutions:
+  Message:
     type: object
+    required:
+      - response_type
+      - message
     properties:
-      user:
+      response_type:
         type: string
-      unsolutions:
-        type: array
-        items:
-          type: string
-  PreviousSolution:
-    type: object
-    properties:
-      solution:
+      message:
         type: string
-      users:
-        type: array
-        items:
-          type: string
+      channel_id:
+        type: string
