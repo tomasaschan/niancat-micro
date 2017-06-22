@@ -1,0 +1,84 @@
+swagger: "2.0"
+
+info:
+  version: 1.0.0
+  title: Niancat
+  description: API for the Niancat chat service.
+
+schemes:
+  - http
+basePath: /v1
+
+paths:
+  /puzzle:
+    get:
+      summary: Send a chat message to get todays puzzle
+      description: The puzzle consists of nine letters, which make up some word
+                   in Swedish.
+      produces:
+        - application/json
+      responses:
+        200:
+          description: Todays puzzle
+          schema:
+            $ref: '#/definitions/Message'
+        default:
+          description: Unknown error
+    post:
+      summary: Set todays puzzle
+      description: Setting the puzzle returns the last puzzle solution
+      produces:
+        - application/json
+      responses:
+        200:
+          description: The puzzle was set and the last days puzzle is returned
+          schema:
+            $ref: '#/definitions/Message'
+  /unsolution/{user}:
+    get:
+      summary: List all unsolutions for a user
+      parameters:
+      - name: user
+        in: path
+        description: Which user to list unsolutions for.
+        required: true
+        type: string
+      responses:
+        200:
+          description: Returns a list of all unsolutions
+          schema:
+            $ref: '#/definitions/Message'
+
+    post:
+      summary: Store an unsolution for a user
+      parameters:
+      - name: user
+        in: path
+        description: The user for which to store the unsolution.
+        required: true
+        type: string
+      - name: unsolution
+        in: body
+        description: The unsolution to store.
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Response stored.
+          schema:
+            $ref: '#/definitions/Message'
+
+definitions:
+  Message:
+    type: object
+    required:
+      - response_type
+      - message
+    properties:
+      response_type:
+        type: string
+      message:
+        type: string
+      channel_id:
+        type: string
