@@ -1,6 +1,9 @@
 *.class
 *.log
 
+# Python
+*.pyc
+
 # sbt specific
 .cache
 .history
