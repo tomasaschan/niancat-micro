@@ -29,6 +29,15 @@ paths:
       description: Setting the puzzle returns the last puzzle solution
       produces:
         - application/json
+      consumes:
+        - application/json
+      parameters:
+      - name: puzzle
+        in: body
+        description: The new puzzle.
+        required: true
+        schema:
+          type: string
       responses:
         200:
           description: The puzzle was set and the last days puzzle is returned
