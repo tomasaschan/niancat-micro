@@ -1,2 +1,12 @@
-slackclient
-tornado
+behave==1.2.5
+certifi==2017.4.17
+chardet==3.0.4
+idna==2.5
+parse==1.8.2
+parse-type==0.3.4
+requests==2.18.1
+six==1.10.0
+slackclient==1.0.6
+tornado==4.5.1
+urllib3==1.21.1
+websocket-client==0.43.0
