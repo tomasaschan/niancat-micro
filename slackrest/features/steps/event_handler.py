@@ -1,5 +1,11 @@
 from queue import Queue, Empty
 
+
+class NoSuchEvent(RuntimeError):
+    def __init__(self, *args, **kwargs):
+        RuntimeError(*args, **kwargs)
+
+
 class EventHandler(object):
     def __init__(self, ws_url):
         self.queue = Queue()
@@ -17,6 +23,7 @@ class EventHandler(object):
         return None
 
     def await(self, type, timeout_ms=5000):
+        print("EventHandler.await, type={}, timeout_ms={}", type, timeout_ms)
         unread_message = self.find_unread_message(type)
         if unread_message: return unread_message
 
@@ -24,7 +31,7 @@ class EventHandler(object):
         slept = 0
         while slept < timeout_ms:
             try:
-                msg = self.queue.get(block=True, timeout=wait_ms)
+                msg = self.queue.get(block=True, timeout=wait_ms / 1000)
                 if msg['event'] == type:
                     return msg
                 else:
@@ -33,3 +40,4 @@ class EventHandler(object):
                 pass
             finally:
                 slept += wait_ms
+        assert False, "No event of type {} received!".format(type)
