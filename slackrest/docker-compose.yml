@@ -1,0 +1,14 @@
+version: '2'
+services:
+  mockslack:
+    build: .
+    command: python /app/bin/mock_slack.py
+  slackrest:
+    build: .
+    command: python /app/
+    links:
+      - "mockslack:slack.com"
+      - "fakechatbot:niancat-chat"
+  fakechatbot:
+    build: .
+    command:
