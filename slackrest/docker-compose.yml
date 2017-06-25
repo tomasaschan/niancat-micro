@@ -2,13 +2,13 @@ version: '2'
 services:
   mockslack:
     build: .
-    command: python /app/bin/mock_slack.py
+    command: python3 /app/bin/mock_slack.py
   slackrest:
     build: .
-    command: python /app/
+    command: behave
     links:
       - "mockslack:slack.com"
       - "fakechatbot:niancat-chat"
   fakechatbot:
     build: .
-    command:
+    command: echo

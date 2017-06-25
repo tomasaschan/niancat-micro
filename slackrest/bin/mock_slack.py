@@ -14,6 +14,8 @@ producers_lock = RLock()
 test_event_producers = []
 event_queue = Queue()
 
+slack_handler = None
+
 def send_event_thread():
     while True:
         new_event = event_queue.get(block=True)
@@ -33,13 +35,11 @@ class TestEventHandler(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         """Ignore any message sent to the event producer."""
-        pass
+        loop.add_callback(slack_handler.write_message, message)
 
     def on_close(self):
         with producers_lock:
             test_event_producers.remove(self)
-
-
 
 
 class TestEventApp(tornado.web.Application):
@@ -56,6 +56,8 @@ class TestEventApp(tornado.web.Application):
 
 class MockSlackHandler(tornado.websocket.WebSocketHandler):
     def __init__(self, *args, **kwargs):
+        global slack_handler
+        slack_handler = self
         tornado.websocket.WebSocketHandler.__init__(self, *args, **kwargs)
 
     def open(self):

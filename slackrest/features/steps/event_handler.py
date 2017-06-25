@@ -1,4 +1,8 @@
 from queue import Queue, Empty
+import tornado.websocket as ws
+from tornado.ioloop import IOLoop
+
+loop = IOLoop.current()
 
 
 class NoSuchEvent(RuntimeError):
@@ -10,6 +14,7 @@ class EventHandler(object):
     def __init__(self, ws_url):
         self.queue = Queue()
         self.unread_messages = []
+        self.ws_connection = ws.websocket_connect(ws_url, on_message_callback=self.on_message_callback)
 
     def on_message_callback(self, msg):
         self.queue.put_nowait(msg)
@@ -21,6 +26,9 @@ class EventHandler(object):
                 self.unread_messages = self.unread_messages[:i] + self.unread_messages[i+1:]
                 return msg
         return None
+
+    def send_message(self, msg):
+        loop.add_callback(self.ws_connection.write_message, msg)
 
     def await(self, type, timeout_ms=5000):
         print("EventHandler.await, type={}, timeout_ms={}", type, timeout_ms)
