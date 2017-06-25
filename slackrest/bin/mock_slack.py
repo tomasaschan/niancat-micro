@@ -6,28 +6,46 @@ import tornado.websocket
 import tornado.httpserver
 import tornado.ioloop
 import json
+from queue import Queue
+from threading import RLock, Thread
 
 loop = tornado.ioloop.IOLoop.current()
+producers_lock = RLock()
+test_event_producers = []
+event_queue = Queue()
+
+def send_event_thread():
+    while True:
+        new_event = event_queue.get(block=True)
+        with producers_lock:
+            for producer in test_event_producers:
+                loop.add_callback(producer.write_message, new_event)
+
 
 class TestEventHandler(tornado.websocket.WebSocketHandler):
+    def __init__(self, *args, **kwargs):
+        tornado.websocket.WebSocketHandler.__init__(self, *args, **kwargs)
+
     def open(self):
-        pass
- 
+        with producers_lock:
+            test_event_producers.append(self)
+        self.write_message({'event': 'hello'})
+
     def on_message(self, message):
         """Ignore any message sent to the event producer."""
         pass
 
     def on_close(self):
-        pass
+        with producers_lock:
+            test_event_producers.remove(self)
 
 
 
 
 class TestEventApp(tornado.web.Application):
-    def __init__(self, test_event_producer):
-        test_event_producer = TestEventHandler()
+    def __init__(self, *args, **kwargs):
         handlers = [
-            (r'/', lambda: test_event_producer)
+            (r'/', TestEventHandler)
         ]
 
         settings = {
@@ -35,15 +53,17 @@ class TestEventApp(tornado.web.Application):
         }
         tornado.web.Application.__init__(self, handlers, **settings)
 
+
 class MockSlackHandler(tornado.websocket.WebSocketHandler):
-    def __init__(self, test_event_producer):
-        self.test_event_producer = test_event_producer
+    def __init__(self, *args, **kwargs):
+        tornado.websocket.WebSocketHandler.__init__(self, *args, **kwargs)
 
     def open(self):
         """A Slack RTM WebSocket connection starts with a hello message."""
+        print("Slack: Opened RTM WebSocket connection. Sending Hello message.")
         self.write_message('{ "type": "hello" }')
         login_event = {'event': 'login'}
-        loop.add_callback(self.test_event_producer.write_message, json.dumps(login_event))
+        event_queue.put_nowait(login_event)
 
     def on_message(self, message):
         if 'type' in message and message['type'] == 'ping':
@@ -52,7 +72,7 @@ class MockSlackHandler(tornado.websocket.WebSocketHandler):
         elif 'type' in message and message['type'] == 'message':
             json_message = json.loads(message)
             message_event = {'event': 'message', 'message': json_message}
-            loop.add_callback(self.test_event_producer.write_message, json.dumps(message_event))
+            event_queue.put_nowait(json.dumps(message_event))
 
     def on_close(self):
         pass
@@ -60,15 +80,15 @@ class MockSlackHandler(tornado.websocket.WebSocketHandler):
 
 class RtmHandler(tornado.web.RequestHandler):
     def get(self):
-        return json.dumps({'ok': True, 'url': 'http://slack.com/websocket'})
+        self.write({'ok': True, 'url': 'http://slack.com/websocket'})
+        self.finish()
 
 
 class MockSlackApp(tornado.web.Application):
-    def __init__(self, test_event_producer):
-        mock_slack_handler = MockSlackHandler(test_event_producer)
+    def __init__(self, *args, **kwargs):
         handlers = [
-            (r'/api/rtm.start', RtmHandler)
-            (r'/websocket', lambda: mock_slack_handler),
+            (r'/api/rtm.start', RtmHandler),
+            (r'/websocket', MockSlackHandler),
         ]
  
         settings = {
@@ -78,8 +98,10 @@ class MockSlackApp(tornado.web.Application):
  
  
 if __name__ == '__main__':
-    test_event_producer = TestEventHandler()
-    test_event_app = TestEventApp(test_event_producer)
+    event_thread = Thread(target=send_event_thread)
+    event_thread.start()
+
+    test_event_app = TestEventApp()
     server = tornado.httpserver.HTTPServer(test_event_app)
     server.listen(8080)
 
@@ -88,3 +110,4 @@ if __name__ == '__main__':
     server.listen(80)
 
     tornado.ioloop.IOLoop.instance().start()
+    event_thread.stop()

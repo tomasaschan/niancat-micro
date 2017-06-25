@@ -1,27 +1,22 @@
 """
 Dump WebSocket messages to stdout.
 
-Usage: python dump_websocket.py <host> <port>
+Usage: python dump_websocket.py <url>
 """
 
-import tornado.websocket
+from tornado.websocket import websocket_connect
 import tornado.ioloop
 import sys
 
-ioloop = tornado.ioloop.IOLoop.current()
-
-if len(sys.argv) != 3:
+if len(sys.argv) != 2:
     print(__doc__)
     sys.exit(1)
 
-host = sys.argv[1]
-port = sys.argv[2]
-url = 'ws://{}:{}'.format(host, port)
+url = sys.argv[1]
 
-async def main():
-    conn = await tornado.websocket.websocket_connect(url, io_loop=ioloop)
-    while True:
-        msg = await conn.read_message()
-        print("MESSAGE:", msg)
+def on_message_callback(message):
+    print("MESSAGE:", message)
 
-ioloop.run_sync(main)
+if __name__ == "__main__":
+    websocket_connect(url, on_message_callback=on_message_callback)
+    tornado.ioloop.IOLoop.instance().start()
