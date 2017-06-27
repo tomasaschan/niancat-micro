@@ -13,10 +13,10 @@ Feature: A Slackrest app acts as a middleman between Slack and a RESTful chat se
 
 
   Scenario: Sending a message and getting a reply
-     When I send "!foo" from channel "C012345"
+     When I send "!givemeareply" from channel "C012345"
      Then I should get a reply in channel "C012345"
 
   Scenario: Sending a message and getting a notification
-     When I send "!bar" from channel "C012345"
+     When I send "!givemeanotification" from channel "C012345"
      Then I should get a notification in channel "C456789"
 

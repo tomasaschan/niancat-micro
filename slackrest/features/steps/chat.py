@@ -1,5 +1,6 @@
 from behave import given, when, then
-from slackrest import SlackrestApp, Route
+from slackrest.app import SlackrestApp
+from slackrest.routing import RouteContext
 
 def before_feature(context):
     context.app = SlackrestApp()
@@ -12,8 +13,7 @@ def step_impl(context):
 
 @given(u'I map "{command}" to {url}')
 def step_impl(context, command, url):
-    context.app.add_route(Route(command, url))
-
+    pass
 
 @when(u'I send "{message}" from channel "{channel_id}"')
 def step_impl(context, message, channel_id):
