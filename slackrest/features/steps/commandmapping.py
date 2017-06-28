@@ -1,44 +1,99 @@
 from behave import *
+from slackrest.command import Visibility
 
-from slackrest.command import FixedParameterCommand, FreeTextCommand
-from slackrest.command import CommandParser
+# class NoParamCommand:
+#     pattern = '!noparam'
+#     url_format = '/noparam'
+#     visibility = Visibility.Any
+#     body = None
+#
+# class FooCommand:
+#     pattern = '!foo {bar}'
+#     url_format = '/foo/{bar}'
+#     visibility = Visibility.Any
+#     body = None
+#
+# class BarCommand:
+#     pattern = '!bar {baz} {qux}'
+#     url_format = '/bar'
+#     visibility = Visibility.Any
+#
+#     @classmethod
+#     def body(cls, baz, qux):
+#         return json.dumps({'argument1': baz, 'argument2': qux})
+#
+# class BazCommand:
+#     pattern = '{freetext}'
+#     url_format = '/baz'
+#     visibility = Visibility.Private
+#
+#     @classmethod
+#     def body(cls, freetext):
+#         return json.dumps(freetext)
 
-def before_feature(context):
-    context.commands = []
-    context.command_parser = CommandParser()
 
-@given(u'a fixed parameter command mapping with pattern "{pattern}", and URL "{url}"')
-def step_impl(context, pattern, url):
-    command = FixedParameterCommand(pattern, url)
-    context.latest_command = command
-    context.commands.append(command)
+@given(u'a command with pattern \'{pattern}\'')
+def step_impl(context, pattern):
+    context.command_attributes['pattern'] = pattern
 
-@then(u'the target URL is "{url}"')
+
+@given(u'URL format \'{url_format}\'')
+def step_impl(context, url_format):
+    context.command_attributes['url_format'] = url_format
+
+
+@given(u'for any visibility')
+def step_impl(context):
+    context.command_attributes['visibility'] = Visibility.Public
+
+
+@given(u'with no request body')
+def step_impl(context):
+    context.command_attributes['body'] = None
+
+
+@when(u'I send a message \'{msg}\'')
+def step_impl(context, msg):
+    channel_id = "C0123456"
+    try:
+        context.request = context.command_parser.parse(msg, channel_id, Visibility.Public)
+    except Exception as e:
+        context.parse_exception = e
+
+
+@then(u'the request URL is \'{url}\'')
 def step_impl(context, url):
     assert context.request.url == url
 
-@given(u'a free text command mapping with pattern "{pattern}", and URL "{url}"')
-def step_impl(context, pattern, url):
-    command = FreeTextCommand(pattern, url)
-    context.latest_command = command
-    context.commands.append(command)
 
-@given(u'required visibility is {visibility}')
-def step_impl(context, visibility):
-    context.latest_command.required_visibility = visibility
+@then(u'the request body is empty')
+def step_impl(context):
+    assert context.request.body is None
+
+
+@given(u'for private channels')
+def step_impl(context):
+    context.command_attributes['visibility'] = Visibility.Private
+
 
 @then(u'the command is ignored')
 def step_impl(context):
     assert context.request is None
 
-@when(u'I send a command "{command}" in public')
-def step_impl(context, command):
-    context.request = context.command_parser.parse(command, CommandParser.PUBLIC)
 
-@when(u'I send a command "{command}" in private')
-def step_impl(context, command):
-    context.request = context.command_parser.parse(command, CommandParser.PRIVATE)
+@when(u'I send a message \'{msg}\' in public')
+def step_impl(context, msg):
+    channel_id = "C0123456"
+    try:
+        context.request = context.command_parser.parse(msg, channel_id, Visibility.Public)
+    except Exception as e:
+        context.parse_exception = e
 
-@then(u'a response is sent noting that the command is unknown')
-def step_impl(context):
-    raise NotImplementedError(u'STEP: Then a response is sent noting that the command is unknown')
+
+@when(u'I send a message \'{msg}\' in private')
+def step_impl(context, msg):
+    channel_id = "C0123456"
+    try:
+        context.request = context.command_parser.parse(msg, channel_id, Visibility.Private)
+    except Exception as e:
+        context.parse_exception = e
