@@ -29,6 +29,7 @@ class CommandParser:
     def add_command(self, command):
         self._commands.append(command)
 
+
 class Visibility:
     Any = 0
     Public = 1

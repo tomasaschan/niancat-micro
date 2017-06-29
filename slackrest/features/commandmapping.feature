@@ -45,3 +45,11 @@ Feature: Command mappings define how Slack events are mapped to a chat bot REST 
       And with no request body
      When I send a message '!nosuchcommand' in public
      Then the command is ignored
+
+  Scenario: Commands can specify a body
+    Given a command with pattern '!bodycommand {param}'
+      And URL format '/bodycommand'
+      And for any visibility
+      And with a body that writes the param value as JSON
+     When I send a message '!bodycommand foo'
+     Then the request body contains 'foo'

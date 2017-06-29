@@ -1,5 +1,6 @@
 from behave import *
 from slackrest.command import Visibility
+import json
 
 # class NoParamCommand:
 #     pattern = '!noparam'
@@ -96,4 +97,17 @@ def step_impl(context, msg, visibility):
     channel_id = "C0123456"
     context.request = context.command_parser.parse(msg, channel_id, channel_visibility)
 
+
+def params_as_json(**kwargs):
+    return json.dumps(kwargs)
+
+
+@given(u'with a body that writes the param value as JSON')
+def step_impl(context):
+    context.command_attributes['body'] = params_as_json
+
+
+@then(u'the request body contains \'{value}\'')
+def step_impl(context, value):
+    assert value in context.request.body
 
