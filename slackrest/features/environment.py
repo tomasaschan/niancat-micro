@@ -15,7 +15,7 @@ def after_all(context):
     tornado.ioloop.IOLoop.current().stop()
 
 
-def before_feature(context, feature):
+def before_scenario(context, scenario):
     context.commands = []
     context.command_attributes = {}
     context.command_parser = CommandParser()

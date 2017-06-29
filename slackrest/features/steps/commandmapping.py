@@ -54,11 +54,11 @@ def step_impl(context):
 
 @when(u'I send a message \'{msg}\'')
 def step_impl(context, msg):
+    command = type('ACommand', (object,), context.command_attributes)
+    context.command_parser.add_command(command)
+
     channel_id = "C0123456"
-    try:
-        context.request = context.command_parser.parse(msg, channel_id, Visibility.Public)
-    except Exception as e:
-        context.parse_exception = e
+    context.request = context.command_parser.parse(msg, channel_id, Visibility.Public)
 
 
 @then(u'the request URL is \'{url}\'')
@@ -81,19 +81,19 @@ def step_impl(context):
     assert context.request is None
 
 
-@when(u'I send a message \'{msg}\' in public')
-def step_impl(context, msg):
+@when(u'I send a message \'{msg}\' in {visibility}')
+def step_impl(context, msg, visibility):
+    command = type('ACommand', (object,), context.command_attributes)
+    context.command_parser.add_command(command)
+
+    if visibility == 'public':
+        channel_visibility = Visibility.Public
+    elif visibility == 'private':
+        channel_visibility = Visibility.Private
+    else:
+        raise ValueError('Unknown visibility "{}"'.format(visibility))
+
     channel_id = "C0123456"
-    try:
-        context.request = context.command_parser.parse(msg, channel_id, Visibility.Public)
-    except Exception as e:
-        context.parse_exception = e
+    context.request = context.command_parser.parse(msg, channel_id, channel_visibility)
 
 
-@when(u'I send a message \'{msg}\' in private')
-def step_impl(context, msg):
-    channel_id = "C0123456"
-    try:
-        context.request = context.command_parser.parse(msg, channel_id, Visibility.Private)
-    except Exception as e:
-        context.parse_exception = e
