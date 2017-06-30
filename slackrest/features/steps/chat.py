@@ -1,19 +1,31 @@
 from behave import given, when, then
 from slackrest.app import SlackrestApp
-from slackrest.routing import RouteContext
+from slackrest.command import Visibility
 
-def before_feature(context):
-    context.app = SlackrestApp()
+
+class GiveMeAReply:
+    pattern = '!givemeareply'
+    url_format = '/reply'
+    visibility = Visibility.Any
+    body = None
+
+
+class GiveMeANotification:
+    pattern = '!givemeanotification'
+    url_format = '/notify'
+    visibility = Visibility.Any
+    body = None
+
+
+commands = [GiveMeAReply, GiveMeANotification]
 
 
 @given(u'Slackrest is connected to Slack')
 def step_impl(context):
+    context.app = SlackrestApp(context.chat_url, commands, context.notification_channel_id)
+    context.app.run_async()
     context.slack_events.await(type='login')
 
-
-@given(u'I map "{command}" to {url}')
-def step_impl(context, command, url):
-    pass
 
 @when(u'I send "{message}" from channel "{channel_id}"')
 def step_impl(context, message, channel_id):
@@ -29,5 +41,19 @@ def step_impl(context, type, channel_id):
 
 @given(u'I set the notification channel to "{notification_channel_id}"')
 def step_impl(context, notification_channel_id):
-    context.app.set_notification_channel(notification_channel_id)
+    context.notification_channel_id = notification_channel_id
 
+
+@given(u'I map "!givemeareply" to /reply')
+def step_impl(context):
+    pass
+
+
+@given(u'I map "!givemeanotification" to /notify')
+def step_impl(context):
+    pass
+
+
+@given(u'the chat bot is at {url}')
+def step_impl(context, url):
+    context.chat_url = url
