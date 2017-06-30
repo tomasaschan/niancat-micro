@@ -6,6 +6,8 @@ services:
   slackrest:
     build: .
     command: behave
+    environment:
+      - SLACK_API_TOKEN=0123456789abcdef
     links:
       - "mockslack:slack.com"
       - "mockchatbot:niancat-chat"

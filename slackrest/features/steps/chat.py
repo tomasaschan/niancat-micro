@@ -24,7 +24,7 @@ commands = [GiveMeAReply, GiveMeANotification]
 def step_impl(context):
     context.app = SlackrestApp(context.chat_url, commands, context.notification_channel_id)
     context.app.run_async()
-    context.slack_events.await(type='login')
+    context.slack_events.await(event_type='login')
 
 
 @when(u'I send "{message}" from channel "{channel_id}"')
@@ -34,8 +34,8 @@ def step_impl(context, message, channel_id):
 
 
 @then(u'I should get a {type} in channel "{channel_id}"')
-def step_impl(context, type, channel_id):
-    event = context.slack_events.await(type=type)
+def step_impl(context, event_type, channel_id):
+    event = context.slack_events.await(event_type=event_type)
     assert event['channel_id'] == channel_id
 
 

@@ -82,7 +82,7 @@ class MockSlackHandler(tornado.websocket.WebSocketHandler):
 
 class RtmHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write({'ok': True, 'url': 'http://slack.com/websocket'})
+        self.write({'ok': True, 'url': 'ws://slack.com/websocket'})
         self.finish()
 
 

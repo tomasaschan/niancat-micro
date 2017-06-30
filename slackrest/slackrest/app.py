@@ -1,12 +1,12 @@
 import threading
-from tornado.platform.asyncio import AsyncIOMainLoop
-import asyncio
 from slackclient import SlackClient
 import os
+from tornado.ioloop import  IOLoop
 
 
 class SlackException(RuntimeError):
-    pass
+    def __init__(self, *args, **kwargs):
+        RuntimeError.__init__(*args, **kwargs)
 
 
 def create_slack_client():
@@ -25,8 +25,9 @@ class SlackrestApp(object):
         self.notification_channel_id = notification_channel_id
         self._async_thread = None
 
-    async def read_slack_messages(self):
-        msgs = self.sc.rtm_read()
+    def read_slack_messages(self, sc):
+        print("WebSocket URL", sc.server.ws_url)
+        msgs = sc.rtm_read()
         for m in msgs:
             print("MESSAGE: {}".format(m))
 
@@ -36,17 +37,15 @@ class SlackrestApp(object):
         self._async_thread.start()
 
     def connect_to_slack(self):
-        # Connect to Slack
         print("Connecting to Slack...")
         sc = create_slack_client()
-        if not sc.rtm_connect():
-            raise SlackException()
+        if not sc:
+            raise SlackException("Failed to create Slack client!")
+        sc.server.rtm_connect()
 
-        asyncio.get_event_loop().call_soon(self.read_slack_messages)
+        IOLoop.current().add_callback(self.read_slack_messages, sc)
 
     def run_forever(self):
         print("Starting SlackrestApp...")
-        asyncio.get_event_loop()
-        AsyncIOMainLoop().install()
-        asyncio.get_event_loop().call_soon(self.connect_to_slack)
-        asyncio.get_event_loop().run_forever()
+        self.connect_to_slack()
+        IOLoop.current().start()

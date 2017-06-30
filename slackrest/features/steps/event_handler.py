@@ -1,6 +1,7 @@
 from queue import Queue, Empty
 import tornado.websocket as ws
 from tornado.ioloop import IOLoop
+import json
 
 loop = IOLoop.current()
 
@@ -17,12 +18,12 @@ class EventHandler(object):
         self.ws_connection = ws.websocket_connect(ws_url, on_message_callback=self.on_message_callback)
 
     def on_message_callback(self, msg):
-        self.queue.put_nowait(msg)
+        self.queue.put_nowait(json.loads(msg))
 
     def find_unread_message(self, type):
         for i in range(0, len(self.unread_messages)):
             msg = self.unread_messages[i]
-            if msg['type'] == type:
+            if msg['event'] == type:
                 self.unread_messages = self.unread_messages[:i] + self.unread_messages[i+1:]
                 return msg
         return None
@@ -30,17 +31,19 @@ class EventHandler(object):
     def send_message(self, msg):
         loop.add_callback(self.ws_connection.write_message, msg)
 
-    def await(self, type, timeout_ms=5000):
-        print("EventHandler.await, type={}, timeout_ms={}", type, timeout_ms)
-        unread_message = self.find_unread_message(type)
-        if unread_message: return unread_message
+    def await(self, event_type, timeout_ms=5000):
+        print("EventHandler.await, type={}, timeout_ms={}", event_type, timeout_ms)
+        unread_message = self.find_unread_message(event_type)
+        if unread_message:
+            return unread_message
 
         wait_ms = 500
         slept = 0
         while slept < timeout_ms:
             try:
                 msg = self.queue.get(block=True, timeout=wait_ms / 1000)
-                if msg['event'] == type:
+                print("EventHandler.await: msg = '{}'".format(msg))
+                if msg['event'] == event_type:
                     return msg
                 else:
                     self.unread_messages.append(msg)
@@ -48,4 +51,4 @@ class EventHandler(object):
                 pass
             finally:
                 slept += wait_ms
-        assert False, "No event of type {} received!".format(type)
+        assert False, "No event of type {} received!".format(event_type)
