@@ -28,6 +28,7 @@ class SlackrestApp(object):
     def read_slack_messages(self, sc):
         print("WebSocket URL", sc.server.ws_url)
         msgs = sc.rtm_read()
+        print("Raw MESSAGE'", msgs)
         for m in msgs:
             print("MESSAGE: {}".format(m))
 

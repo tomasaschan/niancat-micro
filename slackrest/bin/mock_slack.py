@@ -56,6 +56,7 @@ class TestEventApp(tornado.web.Application):
 
 class MockSlackHandler(tornado.websocket.WebSocketHandler):
     def __init__(self, *args, **kwargs):
+        print("Slack RTM WebSocket Handler created")
         global slack_handler
         slack_handler = self
         tornado.websocket.WebSocketHandler.__init__(self, *args, **kwargs)
@@ -63,11 +64,12 @@ class MockSlackHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         """A Slack RTM WebSocket connection starts with a hello message."""
         print("Slack: Opened RTM WebSocket connection. Sending Hello message.")
-        self.write_message('{ "type": "hello" }')
+        self.write_message({"type": "hello"})
         login_event = {'event': 'login'}
         event_queue.put_nowait(login_event)
 
     def on_message(self, message):
+        print("Slack RTM on_message: {}".format(message))
         if 'type' in message and message['type'] == 'ping':
             pong = {'type': 'pong', 'reply_to': message['id']}
             loop.add_callback(self.write_message, json.dumps(pong))
@@ -77,12 +79,27 @@ class MockSlackHandler(tornado.websocket.WebSocketHandler):
             event_queue.put_nowait(json.dumps(message_event))
 
     def on_close(self):
-        pass
+        print("Slack RTM WebSocket closed!")
 
 
 class RtmHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write({'ok': True, 'url': 'ws://slack.com/websocket'})
+    def post(self):
+        print("MockSlack.RtmHandler: POST rtm.start")
+        login_data = {
+            'ok': True,
+            'url': 'wss://slack.com/websocket',
+            'team': {
+                'domain': 'somedomain'
+            },
+            'self': {
+                'name': 'yourbotname'
+            },
+            'channels': [{'id': 'C0123456'}],
+            'groups': [{'id': 'G0123456'}],
+            'ims': [{'id': 'I0123456'}],
+            'users': [{'name': 'yourbotname', 'id': 'U0123456'}]
+        }
+        self.write(login_data)
         self.finish()
 
 
@@ -108,8 +125,11 @@ if __name__ == '__main__':
     server.listen(8080)
 
     mock_slack_app = MockSlackApp()
-    server = tornado.httpserver.HTTPServer(mock_slack_app)
-    server.listen(80)
+    server = tornado.httpserver.HTTPServer(mock_slack_app, ssl_options={
+        "certfile": "/var/cert/cert.pem",
+        "keyfile": "/var/cert/key.pem",
+    })
+    server.listen(443)
 
     tornado.ioloop.IOLoop.instance().start()
     event_thread.stop()

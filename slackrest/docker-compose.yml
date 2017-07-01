@@ -3,11 +3,16 @@ services:
   mockslack:
     build: .
     command: python3 /app/bin/mock_slack.py
+    environment:
+      - MOCK_SSL_CERT=/var/cert/cert.pem
+      - MOCK_SSL_KEY=/var/cert/key.pem
   slackrest:
     build: .
-    command: behave
+    command: behave --no-capture
     environment:
       - SLACK_API_TOKEN=0123456789abcdef
+      - REQUESTS_CA_BUNDLE=/var/cert/cert.pem
+      - WEBSOCKET_CLIENT_CA_BUNDLE=/var/cert/cert.pem
     links:
       - "mockslack:slack.com"
       - "mockchatbot:niancat-chat"

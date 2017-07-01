@@ -18,7 +18,8 @@ class EventHandler(object):
         self.ws_connection = ws.websocket_connect(ws_url, on_message_callback=self.on_message_callback)
 
     def on_message_callback(self, msg):
-        self.queue.put_nowait(json.loads(msg))
+        print("EventHandler got msg '{}'".format(msg))
+        self.unread_messages.append(json.loads(msg))
 
     def find_unread_message(self, type):
         for i in range(0, len(self.unread_messages)):
@@ -32,12 +33,16 @@ class EventHandler(object):
         loop.add_callback(self.ws_connection.write_message, msg)
 
     def await(self, event_type, timeout_ms=5000):
-        print("EventHandler.await, type={}, timeout_ms={}", event_type, timeout_ms)
+        print("EventHandler.await, type={}, timeout_ms={}".format(event_type, timeout_ms))
         unread_message = self.find_unread_message(event_type)
         if unread_message:
             return unread_message
 
         wait_ms = 500
+
+        if timeout_ms < 0:
+            assert False, "No event of type {} received!".format(event_type)
+
         slept = 0
         while slept < timeout_ms:
             try:
@@ -48,7 +53,7 @@ class EventHandler(object):
                 else:
                     self.unread_messages.append(msg)
             except Empty:
-                pass
+                print("EventHandler.await: No message received")
             finally:
                 slept += wait_ms
         assert False, "No event of type {} received!".format(event_type)
