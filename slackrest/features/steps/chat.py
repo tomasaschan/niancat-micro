@@ -29,14 +29,15 @@ def step_impl(context):
 
 @when(u'I send "{message}" from channel "{channel_id}"')
 def step_impl(context, message, channel_id):
-    msg = {'type': 'message', 'text': message, 'channel': channel_id}
+    user_id = 'U123456'
+    msg = {'type': 'message', 'text': message, 'channel': channel_id, 'user': user_id}
     context.slack_events.send_message(msg)
 
 
-@then(u'I should get a {event_type} in channel "{channel_id}"')
-def step_impl(context, event_type, channel_id):
-    event = context.slack_events.await(event_type=event_type)
-    assert event['channel_id'] == channel_id
+@then(u'I should get a message in channel "{channel_id}"')
+def step_impl(context, channel_id):
+    event = context.slack_events.await(event_type='message')
+    assert event['message']['channel'] == channel_id
 
 
 @given(u'I set the notification channel to "{notification_channel_id}"')

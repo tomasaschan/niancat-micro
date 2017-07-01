@@ -24,7 +24,6 @@ def send_events():
         event = yield event_queue.get()
         print("Sending event {}".format(event), file=sys.stderr)
         for event_handler in event_handlers:
-            print("  Sending event to handler {}".format(event_handler), file=sys.stderr)
             event_handler.write_message(event)
         yield gen.sleep(0.01)
 
@@ -70,14 +69,14 @@ class MockSlackHandler(tornado.websocket.WebSocketHandler):
         login_event = {'event': 'login'}
         event_queue.put_nowait(login_event)
 
-    def on_message(self, message):
+    def on_message(self, message_string):
+        message = json.loads(message_string)
         print("Slack RTM on_message: {}".format(message))
         if 'type' in message and message['type'] == 'ping':
             pong = {'type': 'pong', 'reply_to': message['id']}
             loop.add_callback(self.write_message, json.dumps(pong))
         elif 'type' in message and message['type'] == 'message':
-            json_message = json.loads(message)
-            message_event = {'event': 'message', 'message': json_message}
+            message_event = {'event': 'message', 'message': message}
             event_queue.put_nowait(json.dumps(message_event))
 
     def on_close(self):
@@ -96,10 +95,10 @@ class RtmHandler(tornado.web.RequestHandler):
             'self': {
                 'name': 'yourbotname'
             },
-            'channels': [{'id': 'C0123456'}],
-            'groups': [{'id': 'G0123456'}],
-            'ims': [{'id': 'I0123456'}],
-            'users': [{'name': 'yourbotname', 'id': 'U0123456'}]
+            'channels': [{'id': 'C012345'}, {'id': 'C456789'}],
+            'groups': [{'id': 'G012345'}],
+            'ims': [{'id': 'I012345'}],
+            'users': [{'name': 'yourbotname', 'id': 'U012345'}]
         }
         self.write(login_data)
         self.finish()

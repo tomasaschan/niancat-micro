@@ -1,13 +1,15 @@
 from parse import *
 
+
 class Request:
     def __init__(self, url, body):
         self.url = url
         self.body = body
 
+
 class CommandParser:
-    def __init__(self):
-        self._commands = []
+    def __init__(self, commands=[]):
+        self._commands = commands
 
     def parse(self, msg, channel_id, visibility):
         for command in self._commands:
@@ -34,3 +36,10 @@ class Visibility:
     Any = 0
     Public = 1
     Private = 2
+
+    @classmethod
+    def parse(cls, channel_id):
+        if channel_id.startswith('C'):
+            return Visibility.Public
+        elif channel_id.startswith('D'):
+            return Visibility.Private

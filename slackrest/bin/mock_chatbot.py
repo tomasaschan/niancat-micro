@@ -6,6 +6,7 @@ import tornado.ioloop
 test_event_handler = None
 loop = tornado.ioloop.IOLoop.current()
 
+
 class TestEventHandler(tornado.websocket.WebSocketHandler):
     def open(self):
         global test_event_handler
@@ -22,7 +23,8 @@ def write_event(type, message=None):
     event = {'event': type}
     if message:
         event['message'] = message
-    loop.add_callback(test_event_handler.write_message, event)
+    if test_event_handler:
+        loop.add_callback(test_event_handler.write_message, event)
 
 
 class ReplyHandler(tornado.web.RequestHandler):

@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, create_autospec
+from unittest.mock import Mock
 import slackrest.routing as routing
 
 class TestMessageRoute(unittest.TestCase):
@@ -12,8 +12,8 @@ class TestMessageRoute(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def expect_message(self, message, user_id):
-        self.message_queue.enqueue.assert_called_with(message, user_id)
+    def expect_message(self, message, channel_id):
+        self.message_queue.enqueue.assert_called_with(message, channel_id)
 
     def test_RouteContext_Reply_MessageIsReturnedToSender(self):
         reply_msg = {'response_type': 'reply', 'message': 'Lorem Ipsum'}
@@ -22,7 +22,7 @@ class TestMessageRoute(unittest.TestCase):
 
         route_context.route(reply_msg)
 
-        self.expect_message('Lorem Ipsum', self.user_id)
+        self.expect_message('Lorem Ipsum', self.channel_id)
 
     def test_RouteContext_Notification_MessageIsSentToNotificationChannel(self):
         notification_msg = {'response_type': 'notification', 'message': 'Ipsum Lorem'}

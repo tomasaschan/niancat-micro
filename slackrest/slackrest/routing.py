@@ -14,15 +14,18 @@ Messages come in two forms:
 - Outgoing messages to Slack
 """
 
+
 class InvalidResponseType(Exception):
     def __init__(self):
         Exception.__init__(self)
+
 
 class IncomingMessage(object):
     def __init__(self, message, channel_id, user_id):
         self.message = message
         self.channel_id = channel_id
         self.user_id = user_id
+
 
 class RouteContext(object):
     """
@@ -43,7 +46,7 @@ class RouteContext(object):
         """
         response_type = response['response_type']
         if response_type == 'reply':
-            response_channel = self.incoming_message.user_id
+            response_channel = self.incoming_message.channel_id
         elif response_type == 'notification':
             response_channel = self.notification_channel_id
         else:
