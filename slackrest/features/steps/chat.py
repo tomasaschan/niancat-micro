@@ -33,7 +33,7 @@ def step_impl(context, message, channel_id):
     context.slack_events.send_message(msg)
 
 
-@then(u'I should get a {type} in channel "{channel_id}"')
+@then(u'I should get a {event_type} in channel "{channel_id}"')
 def step_impl(context, event_type, channel_id):
     event = context.slack_events.await(event_type=event_type)
     assert event['channel_id'] == channel_id

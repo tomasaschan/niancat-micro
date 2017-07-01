@@ -26,11 +26,10 @@ class SlackrestApp(object):
         self._async_thread = None
 
     def read_slack_messages(self, sc):
-        print("WebSocket URL", sc.server.ws_url)
         msgs = sc.rtm_read()
-        print("Raw MESSAGE'", msgs)
         for m in msgs:
             print("MESSAGE: {}".format(m))
+        IOLoop.current().call_later(0.5, self.read_slack_messages, sc)
 
     def run_async(self):
         print("Starting SlackrestApp asynchronously")

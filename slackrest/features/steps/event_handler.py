@@ -1,10 +1,8 @@
 from queue import Queue, Empty
 import tornado.websocket as ws
 from tornado.ioloop import IOLoop
+from tornado import gen
 import json
-
-loop = IOLoop.current()
-
 
 class NoSuchEvent(RuntimeError):
     def __init__(self, *args, **kwargs):
@@ -12,14 +10,24 @@ class NoSuchEvent(RuntimeError):
 
 
 class EventHandler(object):
-    def __init__(self, ws_url):
+    def __init__(self, ws_url, loop):
         self.queue = Queue()
         self.unread_messages = []
-        self.ws_connection = ws.websocket_connect(ws_url, on_message_callback=self.on_message_callback)
+        self.ws_url = ws_url
+        self.ws_connection = None
+        self.loop = loop
+        self.connect_websocket()
+
+    def connect_websocket(self):
+        print("Connecting EventHandler WebSocket to {}".format(self.ws_url))
+        ws.websocket_connect(self.ws_url, io_loop=self.loop, callback=self.on_connected, on_message_callback=self.on_message_callback)
+
+    def on_connected(self, ws_conn):
+        print("EventHandler connected to {}".format(self.ws_url))
+        self.ws_connection = ws_conn.result()
 
     def on_message_callback(self, msg):
-        print("EventHandler got msg '{}'".format(msg))
-        self.unread_messages.append(json.loads(msg))
+        self.queue.put_nowait(json.loads(msg))
 
     def find_unread_message(self, type):
         for i in range(0, len(self.unread_messages)):
@@ -30,10 +38,12 @@ class EventHandler(object):
         return None
 
     def send_message(self, msg):
-        loop.add_callback(self.ws_connection.write_message, msg)
+        self.loop.add_callback(self.ws_connection.write_message, json.dumps(msg))
+
+    def await_connected(self):
+        self.await('hello')
 
     def await(self, event_type, timeout_ms=5000):
-        print("EventHandler.await, type={}, timeout_ms={}".format(event_type, timeout_ms))
         unread_message = self.find_unread_message(event_type)
         if unread_message:
             return unread_message
@@ -47,13 +57,12 @@ class EventHandler(object):
         while slept < timeout_ms:
             try:
                 msg = self.queue.get(block=True, timeout=wait_ms / 1000)
-                print("EventHandler.await: msg = '{}'".format(msg))
                 if msg['event'] == event_type:
                     return msg
                 else:
                     self.unread_messages.append(msg)
             except Empty:
-                print("EventHandler.await: No message received")
+                pass
             finally:
                 slept += wait_ms
         assert False, "No event of type {} received!".format(event_type)

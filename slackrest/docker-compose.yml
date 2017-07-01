@@ -8,11 +8,10 @@ services:
       - MOCK_SSL_KEY=/var/cert/key.pem
   slackrest:
     build: .
-    command: behave --no-capture
+    command: behave
     environment:
       - SLACK_API_TOKEN=0123456789abcdef
-      - REQUESTS_CA_BUNDLE=/var/cert/cert.pem
-      - WEBSOCKET_CLIENT_CA_BUNDLE=/var/cert/cert.pem
+
     links:
       - "mockslack:slack.com"
       - "mockchatbot:niancat-chat"

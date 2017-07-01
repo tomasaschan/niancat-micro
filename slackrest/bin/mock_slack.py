@@ -5,23 +5,28 @@ import tornado.web
 import tornado.websocket
 import tornado.httpserver
 import tornado.ioloop
+from tornado import gen
+from tornado.queues import Queue
 import json
-from queue import Queue
-from threading import RLock, Thread
+import os
+import sys
 
 loop = tornado.ioloop.IOLoop.current()
-producers_lock = RLock()
-test_event_producers = []
+event_handlers = []
 event_queue = Queue()
 
 slack_handler = None
 
-def send_event_thread():
+
+@gen.coroutine
+def send_events():
     while True:
-        new_event = event_queue.get(block=True)
-        with producers_lock:
-            for producer in test_event_producers:
-                loop.add_callback(producer.write_message, new_event)
+        event = yield event_queue.get()
+        print("Sending event {}".format(event), file=sys.stderr)
+        for event_handler in event_handlers:
+            print("  Sending event to handler {}".format(event_handler), file=sys.stderr)
+            event_handler.write_message(event)
+        yield gen.sleep(0.01)
 
 
 class TestEventHandler(tornado.websocket.WebSocketHandler):
@@ -29,17 +34,14 @@ class TestEventHandler(tornado.websocket.WebSocketHandler):
         tornado.websocket.WebSocketHandler.__init__(self, *args, **kwargs)
 
     def open(self):
-        with producers_lock:
-            test_event_producers.append(self)
+        event_handlers.append(self)
         self.write_message({'event': 'hello'})
 
     def on_message(self, message):
-        """Ignore any message sent to the event producer."""
         loop.add_callback(slack_handler.write_message, message)
 
     def on_close(self):
-        with producers_lock:
-            test_event_producers.remove(self)
+        event_handlers.remove(self)
 
 
 class TestEventApp(tornado.web.Application):
@@ -56,14 +58,14 @@ class TestEventApp(tornado.web.Application):
 
 class MockSlackHandler(tornado.websocket.WebSocketHandler):
     def __init__(self, *args, **kwargs):
-        print("Slack RTM WebSocket Handler created")
+        print("Slack RTM WebSocket Handler created", file=sys.stderr)
         global slack_handler
         slack_handler = self
         tornado.websocket.WebSocketHandler.__init__(self, *args, **kwargs)
 
     def open(self):
         """A Slack RTM WebSocket connection starts with a hello message."""
-        print("Slack: Opened RTM WebSocket connection. Sending Hello message.")
+        print("Slack: Opened RTM WebSocket connection. Sending Hello message.", file=sys.stderr)
         self.write_message({"type": "hello"})
         login_event = {'event': 'login'}
         event_queue.put_nowait(login_event)
@@ -117,19 +119,31 @@ class MockSlackApp(tornado.web.Application):
  
  
 if __name__ == '__main__':
-    event_thread = Thread(target=send_event_thread)
-    event_thread.start()
+    try:
+        cert = os.environ["MOCK_SSL_CERT"]
+        cert_key = os.environ["MOCK_SSL_KEY"]
+    except KeyError:
+        cert = '/var/cert/cert.pem'
+        cert_key = '/var/cert/key.pem'
+
+    try:
+        ssl_port = int(os.environ["MOCK_SLACK_SSL_PORT"])
+    except KeyError:
+        ssl_port = 443
 
     test_event_app = TestEventApp()
     server = tornado.httpserver.HTTPServer(test_event_app)
     server.listen(8080)
+    print("Listening to event WebSocket connections on port 8080...")
 
     mock_slack_app = MockSlackApp()
     server = tornado.httpserver.HTTPServer(mock_slack_app, ssl_options={
-        "certfile": "/var/cert/cert.pem",
-        "keyfile": "/var/cert/key.pem",
+        "certfile": cert,
+        "keyfile": cert_key,
     })
-    server.listen(443)
+    server.listen(ssl_port)
+    print("Listening to Slack connections on port {}".format(ssl_port))
+
+    loop.add_callback(send_events)
 
     tornado.ioloop.IOLoop.instance().start()
-    event_thread.stop()
