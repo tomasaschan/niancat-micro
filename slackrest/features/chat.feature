@@ -1,3 +1,4 @@
+@integration
 Feature: A Slackrest app acts as a middleman between Slack and a RESTful chat service.
   In order to separate a chat bot from its Slack integration
   As a developer

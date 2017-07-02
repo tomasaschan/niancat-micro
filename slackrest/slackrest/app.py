@@ -56,7 +56,7 @@ class SlackrestApp(object):
     def handle_command(self, incoming_message, route_context, visibility):
         print("Handling command for incoming message {}".format(incoming_message.message))
         message_text = incoming_message.message['text']
-        request = self.command_parser.parse(message_text, incoming_message.channel_id, visibility)
+        request = self.command_parser.parse(message_text, incoming_message.channel_id, incoming_message.user_id, visibility)
         if request:
             print("Request will be for URL {}".format(request.url))
             self.make_request(request, route_context)

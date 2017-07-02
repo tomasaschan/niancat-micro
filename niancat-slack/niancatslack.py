@@ -18,7 +18,7 @@ class SetPuzzle:
     method = Method.POST
 
     @classmethod
-    def body(cls, nian):
+    def body(cls, nian, **kwargs):
         return json.dumps(nian)
 
 
@@ -37,7 +37,7 @@ class AddUnsolution:
     method = Method.POST
 
     @classmethod
-    def body(cls, unsolution):
+    def body(cls, unsolution, **kwargs):
         return json.dumps(unsolution)
 
 
@@ -48,7 +48,7 @@ class CheckSolution:
     method = Method.POST
 
     @classmethod
-    def body(cls, solution):
+    def body(cls, solution, **kwargs):
         return json.dumps(solution)
 
 

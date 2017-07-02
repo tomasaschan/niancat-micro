@@ -53,3 +53,37 @@ Feature: Command mappings define how Slack events are mapped to a chat bot REST 
       And with a body that writes the param value as JSON
      When I send a message '!bodycommand foo'
      Then the request body contains 'foo'
+
+  Scenario: Commands can also use POST
+    Given a command with pattern '!command'
+      And URL format '/command' with method POST
+      And for any visibility
+      And with no request body
+     When I send a message '!command'
+     Then the request method is POST
+
+  Scenario: User id is always implicitly available in URLs
+    Given a command with pattern '!command'
+      And URL format '/command/{user_id}' with method POST
+     When a message '!command' is sent by user id 'U012345'
+     Then the request URL is '/command/U012345'
+
+  Scenario: User id is always implicitly available in the body
+    Given a command with pattern '!command'
+      And URL format '/command'
+      And with a body that contains the user id
+     When a message '!command' is sent by user id 'U012345'
+     Then the request body contains 'U012345'
+
+  Scenario: Channel id is always implicitly available in URLs
+    Given a command with pattern '!command'
+      And URL format '/command/{channel_id}'
+     When a message '!command' is sent from channel 'C012345'
+     Then the request URL is '/command/C012345'
+
+  Scenario: Channel id is always implicitly available in the body
+    Given a command with pattern '!command'
+      And URL format '/command'
+      And with a body that contains the channel id
+     When a message '!command' is sent from channel 'C012345'
+     Then the request body contains 'C012345'

@@ -1,6 +1,6 @@
 from behave import given, when, then
 from slackrest.app import SlackrestApp
-from slackrest.command import Visibility
+from slackrest.command import Visibility, Method
 
 
 class GiveMeAReply:
@@ -8,6 +8,7 @@ class GiveMeAReply:
     url_format = '/reply'
     visibility = Visibility.Any
     body = None
+    method = Method.GET
 
 
 class GiveMeANotification:
@@ -15,6 +16,7 @@ class GiveMeANotification:
     url_format = '/notify'
     visibility = Visibility.Any
     body = None
+    method = Method.GET
 
 
 commands = [GiveMeAReply, GiveMeANotification]
