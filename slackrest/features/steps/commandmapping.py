@@ -1,5 +1,5 @@
 from behave import *
-from slackrest.command import Visibility
+from slackrest.command import Visibility, Method
 import json
 
 # class NoParamCommand:
@@ -38,9 +38,10 @@ def step_impl(context, pattern):
     context.command_attributes['pattern'] = pattern
 
 
-@given(u'URL format \'{url_format}\'')
-def step_impl(context, url_format):
+@given(u'URL format \'{url_format}\' with method {method}')
+def step_impl(context, url_format, method):
     context.command_attributes['url_format'] = url_format
+    context.command_attributes['method'] = Method.parse(method)
 
 
 @given(u'for any visibility')
