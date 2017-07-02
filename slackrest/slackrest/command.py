@@ -43,3 +43,12 @@ class Visibility:
             return Visibility.Public
         elif channel_id.startswith('D'):
             return Visibility.Private
+
+
+class Method:
+    GET = 0
+    POST = 1
+    PUT = 2
+    UPDATE = 3
+    DELETE = 4
+    HEAD = 5
