@@ -62,6 +62,16 @@ paths:
                 items:
                   $ref: '#/definitions/UsersUnsolutions'
 
+  /solution/{solution}:
+    post:
+      summary: Solve the puzzle
+      responses:
+        200:
+          description: Solution is correct
+        404:
+          description: Solution is incorrect
+
+
   /unsolution/{user}:
     get:
       summary: List all unsolutions for a user
