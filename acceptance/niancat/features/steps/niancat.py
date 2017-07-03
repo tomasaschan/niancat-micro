@@ -1,8 +1,27 @@
 from behave import *
 import requests
 from requests.compat import urljoin
+import json
 
 niancat = 'http://niancat/v1'
+
+
+def get_responses_of_type(response_type, request_text):
+    messages = json.loads(request_text)
+    if response_type:
+        return [m for m in messages if m['response_type'] == response_type]
+    else:
+        return messages
+
+
+def get_responses_containing(text, request_text, response_type=None):
+    replies = get_responses_of_type(response_type, request_text)
+    return [r for r in replies
+            if text in r['message']]
+
+
+def has_reply_containing(text, request_text):
+    return get_responses_containing(text, request_text, response_type='reply') is not []
 
 
 @given(u'that no puzzle is set')
@@ -16,9 +35,9 @@ def step_impl(context):
     context.response = requests.get(urljoin(niancat, '/puzzle'))
 
 
-@then(u'I get a response that the puzzle is not set')
+@then(u'I get a reply that the puzzle is not set')
 def step_impl(context):
-    assert context.response.status_code == requests.code.not_found
+    assert has_reply_containing('är inte satt', context.request.text)
 
 
 @given(u'I set the puzzle {puzzle}')
@@ -26,17 +45,17 @@ def step_impl(context, puzzle):
     context.response = requests.post(urljoin(niancat, '/puzzle'), json=puzzle)
 
 
-@then(u'I get back {response_text}')
-def step_impl(context, response_text):
-    assert context.text == response_text
+@then(u'I get a reply containing {reply_text}')
+def step_impl(context, reply_text):
+    assert has_reply_containing(reply_text, context.request.text)
 
 
-@then(u'the response is that it is correct')
+@then(u'I get a reply that it is correct')
 def step_impl(context):
-    raise NotImplementedError(u'STEP: Then the response is that it is correct')
+    assert has_reply_containing('är korrekt', context.request.text)
 
 
-@then(u'a notification that I solved the puzzle')
+@then(u'there is a notification that I solved the puzzle')
 def step_impl(context):
     raise NotImplementedError(u'STEP: Then a notification that I solved the puzzle')
 
@@ -46,7 +65,7 @@ def step_impl(context, maybesolution):
     raise NotImplementedError(u'STEP: When I test the solution DATORLESP')
 
 
-@then(u'the response is that it is incorrect')
+@then(u'I get a reply that it is incorrect')
 def step_impl(context):
     raise NotImplementedError(u'STEP: Then the response is that it is incorrect')
 

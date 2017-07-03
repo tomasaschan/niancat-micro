@@ -7,23 +7,23 @@ Feature: Niancat as a service
   Scenario: No puzzle is set
     Given that no puzzle is set
      When I get the puzzle
-     Then I get a response that the puzzle is not set
+     Then I get a reply that the puzzle is not set
 
   Scenario: Get a puzzle
     Given I set the puzzle DATORSPLE
      When I get the puzzle
-     Then I get back "DATORSPLE"
+     Then I get a reply containing "DATORSPLE"
 
   Scenario: Solve a puzzle
     Given I set the puzzle DATORSPLE
      When I test the solution DATORSPEL
-     Then the response is that it is correct
-      And a notification that I solved the puzzle
+     Then I get a reply that it is correct
+      And there is a notification that I solved the puzzle
 
   Scenario: Check an incorrect solution
     Given I set the puzzle DATORSPLE
      When I test the solution DATORLESP
-     Then the response is that it is incorrect
+     Then I get a reply that it is incorrect
 
   Scenario: Solutions are reported on next puzzle
     Given I set the puzzle DATORSPLE

@@ -43,6 +43,12 @@ paths:
           description: The puzzle was set and the last days puzzle is returned
           schema:
             $ref: '#/definitions/Messages'
+    delete:
+      summary: Remove current puzzle
+      description: Currently only used in acceptance testing
+      responses:
+        200:
+          description: The puzzle was removed.
 
   /solution/{solution}:
     post:
