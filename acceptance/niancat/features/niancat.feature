@@ -45,3 +45,8 @@ Feature: Niancat as a service
       And I store an unsolution "ABC DEF GHI"
      When I set the puzzle VANTRIVSA
      Then the unsolution "ABC DEF GHI" is listed with my name
+
+  Scenario: Showing mismatches for potential solutions
+    Given I set the puzzle DATORSPLE
+     When I test the solution DATORSPEXY
+     Then I get a reply that there are too many XY and too few L

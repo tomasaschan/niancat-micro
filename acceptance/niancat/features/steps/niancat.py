@@ -116,3 +116,7 @@ def step_impl(context, puzzle):
     context.response = requests.post(urljoin(niancat, '/puzzle'), json=puzzle)
 
 
+@then(u'I get a reply that there are too many {toomany} and too few {toofew}')
+def step_impl(context, toomany, toofew):
+    assert has_reply_containing(toomany, context.request.text)
+    assert has_reply_containing(toofew, context.request.text)
