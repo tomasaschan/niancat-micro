@@ -24,6 +24,10 @@ def has_reply_containing(text, request_text):
     return get_responses_containing(text, request_text, response_type='reply') is not []
 
 
+def has_notification_containing(text, request_text):
+    return get_responses_containing(text, request_text, response_type='notification') is not []
+
+
 @given(u'that no puzzle is set')
 def step_impl(context):
     r = requests.delete(urljoin(niancat, '/puzzle'))
@@ -57,27 +61,33 @@ def step_impl(context):
 
 @then(u'there is a notification that I solved the puzzle')
 def step_impl(context):
-    raise NotImplementedError(u'STEP: Then a notification that I solved the puzzle')
+    notifications = get_responses_containing('löste nian')
+    assert notifications is not []
+    assert len(notifications) == 1
+    assert context.user_id in notifications[0]
 
 
 @when(u'I test the solution {maybesolution}')
 def step_impl(context, maybesolution):
-    raise NotImplementedError(u'STEP: When I test the solution DATORLESP')
+    context.user_id = 'U012345'
+    context.response = requests.post(urljoin(niancat, '/solution/{}'.format(maybesolution)), json=context.user_id)
 
 
 @then(u'I get a reply that it is incorrect')
 def step_impl(context):
-    raise NotImplementedError(u'STEP: Then the response is that it is incorrect')
+    assert has_reply_containing('finns inte med i')
 
 
 @then(u'my name is listed as solving {solution} in the notification channel')
 def step_impl(context, solution):
-    raise NotImplementedError(u'STEP: Then my name is listed as solving DATORSPEL in the notification channel')
+    notifications = get_responses_containing(solution, context.request.text)
+    notifications_with_my_name = [mine for mine in notifications if context.user_id in mine]
+    assert notifications_with_my_name is not  []
 
 
 @then(u'there is a notification that there are two solutions')
 def step_impl(context):
-    raise NotImplementedError(u'STEP: Then there is a notification that there are two solutions')
+    assert has_notification_containing('2 lösningar', context.request.text)
 
 
 @given(u'I store an unsolution "{unsolution}"')
@@ -108,7 +118,8 @@ def step_impl(context, unsolution):
 
 @given(u'I test the solution {maybesolution}')
 def step_impl(context, maybesolution):
-    raise NotImplementedError(u'STEP: Given I test the solution DATORSPEL')
+    context.user_id = 'U012345'
+    context.response = requests.post(urljoin(niancat, '/solution/{}'.format(maybesolution)), json=context.user_id)
 
 
 @when(u'I set the puzzle {puzzle}')
