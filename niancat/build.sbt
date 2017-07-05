@@ -8,7 +8,9 @@ lazy val root = (project in file(".")).
       version      := "1.0rc1"
     )),
     name := "niancat",
-    libraryDependencies += scalaTest % Test,
+    exportJars := true,
+    retrieveManaged := true,
+    libraryDependencies += scalaTest,
     libraryDependencies += scalactic,
     libraryDependencies += scalaMock
   )
