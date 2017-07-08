@@ -3,7 +3,7 @@ import requests
 from requests.compat import urljoin
 import json
 
-niancat = 'http://niancat/v1'
+niancat = 'http://niancat:8080/v1'
 
 
 def get_responses_of_type(response_type, request_text):
@@ -75,7 +75,7 @@ def step_impl(context, maybesolution):
 
 @then(u'I get a reply that it is incorrect')
 def step_impl(context):
-    assert has_reply_containing('finns inte med i')
+    assert has_reply_containing('finns inte med i', context.request.text)
 
 
 @then(u'my name is listed as solving {solution} in the notification channel')
