@@ -1,7 +1,7 @@
 version: '2'
 services:
   niancat:
-    image: erikedin/niancat:ready_for_acceptance
+    image: erikedin/niancat:ready-for-acceptance
     environment:
       - DICTIONARY_FILE=/app/dictionary.txt
   niancatacceptance:
