@@ -1,5 +1,7 @@
 package io.github.dandeliondeathray.niancat
 
+import io.circe.Json
+
 case class Channel(id: String) {
   def visibility: ChannelVisibility = {
     if (id startsWith("D")) {
@@ -9,24 +11,25 @@ case class Channel(id: String) {
     }
   }
 }
-case class MessageResponse(channel: Channel, msg: String)
-
-trait Responder {
-  def messageResponses(response: Response,
-                       receivedInChannel: Channel): Seq[MessageResponse]
+case class MessageResponse(responseType: String, msg: String) {
+  def toJSON = Json.obj("response_type" -> Json.fromString(responseType),
+                        "message" -> Json.fromString(msg))
 }
 
-class SwedishResponder(val notificationChannel: Channel) extends Responder {
-  def messageResponses(response: Response,
-                       receivedInChannel: Channel): Seq[MessageResponse] = {
+trait Responder {
+  def messageResponses(response: Response): Seq[MessageResponse]
+}
+
+class NiancatApiResponder extends Responder {
+  def messageResponses(response: Response): Seq[MessageResponse] = {
     response match {
       case n:Notification =>
-        Seq(MessageResponse(notificationChannel, n toResponse))
+        Seq(MessageResponse("notification", n toResponse))
       case r:Reply =>
-        Seq(MessageResponse(receivedInChannel, r toResponse))
+        Seq(MessageResponse("reply", r toResponse))
       case NoResponse() => Seq()
       case CompositeResponse(v: Vector[Response]) =>
-        v flatMap (messageResponses(_, receivedInChannel))
+        v flatMap (messageResponses(_))
       }
     }
 }
