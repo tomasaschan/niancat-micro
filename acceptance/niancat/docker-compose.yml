@@ -8,6 +8,8 @@ services:
       - ./dictionary.txt:/app/dictionary.txt
   niancatacceptance:
     build: .
-    command: behave
+    command: behave --no-capture --no-capture-stderr
+    environment:
+      - PYTHONUNBUFFERED=1
     links:
       - niancat

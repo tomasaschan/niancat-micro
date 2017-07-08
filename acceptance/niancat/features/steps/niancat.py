@@ -3,7 +3,7 @@ import requests
 from requests.compat import urljoin
 import json
 
-niancat = 'http://niancat:8080/v1'
+niancat = 'http://niancat:8080/v1/'
 
 
 def get_responses_of_type(response_type, request_text):
@@ -21,11 +21,11 @@ def get_responses_containing(text, request_text, response_type=None):
 
 
 def has_reply_containing(text, request_text):
-    return get_responses_containing(text, request_text, response_type='reply') is not []
+    return get_responses_containing(text, request_text, response_type='reply')
 
 
 def has_notification_containing(text, request_text):
-    return get_responses_containing(text, request_text, response_type='notification') is not []
+    return get_responses_containing(text, request_text, response_type='notification')
 
 
 @given(u'that no puzzle is set')
@@ -41,22 +41,23 @@ def step_impl(context):
 
 @then(u'I get a reply that the puzzle is not set')
 def step_impl(context):
-    assert has_reply_containing('är inte satt', context.request.text)
+    assert has_reply_containing('är inte satt', context.response.text)
 
 
 @given(u'I set the puzzle {puzzle}')
 def step_impl(context, puzzle):
-    context.response = requests.post(urljoin(niancat, '/puzzle'), json=puzzle)
+    context.response = requests.post(urljoin(niancat, 'puzzle'), json=puzzle)
+    assert context.response.status_code == requests.codes.ok
 
 
 @then(u'I get a reply containing {reply_text}')
 def step_impl(context, reply_text):
-    assert has_reply_containing(reply_text, context.request.text)
+    assert has_reply_containing(reply_text, context.response.text) is True
 
 
 @then(u'I get a reply that it is correct')
 def step_impl(context):
-    assert has_reply_containing('är korrekt', context.request.text)
+    assert has_reply_containing('är korrekt', context.response.text)
 
 
 @then(u'there is a notification that I solved the puzzle')
@@ -75,19 +76,19 @@ def step_impl(context, maybesolution):
 
 @then(u'I get a reply that it is incorrect')
 def step_impl(context):
-    assert has_reply_containing('finns inte med i', context.request.text)
+    assert has_reply_containing('finns inte med i', context.response.text)
 
 
 @then(u'my name is listed as solving {solution} in the notification channel')
 def step_impl(context, solution):
-    notifications = get_responses_containing(solution, context.request.text)
+    notifications = get_responses_containing(solution, context.response.text)
     notifications_with_my_name = [mine for mine in notifications if context.user_id in mine]
     assert notifications_with_my_name is not  []
 
 
 @then(u'there is a notification that there are two solutions')
 def step_impl(context):
-    assert has_notification_containing('2 lösningar', context.request.text)
+    assert has_notification_containing('2 lösningar', context.response.text)
 
 
 @given(u'I store an unsolution "{unsolution}"')
@@ -129,5 +130,5 @@ def step_impl(context, puzzle):
 
 @then(u'I get a reply that there are too many {toomany} and too few {toofew}')
 def step_impl(context, toomany, toofew):
-    assert has_reply_containing(toomany, context.request.text)
-    assert has_reply_containing(toofew, context.request.text)
+    assert has_reply_containing(toomany, context.response.text)
+    assert has_reply_containing(toofew, context.response.text)
