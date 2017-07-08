@@ -4,6 +4,8 @@ services:
     image: erikedin/niancat:ready-for-acceptance
     environment:
       - DICTIONARY_FILE=/app/dictionary.txt
+    volumes:
+      - ./dictionary.txt:/app/dictionary.txt
   niancatacceptance:
     build: .
     command: behave
