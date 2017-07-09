@@ -12,7 +12,7 @@ Feature: Niancat as a service
   Scenario: Get a puzzle
     Given I set the puzzle DATORSPLE
      When I get the puzzle
-     Then I get a reply containing "DATORSPLE"
+     Then I get a reply containing "DAT ORS PLE"
 
   Scenario: Solve a puzzle
     Given I set the puzzle DATORSPLE

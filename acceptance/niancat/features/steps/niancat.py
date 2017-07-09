@@ -30,13 +30,13 @@ def has_notification_containing(text, request_text):
 
 @given(u'that no puzzle is set')
 def step_impl(context):
-    r = requests.delete(urljoin(niancat, '/puzzle'))
+    r = requests.delete(urljoin(niancat, 'puzzle'))
     assert r.status_code == requests.codes.ok
 
 
 @when(u'I get the puzzle')
 def step_impl(context):
-    context.response = requests.get(urljoin(niancat, '/puzzle'))
+    context.response = requests.get(urljoin(niancat, 'puzzle'))
 
 
 @then(u'I get a reply that the puzzle is not set')
@@ -46,13 +46,14 @@ def step_impl(context):
 
 @given(u'I set the puzzle {puzzle}')
 def step_impl(context, puzzle):
-    context.response = requests.post(urljoin(niancat, 'puzzle'), json=puzzle)
+    context.response = requests.post(urljoin(niancat, 'puzzle'),
+                                     json={'puzzle': puzzle})
     assert context.response.status_code == requests.codes.ok
 
 
-@then(u'I get a reply containing {reply_text}')
+@then(u'I get a reply containing "{reply_text}"')
 def step_impl(context, reply_text):
-    assert has_reply_containing(reply_text, context.response.text) is True
+    print(context.response.text)
 
 
 @then(u'I get a reply that it is correct')
@@ -62,16 +63,17 @@ def step_impl(context):
 
 @then(u'there is a notification that I solved the puzzle')
 def step_impl(context):
-    notifications = get_responses_containing('löste nian')
-    assert notifications is not []
+    notifications = get_responses_containing('löste nian', context.response.text, response_type='notification')
+    assert notifications != []
     assert len(notifications) == 1
-    assert context.user_id in notifications[0]
+    assert context.user_id in notifications[0]['message']
 
 
 @when(u'I test the solution {maybesolution}')
 def step_impl(context, maybesolution):
     context.user_id = 'U012345'
-    context.response = requests.post(urljoin(niancat, '/solution/{}'.format(maybesolution)), json=context.user_id)
+    url = urljoin(niancat, 'solution/{}'.format(maybesolution))
+    context.response = requests.post(url, json={'user': context.user_id})
 
 
 @then(u'I get a reply that it is incorrect')
@@ -82,8 +84,8 @@ def step_impl(context):
 @then(u'my name is listed as solving {solution} in the notification channel')
 def step_impl(context, solution):
     notifications = get_responses_containing(solution, context.response.text)
-    notifications_with_my_name = [mine for mine in notifications if context.user_id in mine]
-    assert notifications_with_my_name is not  []
+    notifications_with_my_name = [mine for mine in notifications if context.user_id in mine['message']]
+    assert notifications_with_my_name != []
 
 
 @then(u'there is a notification that there are two solutions')
@@ -94,15 +96,14 @@ def step_impl(context):
 @given(u'I store an unsolution "{unsolution}"')
 def step_impl(context, unsolution):
     user_id = "U012345"
-    context.response = requests.post(
-        urljoin(niancat, '/unsolution/{}'.format(user_id)),
-        json=unsolution)
-
+    url = urljoin(niancat, 'unsolution/{}'.format(user_id))
+    context.response = requests.post(url, json={'unsolution': unsolution})
+    assert context.response.status_code == requests.codes.ok
 
 @when(u'I list my unsolutions')
 def step_impl(context):
     user_id = "U012345"
-    context.response = requests.get(urljoin(niancat, '/unsolution/{}'.format(user_id)))
+    context.response = requests.get(urljoin(niancat, 'unsolution/{}'.format(user_id)))
 
 
 @then(u'the unsolutions contain "{unsolution}"')
@@ -120,12 +121,12 @@ def step_impl(context, unsolution):
 @given(u'I test the solution {maybesolution}')
 def step_impl(context, maybesolution):
     context.user_id = 'U012345'
-    context.response = requests.post(urljoin(niancat, '/solution/{}'.format(maybesolution)), json=context.user_id)
+    context.response = requests.post(urljoin(niancat, 'solution/{}'.format(maybesolution)), json={'user': context.user_id})
 
 
 @when(u'I set the puzzle {puzzle}')
 def step_impl(context, puzzle):
-    context.response = requests.post(urljoin(niancat, '/puzzle'), json=puzzle)
+    context.response = requests.post(urljoin(niancat, 'puzzle'), json={'puzzle': puzzle})
 
 
 @then(u'I get a reply that there are too many {toomany} and too few {toofew}')

@@ -11,7 +11,7 @@ import org.http4s.server.blaze.BlazeBuilder
 object NiancatSlackApp extends ServerApp {
   val port : Int              = envOrNone("HTTP_PORT") map (_.toInt) getOrElse 8080
   val ip   : String           = "0.0.0.0"
-  val pool : ExecutorService  = Executors.newCachedThreadPool()
+  val pool : ExecutorService  = Executors.newSingleThreadExecutor()
 
   override def server(args: List[String]): Task[Server] = {
     if (args.size == 2 && args(0) == "filter") {

@@ -37,12 +37,12 @@ paths:
         description: The new puzzle.
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/Messages'
       responses:
         200:
           description: The puzzle was set and the last days puzzle is returned
           schema:
-            $ref: '#/definitions/Messages'
+            $ref: '#/definitions/PuzzleBody'
     delete:
       summary: Remove current puzzle
       description: Currently only used in acceptance testing
@@ -61,7 +61,7 @@ paths:
         description: The user id of the person checking the solution.
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/UserInBody'
       responses:
         200:
           description: The reply to the user and the notification, or just a
@@ -97,7 +97,7 @@ paths:
         description: The unsolution to store.
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/UnsolutionBody'
       responses:
         200:
           description: Response stored.
@@ -105,6 +105,27 @@ paths:
             $ref: '#/definitions/Messages'
 
 definitions:
+  PuzzleBody:
+    type: object
+    required:
+      - puzzle
+    properties:
+      puzzle:
+        type: string
+  UserInBody:
+    type: object
+    required:
+      - user
+    properties:
+      user:
+        type: string
+  UnsolutionBody:
+    type: object
+    required:
+      - unsolution
+    properties:
+      unsolution:
+        type: string
   Messages:
     type: array
     items:
