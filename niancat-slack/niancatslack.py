@@ -19,7 +19,7 @@ class SetPuzzle:
 
     @classmethod
     def body(cls, nian, **kwargs):
-        return json.dumps(nian)
+        return json.dumps({'puzzle': nian})
 
 
 class ListUnsolution:
@@ -38,18 +38,18 @@ class AddUnsolution:
 
     @classmethod
     def body(cls, unsolution, **kwargs):
-        return json.dumps(unsolution)
+        return json.dumps({'unsolution': unsolution})
 
 
 class CheckSolution:
     pattern = '{solution}'
-    url_format = '/solution'
+    url_format = '/solution/{solution}'
     visibility = Visibility.Private
     method = Method.POST
 
     @classmethod
-    def body(cls, solution, **kwargs):
-        return json.dumps(solution)
+    def body(cls, user_id, **kwargs):
+        return json.dumps({'user': user_id})
 
 
 class NiancatSlack(SlackrestApp):
