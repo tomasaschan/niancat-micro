@@ -4,6 +4,7 @@ Feature: Niancat as a service
   I want to be able to check solutions and store unsolutions
   So that we have tons of fun in our Slack channel
 
+  @wip
   Scenario: No puzzle is set
     Given that no puzzle is set
      When I get the puzzle
@@ -46,6 +47,7 @@ Feature: Niancat as a service
      When I set the puzzle VANTRIVSA
      Then the unsolution "ABC DEF GHI" is listed with my name
 
+  @wip
   Scenario: Showing mismatches for potential solutions
     Given I set the puzzle DATORSPLE
      When I test the solution DATORSPEXY
