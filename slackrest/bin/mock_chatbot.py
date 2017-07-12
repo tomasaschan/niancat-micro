@@ -2,6 +2,7 @@ import tornado.web
 import tornado.websocket
 import tornado.httpserver
 import tornado.ioloop
+import json
 
 test_event_handler = None
 loop = tornado.ioloop.IOLoop.current()
@@ -29,14 +30,14 @@ def write_event(type, message=None):
 
 class ReplyHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write({'response_type': 'reply', 'message': 'Some reply'})
+        self.write(json.dumps([{'response_type': 'reply', 'message': 'Some reply'}]))
         self.finish()
         write_event('reply')
 
 
 class NotificationHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write({'response_type': 'notification', 'message': 'Some notification'})
+        self.write(json.dumps([{'response_type': 'notification', 'message': 'Some notification'}]))
         self.finish()
         write_event('notification')
 

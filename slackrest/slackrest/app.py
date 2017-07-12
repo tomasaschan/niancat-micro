@@ -71,7 +71,8 @@ class SlackrestApp(object):
             else:
                 response = json.loads(http_response.buffer.getvalue().decode("utf-8"))
                 print("Response: {}".format(response))
-                route_context.route(response)
+                for r in response:
+                    route_context.route(r)
 
         final_url = self.base_url + request.url
         client = AsyncHTTPClient()
