@@ -59,5 +59,5 @@ class NiancatSlack(SlackrestApp):
 
 
 if __name__ == "__main__":
-    app = NiancatSlack('http://niancat-chat', '#konsulatet')
+    app = NiancatSlack('http://niancat-chat/v1', '#konsulatet')
     app.run_forever()
