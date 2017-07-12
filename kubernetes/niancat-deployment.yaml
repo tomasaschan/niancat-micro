@@ -1,0 +1,32 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: niancat-deployment
+spec:
+  template:
+    metadata:
+      labels:
+        app: niancat
+    spec:
+      containers:
+      - name: niancat-slack
+        image: erikedin/niancat-slack
+        env:
+        - name: SLACK_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: slack-api
+              key: token
+      - name: niancat
+        image: erikedin/niancat
+        env:
+        - name: DICTIONARY_FILE
+          value: /data/dictionary.txt
+        volumeMounts:
+        - name: niancat-config-vol
+          mountPath: /data
+      volumes:
+      - name: niancat-config-vol
+        configMap:
+          name: niancat-config
+
