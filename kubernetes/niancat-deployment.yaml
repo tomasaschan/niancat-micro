@@ -1,7 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: niancat-chat
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  selector:
+    app: niancat
+---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: niancat-deployment
+  name: niancat-chat-deployment
 spec:
   template:
     metadata:
@@ -9,14 +21,6 @@ spec:
         app: niancat
     spec:
       containers:
-      - name: niancat-slack
-        image: erikedin/niancat-slack
-        env:
-        - name: SLACK_API_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: slack-api
-              key: token
       - name: niancat
         image: erikedin/niancat
         env:
@@ -29,4 +33,23 @@ spec:
       - name: niancat-config-vol
         configMap:
           name: niancat-config
-
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: niancat-slack-deployment
+spec:
+  template:
+    metadata:
+      labels:
+        app: niancat-slack
+    spec:
+      containers:
+      - name: niancat-slack
+        image: erikedin/niancat-slack
+        env:
+        - name: SLACK_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: slack-api
+              key: token
