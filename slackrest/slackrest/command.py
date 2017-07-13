@@ -12,7 +12,7 @@ class CommandParser:
     def __init__(self, commands=None):
         self._commands = commands or []
 
-    def parse(self, msg, channel_id, user_id, visibility):
+    def parse(self, msg, channel_id, user_id, user_name, visibility):
         for command in self._commands:
             command_has_visibility = not command.visibility == Visibility.Any
             visibility_matches_message = command.visibility == visibility
@@ -24,6 +24,7 @@ class CommandParser:
                 arguments = match.named
                 arguments['user_id'] = user_id
                 arguments['channel_id'] = channel_id
+                arguments['user_name'] = user_name
                 url = command.url_format.format(**arguments)
                 if command.body:
                     request_body = command.body(**arguments)

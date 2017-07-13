@@ -87,3 +87,10 @@ Feature: Command mappings define how Slack events are mapped to a chat bot REST 
       And with a body that contains the channel id
      When a message '!command' is sent from channel 'C012345'
      Then the request body contains 'C012345'
+
+  Scenario: User name is always implicitly available
+    Given a command with pattern '!command'
+      And URL format '/command'
+      And with a body that contains a user name
+     When a message '!command' is sent by user name foobar
+     Then the request body contains 'foobar'

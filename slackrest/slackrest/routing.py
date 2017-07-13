@@ -21,10 +21,11 @@ class InvalidResponseType(Exception):
 
 
 class IncomingMessage(object):
-    def __init__(self, message, channel_id, user_id):
+    def __init__(self, message, channel_id, user_id, user_name):
         self.message = message
         self.channel_id = channel_id
         self.user_id = user_id
+        self.user_name = user_name
 
 
 class RouteContext(object):

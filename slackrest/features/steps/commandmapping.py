@@ -67,7 +67,8 @@ def step_impl(context, msg):
 
     channel_id = "C0123456"
     user_id = 'U012345'
-    context.request = context.command_parser.parse(msg, channel_id, user_id, Visibility.Public)
+    user_name = 'foo'
+    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, Visibility.Public)
 
 
 @when(u'a message \'{msg}\' is sent by user id \'{user_id}\'')
@@ -75,7 +76,8 @@ def step_impl(context, msg, user_id):
     command = type('ACommand', (object,), context.command_attributes)
     context.command_parser.add_command(command)
     channel_id = "C0123456"
-    context.request = context.command_parser.parse(msg, channel_id, user_id, Visibility.Public)
+    user_name = 'foo'
+    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, Visibility.Public)
 
 
 @when(u'a message \'{msg}\' is sent from channel \'{channel_id}\'')
@@ -83,7 +85,17 @@ def step_impl(context, msg, channel_id):
     command = type('ACommand', (object,), context.command_attributes)
     context.command_parser.add_command(command)
     user_id = 'U012345'
-    context.request = context.command_parser.parse(msg, channel_id, user_id, Visibility.Public)
+    user_name = 'foo'
+    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, Visibility.Public)
+
+
+@when(u'a message \'{msg}\' is sent by user name {user_name}')
+def step_impl(context, msg, user_name):
+    command = type('ACommand', (object,), context.command_attributes)
+    context.command_parser.add_command(command)
+    user_id = 'U012345'
+    channel_id = 'C012345'
+    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, Visibility.Public)
 
 
 @when(u'I send a message \'{msg}\' in {visibility}')
@@ -100,7 +112,8 @@ def step_impl(context, msg, visibility):
 
     channel_id = "C0123456"
     user_id = 'C012345'
-    context.request = context.command_parser.parse(msg, channel_id, user_id, channel_visibility)
+    user_name = 'foo'
+    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, channel_visibility)
 
 
 @then(u'the request URL is \'{url}\'')
@@ -159,3 +172,11 @@ def channel_id_body(channel_id, **kwargs):
 def step_impl(context):
     context.command_attributes['body'] = channel_id_body
 
+
+def user_name_body(user_name, **kwargs):
+    return json.dumps(user_name)
+
+
+@given(u'with a body that contains a user name')
+def step_impl(context):
+    context.command_attributes['body'] = user_name_body
