@@ -24,7 +24,7 @@ class SetPuzzle:
 
 class ListUnsolution:
     pattern = '!olösningar'
-    url_format = '/unsolution/{user_id}'
+    url_format = '/unsolution/{user_name}'
     visibility = Visibility.Private
     method = Method.GET
     body = None
@@ -32,7 +32,7 @@ class ListUnsolution:
 
 class AddUnsolution:
     pattern = '!olösning {unsolution}'
-    url_format = '/unsolution/{user_id}'
+    url_format = '/unsolution/{user_name}'
     visibility = Visibility.Private
     method = Method.POST
 
@@ -48,8 +48,8 @@ class CheckSolution:
     method = Method.POST
 
     @classmethod
-    def body(cls, user_id, **kwargs):
-        return json.dumps({'user': user_id})
+    def body(cls, user_name, **kwargs):
+        return json.dumps({'user': user_name})
 
 
 class NiancatSlack(SlackrestApp):
