@@ -21,3 +21,6 @@ Feature: A Slackrest app acts as a middleman between Slack and a RESTful chat se
      When I send "!givemeanotification" from channel "C012345"
      Then I should get a message in channel "C456789"
 
+  Scenario: A command can use POST as an HTTP method
+     When I send "!makeapost" from channel "C012345"
+     Then I should get a message containing "Make a post"

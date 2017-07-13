@@ -77,3 +77,19 @@ class Method:
             return methods[s]
         except KeyError:
             raise UnknownMethodException()
+
+    @classmethod
+    def serialize(cls, method):
+        names = {
+            Method.GET: 'GET',
+            Method.PUT: 'PUT',
+            Method.POST: 'POST',
+            Method.DELETE: 'DELETE',
+            Method.UPDATE: 'UPDATE',
+            Method.HEAD: 'HEAD',
+            Method.PATCH: 'PATCH'
+        }
+        try:
+            return names[method]
+        except KeyError:
+            raise UnknownMethodException()

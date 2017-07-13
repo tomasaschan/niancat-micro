@@ -1,6 +1,7 @@
 from behave import given, when, then
 from slackrest.app import SlackrestApp
 from slackrest.command import Visibility, Method
+import json
 
 
 class GiveMeAReply:
@@ -19,7 +20,18 @@ class GiveMeANotification:
     method = Method.GET
 
 
-commands = [GiveMeAReply, GiveMeANotification]
+class MakeAPost:
+    pattern = '!makeapost'
+    url_format = '/makeapost'
+    visibility = Visibility.Any
+    method = Method.POST
+
+    @classmethod
+    def body(cls, **kwargs):
+        return json.dumps({'param': 'value'})
+
+
+commands = [GiveMeAReply, GiveMeANotification, MakeAPost]
 
 
 @given(u'Slackrest is connected to Slack')
@@ -40,6 +52,14 @@ def step_impl(context, message, channel_id):
 def step_impl(context, channel_id):
     event = context.slack_events.await(event_type='message')
     assert event['message']['channel'] == channel_id
+
+
+@then(u'I should get a message containing "{msg}"')
+def step_impl(context, msg):
+    event = context.slack_events.await(event_type='message')
+    print("Got message containing '{}'".format(event['message']['text']))
+    print("Got message containing '{}'".format(event['message']['text']))
+    assert msg in event['message']['text']
 
 
 @given(u'I set the notification channel to "{notification_channel_id}"')

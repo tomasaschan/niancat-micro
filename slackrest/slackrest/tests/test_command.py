@@ -24,3 +24,9 @@ class TestCommand(unittest.TestCase):
 
     def test_ParseMethod_UnknownMethod_RaisesException(self):
         self.assertRaises(UnknownMethodException, Method.parse, "NOTAMETHOD")
+
+    def test_SerializeMethod_GET_ReturnsString(self):
+        self.assertEqual('GET', Method.serialize(Method.GET))
+
+    def test_SerializeMethod_POST_ReturnsString(self):
+        self.assertEqual('POST', Method.serialize(Method.POST))

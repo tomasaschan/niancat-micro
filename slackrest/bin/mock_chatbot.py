@@ -42,11 +42,19 @@ class NotificationHandler(tornado.web.RequestHandler):
         write_event('notification')
 
 
+class MakeAPostHandler(tornado.web.RequestHandler):
+    def post(self):
+        self.write(json.dumps([{'response_type': 'reply', 'message': 'Make a post'}]))
+        self.finish()
+        write_event('reply')
+
+
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             (r'/reply', ReplyHandler),
             (r'/notify', NotificationHandler),
+            (r'/makeapost', MakeAPostHandler),
             (r'/test', TestEventHandler)
         ]
 

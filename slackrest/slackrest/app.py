@@ -1,11 +1,11 @@
 import threading
 from slackclient import SlackClient
 from slackrest.routing import IncomingMessage, RouteContext
-from slackrest.command import Visibility, CommandParser
+from slackrest.command import Visibility, CommandParser, Method
 import os
 from tornado.ioloop import  IOLoop
 from tornado import gen
-from tornado.httpclient import AsyncHTTPClient
+from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import json
 
 
@@ -76,7 +76,8 @@ class SlackrestApp(object):
 
         final_url = self.base_url + request.url
         client = AsyncHTTPClient()
-        client.fetch(final_url, response_callback)
+        http_request = HTTPRequest(final_url, method=Method.serialize(request.method), body=request.body)
+        client.fetch(http_request, response_callback)
 
     def enqueue(self, message, channel_id):
         print("Replying to Slack with message {} and channel id {}".format(message, channel_id))
