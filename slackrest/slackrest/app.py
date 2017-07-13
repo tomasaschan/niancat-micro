@@ -48,7 +48,7 @@ class SlackrestApp(object):
             channel_id = m['channel']
             user_id = m['user']
             try:
-                user_name = self.sc.server.users[user_id]
+                user_name = self.sc.server.users[user_id].name
             except KeyError:
                 user_name = '<unknown user name>'
             incoming_message = IncomingMessage(m, channel_id, user_id, user_name)
