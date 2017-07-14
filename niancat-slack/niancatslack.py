@@ -1,6 +1,7 @@
 from slackrest.app import SlackrestApp
 from slackrest.command import Visibility, Method
 import json
+import os
 
 
 class GetPuzzle:
@@ -58,6 +59,14 @@ class NiancatSlack(SlackrestApp):
         SlackrestApp.__init__(self, base_url, commands, notification_channel_id)
 
 
+def read_environment_var(name):
+    try:
+        os.environ[name]
+    except KeyError:
+        raise OSError("Missing required environment variable {}".format(name))
+
 if __name__ == "__main__":
-    app = NiancatSlack('http://niancat-chat/v1', '#konsulatet')
+    base_url = read_environment_var("NIANCAT_CHAT_BASE_URL")
+    notification_channel = read_environment_var("NOTIFICATION_CHANNEL")
+    app = NiancatSlack(base_url, notification_channel)
     app.run_forever()
