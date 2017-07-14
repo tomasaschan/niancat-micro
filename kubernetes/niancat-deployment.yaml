@@ -51,5 +51,15 @@ spec:
         - name: SLACK_API_TOKEN
           valueFrom:
             secretKeyRef:
-              name: slack-api
-              key: token
+              name: slack-token
+              key: tiancat.token
+        - name: NIANCAT_CHAT_BASE_URL
+          valueFrom:
+            configMapRef:
+              name: tiancat-slack-config
+              key: base_url
+        - name: NOTIFICATION_CHANNEL
+          valueFrom:
+            configMapRef:
+              name: tiancat-slack-config
+              key: notification_channel
