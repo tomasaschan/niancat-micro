@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: niancat
-        image: erikedin/niancat
+        image: erikedin/niancat:latest
         env:
         - name: DICTIONARY_FILE
           value: /data/dictionary.txt
@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
       - name: niancat-slack
-        image: erikedin/niancat-slack
+        image: erikedin/niancat-slack:1.0rc6
         env:
         - name: SLACK_API_TOKEN
           valueFrom:
@@ -55,11 +55,11 @@ spec:
               key: tiancat.token
         - name: NIANCAT_CHAT_BASE_URL
           valueFrom:
-            configMapRef:
+            configMapKeyRef:
               name: tiancat-slack-config
               key: base_url
         - name: NOTIFICATION_CHANNEL
           valueFrom:
-            configMapRef:
+            configMapKeyRef:
               name: tiancat-slack-config
               key: notification_channel

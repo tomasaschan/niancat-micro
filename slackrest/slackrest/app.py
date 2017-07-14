@@ -16,7 +16,7 @@ class SlackException(RuntimeError):
 
 def create_slack_client():
     try:
-        token = os.environ["SLACK_API_TOKEN"]
+        token = os.environ["SLACK_API_TOKEN"].strip()
     except KeyError:
         print("You must specify a Slack API token in the 'SLACK_API_TOKEN' environment variable")
         return

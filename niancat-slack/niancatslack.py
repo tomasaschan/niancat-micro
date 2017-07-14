@@ -61,7 +61,7 @@ class NiancatSlack(SlackrestApp):
 
 def read_environment_var(name):
     try:
-        os.environ[name]
+        return os.environ[name].strip()
     except KeyError:
         raise OSError("Missing required environment variable {}".format(name))
 
