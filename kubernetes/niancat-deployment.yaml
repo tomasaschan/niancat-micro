@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
       - name: niancat-slack
-        image: erikedin/niancat-slack:1.0rc6
+        image: erikedin/niancat-slack:prod
         env:
         - name: SLACK_API_TOKEN
           valueFrom:
