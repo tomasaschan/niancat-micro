@@ -1,4 +1,4 @@
-FROM erikedin/slackrest:1.0rc2
+FROM erikedin/slackrest:prod
 LABEL maintainer="Erik Edin <erikedin.name@gmail.com>"
 
 ENV PYTHONUNBUFFERED=0
