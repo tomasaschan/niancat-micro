@@ -44,7 +44,7 @@ class SlackrestApp(object):
         self._async_thread.start()
 
     def handle_if_message(self, m):
-        if 'type' in m and m['type'] == 'message':
+        if 'type' in m and m['type'] == 'message' and 'channel' in m and 'user' in m:
             channel_id = m['channel']
             user_id = m['user']
             try:
