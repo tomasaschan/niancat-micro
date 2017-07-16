@@ -2,12 +2,14 @@ import unittest
 from unittest.mock import Mock
 import slackrest.routing as routing
 
+
 class TestMessageRoute(unittest.TestCase):
     def setUp(self):
         self.message_queue = Mock()
         self.channel_id = 'C012345'
         self.user_id = 'U012345'
         self.notification_channel_id = 'C456789'
+        self.user_name = 'foo'
 
     def tearDown(self):
         pass
@@ -17,7 +19,7 @@ class TestMessageRoute(unittest.TestCase):
 
     def test_RouteContext_Reply_MessageIsReturnedToSender(self):
         reply_msg = {'response_type': 'reply', 'message': 'Lorem Ipsum'}
-        incoming_msg = routing.IncomingMessage("Some message text", self.channel_id, self.user_id)
+        incoming_msg = routing.IncomingMessage("Some message text", self.channel_id, self.user_id, self.user_name)
         route_context = routing.RouteContext(self.message_queue, incoming_msg, self.notification_channel_id)
 
         route_context.route(reply_msg)
@@ -26,7 +28,7 @@ class TestMessageRoute(unittest.TestCase):
 
     def test_RouteContext_Notification_MessageIsSentToNotificationChannel(self):
         notification_msg = {'response_type': 'notification', 'message': 'Ipsum Lorem'}
-        incoming_msg = routing.IncomingMessage("Some message text", self.channel_id, self.user_id)
+        incoming_msg = routing.IncomingMessage("Some message text", self.channel_id, self.user_id, self.user_name)
         route_context = routing.RouteContext(self.message_queue, incoming_msg, self.notification_channel_id)
 
         route_context.route(notification_msg)
@@ -36,7 +38,7 @@ class TestMessageRoute(unittest.TestCase):
     def test_RouteContext_InvalidResponseType_InvalidMessageException(self):
         invalid_response_type_msg = {'response_type': 'invalidresponsetype', 'message': 'ABCDEFGHI'}
 
-        incoming_msg = routing.IncomingMessage("Some message text", self.channel_id, self.user_id)
+        incoming_msg = routing.IncomingMessage("Some message text", self.channel_id, self.user_id, self.user_name)
         route_context = routing.RouteContext(self.message_queue, incoming_msg, self.notification_channel_id)
 
         with self.assertRaises(routing.InvalidResponseType):
