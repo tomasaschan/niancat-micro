@@ -7,7 +7,7 @@ import org.http4s.circe._
 import io.circe.generic.auto._
 
 case class SetPuzzleBody(puzzle: String)
-case class CheckSolutionBody(user: String)
+case class CheckSolutionBody(user: String, solution: String)
 case class AddUnsolutionBody(unsolution: String)
 
 object NiancatService {
@@ -32,9 +32,9 @@ object NiancatService {
           Ok(Json.fromValues(messageResponses map (_.toJSON)))
         }
       }
-      case req @ POST -> Root / "v1" / "solution" / solution => {
+      case req @ POST -> Root / "v1" / "solution" => {
         req.as(jsonOf[CheckSolutionBody]) flatMap { checkSolutionBody =>
-          val command = CheckSolution(Word(solution), User(checkSolutionBody.user))
+          val command = CheckSolution(Word(checkSolutionBody.solution), User(checkSolutionBody.user))
           val response = command(engine)
           val messageResponses = responder.messageResponses(response)
           Ok(Json.fromValues(messageResponses map (_.toJSON)))
