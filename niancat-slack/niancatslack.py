@@ -44,13 +44,13 @@ class AddUnsolution:
 
 class CheckSolution:
     pattern = '{solution}'
-    url_format = '/solution/{solution}'
+    url_format = '/solution'
     visibility = Visibility.Private
     method = Method.POST
 
     @classmethod
-    def body(cls, user_name, **kwargs):
-        return json.dumps({'user': user_name})
+    def body(cls, user_name, solution, **kwargs):
+        return json.dumps({'user': user_name, 'solution': solution})
 
 
 class NiancatSlack(SlackrestApp):
