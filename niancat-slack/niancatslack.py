@@ -2,6 +2,8 @@ from slackrest.app import SlackrestApp
 from slackrest.command import Visibility, Method
 import json
 import os
+import tornado.web
+import tornado.ioloop
 
 
 class GetPuzzle:
@@ -59,6 +61,16 @@ class NiancatSlack(SlackrestApp):
         SlackrestApp.__init__(self, base_url, commands, notification_channel_id)
 
 
+class HealthHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.finish()
+
+
+class ReadinessHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.finish()
+
+
 def read_environment_var(name):
     try:
         return os.environ[name].strip()
@@ -66,6 +78,12 @@ def read_environment_var(name):
         raise OSError("Missing required environment variable {}".format(name))
 
 if __name__ == "__main__":
+    health_app = tornado.web.Application([
+        (r"/health", HealthHandler),
+        (r"/readiness", ReadinessHandler)
+    ])
+    health_app.listen(8080)
+
     base_url = read_environment_var("NIANCAT_CHAT_BASE_URL")
     notification_channel = read_environment_var("NOTIFICATION_CHANNEL")
     app = NiancatSlack(base_url, notification_channel)
