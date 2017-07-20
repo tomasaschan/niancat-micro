@@ -54,6 +54,12 @@ object NiancatService {
           Ok(Json.fromValues(messageResponses map (_.toJSON)))
         }
       }
+      case GET -> Root / "health" => {
+        Ok()
+      }
+      case GET -> Root / "readiness" => {
+        Ok()
+      }
     }
   }
 
