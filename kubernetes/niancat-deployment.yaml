@@ -23,6 +23,18 @@ spec:
       containers:
       - name: niancat
         image: erikedin/niancat:latest
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
         env:
         - name: DICTIONARY_FILE
           value: /data/dictionary.txt
@@ -47,6 +59,18 @@ spec:
       containers:
       - name: niancat-slack
         image: erikedin/niancat-slack:prod
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
         env:
         - name: SLACK_API_TOKEN
           valueFrom:
