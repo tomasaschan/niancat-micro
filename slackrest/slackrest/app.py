@@ -6,7 +6,7 @@ from tornado import gen
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import json
 from slackrest.handler import MessageHandler
-from slackrest.command import Method
+from slackrest.command import Method, CommandParser
 
 
 class SlackException(RuntimeError):
@@ -29,7 +29,7 @@ class SlackrestApp(object):
         self._async_thread = None
         self.sc = None
         self.read_msg_callback = None
-        self.handler = MessageHandler(commands, self, notification_channel_id)
+        self.handler = MessageHandler(CommandParser(commands), self, notification_channel_id)
 
     def run_async(self):
         print("Starting SlackrestApp asynchronously")
@@ -64,7 +64,8 @@ class SlackrestApp(object):
         self.sc.server.rtm_connect()
 
     def read_slack_message(self):
-        requests_and_route_contexts = self.handler.read_slack_messages(self.sc)
+        msgs = self.sc.rtm_read()
+        requests_and_route_contexts = self.handler.handle_messages(msgs, self.sc.server.users)
         for rarc in requests_and_route_contexts:
             self.make_request(rarc.request, rarc.route_context)
 
