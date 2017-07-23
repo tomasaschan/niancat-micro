@@ -63,7 +63,7 @@ class SlackrestApp(object):
             raise SlackException("Failed to create Slack client!")
         self.sc.server.rtm_connect()
 
-    def read_slack_message(self):
+    def read_slack_messages(self):
         msgs = self.sc.rtm_read()
         requests_and_route_contexts = self.handler.handle_messages(msgs, self.sc.server.users)
         for rarc in requests_and_route_contexts:
@@ -72,6 +72,6 @@ class SlackrestApp(object):
     def run_forever(self):
         print("Starting SlackrestApp...")
         self.connect_to_slack()
-        self.read_msg_callback = PeriodicCallback(self.handler.read_slack_messages, 500)
+        self.read_msg_callback = PeriodicCallback(self.read_slack_messages, 500)
         self.read_msg_callback.start()
         IOLoop.current().start()
