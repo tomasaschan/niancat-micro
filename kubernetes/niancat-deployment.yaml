@@ -27,13 +27,13 @@ spec:
           httpGet:
             path: /health
             port: 8080
-          initialDelaySeconds: 15
+          initialDelaySeconds: 60
           timeoutSeconds: 1
         readinessProbe:
           httpGet:
             path: /readiness
             port: 8080
-          initialDelaySeconds: 15
+          initialDelaySeconds: 60
           timeoutSeconds: 1
         env:
         - name: DICTIONARY_FILE
