@@ -1,6 +1,14 @@
 import unittest
 
-from slackrest.command import Visibility, Method, UnknownMethodException
+from slackrest.command import Visibility, Method, UnknownMethodException, CommandParser
+
+
+class FooCommand:
+    pattern = '!foo'
+    url_format = '/foo'
+    visibility = Visibility.Any
+    body = None
+    method = Method.GET
 
 
 class TestCommand(unittest.TestCase):
@@ -30,3 +38,12 @@ class TestCommand(unittest.TestCase):
 
     def test_SerializeMethod_POST_ReturnsString(self):
         self.assertEqual('POST', Method.serialize(Method.POST))
+
+    def test_ParseCommand_CommandHasTrailingWhitespace_CommandIsFound(self):
+        command_parser = CommandParser([FooCommand])
+        text_with_trailing_whitespace = "!foo "
+        channel_id = "C1"
+        user_id = "U1"
+        user_name = "user"
+        command = command_parser.parse(text_with_trailing_whitespace, channel_id, user_id, user_name, Visibility.Public)
+        self.assertIsNotNone(command)
