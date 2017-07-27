@@ -39,6 +39,7 @@ class MessageHandler:
 
     def handle_command(self, incoming_message, route_context, visibility):
         print("Handling command for incoming message {}".format(incoming_message.message))
+        print("  Bot user name is '{}' and sender user name is '{}'".format(self.self_name, incoming_message.user_name))
         message_text = incoming_message.message['text']
         request = self._command_parser.parse(message_text,
                                              incoming_message.channel_id,
