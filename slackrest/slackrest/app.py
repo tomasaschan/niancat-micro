@@ -1,7 +1,8 @@
 import threading
 from slackclient import SlackClient
 import os
-from tornado.ioloop import  IOLoop, PeriodicCallback
+from tornado.ioloop import IOLoop, PeriodicCallback
+from tornado.platform.epoll import EPollIOLoop
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import json
@@ -23,7 +24,7 @@ def create_slack_client():
     return SlackClient(token)
 
 
-class ThrowingIOLoop(IOLoop):
+class ThrowingIOLoop(EPollIOLoop):
     def handle_callback_exception(self, callback):
         exc_type, exc_value, tb = sys.exc_info()
         raise exc_value
