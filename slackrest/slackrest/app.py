@@ -2,7 +2,6 @@ import threading
 from slackclient import SlackClient
 import os
 from tornado.ioloop import IOLoop, PeriodicCallback
-from tornado.platform.epoll import EPollIOLoop
 from tornado import gen
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import json

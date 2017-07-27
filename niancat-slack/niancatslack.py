@@ -1,4 +1,4 @@
-from slackrest.app import SlackrestApp, ThrowingIOLoop
+from slackrest.app import SlackrestApp
 from slackrest.command import Visibility, Method
 import json
 import os
