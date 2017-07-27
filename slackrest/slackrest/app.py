@@ -7,7 +7,7 @@ from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 import json
 from slackrest.handler import MessageHandler
 from slackrest.command import Method, CommandParser
-
+import sys
 
 class SlackException(RuntimeError):
     def __init__(self, *args, **kwargs):
@@ -21,6 +21,12 @@ def create_slack_client():
         print("You must specify a Slack API token in the 'SLACK_API_TOKEN' environment variable")
         return
     return SlackClient(token)
+
+
+class ThrowingIOLoop(IOLoop):
+    def handle_callback_exception(self, callback):
+        exc_type, exc_value, tb = sys.exc_info()
+        raise exc_value
 
 
 class SlackrestApp(object):
@@ -74,4 +80,5 @@ class SlackrestApp(object):
         self.connect_to_slack()
         self.read_msg_callback = PeriodicCallback(self.read_slack_messages, 500)
         self.read_msg_callback.start()
+        ThrowingIOLoop().install()
         IOLoop.current().start()
