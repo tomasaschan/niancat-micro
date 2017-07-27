@@ -61,9 +61,9 @@ class SlackrestApp(object):
         self.sc = create_slack_client()
         if not self.sc:
             raise SlackException("Failed to create Slack client!")
-        print("Connected to Slack. Bot user name is '{}'".format(self.sc.server.username))
         self.sc.server.rtm_connect()
         self.handler.set_self_name(self.sc.server.username)
+        print("Connected to Slack. Bot user name is '{}'".format(self.sc.server.username))
 
     def read_slack_messages(self):
         msgs = self.sc.rtm_read()
