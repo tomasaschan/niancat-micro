@@ -24,12 +24,6 @@ def create_slack_client():
     return SlackClient(token)
 
 
-class ThrowingIOLoop(EPollIOLoop):
-    def handle_callback_exception(self, callback):
-        exc_type, exc_value, tb = sys.exc_info()
-        raise exc_value
-
-
 class SlackrestApp(object):
     def __init__(self, base_url, commands, notification_channel_id):
         self.base_url = base_url
