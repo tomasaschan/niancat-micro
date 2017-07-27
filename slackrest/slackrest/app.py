@@ -9,6 +9,7 @@ from slackrest.handler import MessageHandler
 from slackrest.command import Method, CommandParser
 import sys
 
+
 class SlackException(RuntimeError):
     def __init__(self, *args, **kwargs):
         RuntimeError.__init__(*args, **kwargs)
@@ -21,6 +22,13 @@ def create_slack_client():
         print("You must specify a Slack API token in the 'SLACK_API_TOKEN' environment variable")
         return
     return SlackClient(token)
+
+
+def handle_callback_exception(callback):
+    (ex_type, value, traceback) = sys.exc_info()
+    print("EXCEPTION {}: {}", ex_type, value)
+    print("Traceback: {}", traceback)
+    IOLoop.current().stop()
 
 
 class SlackrestApp(object):
@@ -71,9 +79,12 @@ class SlackrestApp(object):
         for rarc in requests_and_route_contexts:
             self.make_request(rarc.request, rarc.route_context)
 
+
+
     def run_forever(self):
         print("Starting SlackrestApp...")
         self.connect_to_slack()
         self.read_msg_callback = PeriodicCallback(self.read_slack_messages, 500)
         self.read_msg_callback.start()
+        IOLoop.current().handle_callback_exception = handle_callback_exception
         IOLoop.current().start()
