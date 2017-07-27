@@ -1,4 +1,4 @@
-from slackrest.app import SlackrestApp
+from slackrest.app import SlackrestApp, ThrowingIOLoop
 from slackrest.command import Visibility, Method
 import json
 import os
@@ -78,6 +78,8 @@ def read_environment_var(name):
         raise OSError("Missing required environment variable {}".format(name))
 
 if __name__ == "__main__":
+    ThrowingIOLoop().install()
+
     health_app = tornado.web.Application([
         (r"/health", HealthHandler),
         (r"/readiness", ReadinessHandler)
