@@ -23,6 +23,7 @@ spec:
       containers:
       - name: niancat
         image: erikedin/niancat:latest
+        imagePullPolicy: Always
         livenessProbe:
           httpGet:
             path: /health
@@ -59,6 +60,7 @@ spec:
       containers:
       - name: niancat-slack
         image: erikedin/niancat-slack:prod
+        imagePullPolicy: Always
         livenessProbe:
           httpGet:
             path: /health
