@@ -94,3 +94,9 @@ Feature: Command mappings define how Slack events are mapped to a chat bot REST 
       And with a body that contains a user name
      When a message '!command' is sent by user name foobar
      Then the request body contains 'foobar'
+
+  Scenario: A message from the bot itself should be ignored
+    Given that the bot name is 'foobot'
+      And there is a command which responds to anything
+     When a message 'Message from the bot itself' is sent by user name foobot
+     Then the command is ignored

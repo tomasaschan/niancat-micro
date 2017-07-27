@@ -13,6 +13,7 @@ class MessageHandler:
         self._notification_channel_id = notification_channel_id
         self._outbound_message_queue = outbound_message_queue
         self._command_parser = command_parser
+        self.self_name = None
 
     def handle_messages(self, msgs, users):
         requests_and_route_contexts = []
@@ -43,6 +44,7 @@ class MessageHandler:
                                              incoming_message.channel_id,
                                              incoming_message.user_id,
                                              incoming_message.user_name,
+                                             self.self_name,
                                              visibility)
         if request:
             print("Request will be for URL {}".format(request.url))
@@ -50,3 +52,6 @@ class MessageHandler:
         else:
             print("Ignoring message")
             return None
+
+    def set_self_name(self, self_name):
+        self.self_name = self_name

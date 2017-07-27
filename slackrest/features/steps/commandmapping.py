@@ -2,36 +2,6 @@ from behave import *
 from slackrest.command import Visibility, Method
 import json
 
-# class NoParamCommand:
-#     pattern = '!noparam'
-#     url_format = '/noparam'
-#     visibility = Visibility.Any
-#     body = None
-#
-# class FooCommand:
-#     pattern = '!foo {bar}'
-#     url_format = '/foo/{bar}'
-#     visibility = Visibility.Any
-#     body = None
-#
-# class BarCommand:
-#     pattern = '!bar {baz} {qux}'
-#     url_format = '/bar'
-#     visibility = Visibility.Any
-#
-#     @classmethod
-#     def body(cls, baz, qux):
-#         return json.dumps({'argument1': baz, 'argument2': qux})
-#
-# class BazCommand:
-#     pattern = '{freetext}'
-#     url_format = '/baz'
-#     visibility = Visibility.Private
-#
-#     @classmethod
-#     def body(cls, freetext):
-#         return json.dumps(freetext)
-
 
 @given(u'a command with pattern \'{pattern}\'')
 def step_impl(context, pattern):
@@ -68,7 +38,7 @@ def step_impl(context, msg):
     channel_id = "C0123456"
     user_id = 'U012345'
     user_name = 'foo'
-    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, Visibility.Public)
+    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, context.self_name, Visibility.Public)
 
 
 @when(u'a message \'{msg}\' is sent by user id \'{user_id}\'')
@@ -77,7 +47,7 @@ def step_impl(context, msg, user_id):
     context.command_parser.add_command(command)
     channel_id = "C0123456"
     user_name = 'foo'
-    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, Visibility.Public)
+    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, context.self_name, Visibility.Public)
 
 
 @when(u'a message \'{msg}\' is sent from channel \'{channel_id}\'')
@@ -86,7 +56,7 @@ def step_impl(context, msg, channel_id):
     context.command_parser.add_command(command)
     user_id = 'U012345'
     user_name = 'foo'
-    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, Visibility.Public)
+    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, context.self_name, Visibility.Public)
 
 
 @when(u'a message \'{msg}\' is sent by user name {user_name}')
@@ -95,7 +65,7 @@ def step_impl(context, msg, user_name):
     context.command_parser.add_command(command)
     user_id = 'U012345'
     channel_id = 'C012345'
-    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, Visibility.Public)
+    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, context.self_name, Visibility.Public)
 
 
 @when(u'I send a message \'{msg}\' in {visibility}')
@@ -113,7 +83,7 @@ def step_impl(context, msg, visibility):
     channel_id = "C0123456"
     user_id = 'C012345'
     user_name = 'foo'
-    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, channel_visibility)
+    context.request = context.command_parser.parse(msg, channel_id, user_id, user_name, context.self_name, channel_visibility)
 
 
 @then(u'the request URL is \'{url}\'')
@@ -180,3 +150,17 @@ def user_name_body(user_name, **kwargs):
 @given(u'with a body that contains a user name')
 def step_impl(context):
     context.command_attributes['body'] = user_name_body
+
+
+@given(u'that the bot name is \'{botname}\'')
+def step_impl(context, botname):
+    context.self_name = botname
+
+
+@given(u'there is a command which responds to anything')
+def step_impl(context):
+    context.command_attributes['pattern'] = '{anything}'
+    context.command_attributes['url_format'] = '/'
+    context.command_attributes['method'] = Method.GET
+    context.command_attributes['visibility'] = Visibility.Any
+    context.command_attributes['body'] = None

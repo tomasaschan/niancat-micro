@@ -45,5 +45,6 @@ class TestCommand(unittest.TestCase):
         channel_id = "C1"
         user_id = "U1"
         user_name = "user"
-        command = command_parser.parse(text_with_trailing_whitespace, channel_id, user_id, user_name, Visibility.Public)
+        self_name = "mybotname"
+        command = command_parser.parse(text_with_trailing_whitespace, channel_id, user_id, user_name, self_name, Visibility.Public)
         self.assertIsNotNone(command)

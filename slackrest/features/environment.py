@@ -23,4 +23,5 @@ def before_scenario(context, scenario):
     context.commands = []
     context.command_attributes = {'visibility': Visibility.Any, 'body': None}
     context.command_parser = CommandParser()
+    context.self_name = 'mybotname'
     context.request = None
