@@ -13,13 +13,14 @@ class CommandParser:
         self._commands = commands or []
 
     def parse(self, msg, channel_id, user_id, user_name, visibility):
+        stripped_msg = msg.strip()
         for command in self._commands:
             command_has_visibility = not command.visibility == Visibility.Any
             visibility_matches_message = command.visibility == visibility
             if command_has_visibility and not visibility_matches_message:
                 continue
 
-            match = parse(command.pattern, msg)
+            match = parse(command.pattern, stripped_msg)
             if match:
                 arguments = match.named
                 arguments['user_id'] = user_id
