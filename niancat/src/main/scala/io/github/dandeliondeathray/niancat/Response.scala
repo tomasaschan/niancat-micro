@@ -99,15 +99,15 @@ case class YesterdaysPuzzle(result: SolutionResult) extends Notification {
   }
 }
 case class MultipleSolutions(n: Int) extends Notification {
-  override def toResponse = s"Dagens nian har $n lösningar."
+  override def toResponse = s":bangbang: Dagens nian har $n lösningar. :bangbang:"
 }
 
 case class SolutionNotification(user: User, solutionId: Option[Int] = None) extends Notification {
   override def toResponse = {
     val parts = List(
-      Some(s"${user.name} löste nian"),
+      Some(s":niancat: :niancat: :niancat: ${user.name} löste nian"),
       solutionId map(n => s", ord $n"),
-      Some("!")
+      Some("! :niancat: :niancat: :niancat:")
     )
     parts.flatten.mkString
   }
