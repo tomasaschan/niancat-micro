@@ -79,8 +79,8 @@ class SlackrestApp(object):
 
     def run_forever(self):
         print("Starting SlackrestApp...")
+        ThrowingIOLoop().install()
         self.connect_to_slack()
         self.read_msg_callback = PeriodicCallback(self.read_slack_messages, 500)
         self.read_msg_callback.start()
-        ThrowingIOLoop().install()
         IOLoop.current().start()
