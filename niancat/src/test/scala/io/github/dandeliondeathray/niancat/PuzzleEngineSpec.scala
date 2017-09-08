@@ -440,7 +440,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val response = AddUnsolution("Some unsolution", User("foo"))(engine)
 
-    response shouldBe NoResponse()
+    response shouldBe UnsolutionAdded()
   }
 
   it should "store an unsolution for later listing" in {

@@ -101,7 +101,7 @@ class PuzzleEngine(val dictionary: Dictionary,
     val unsolutionsForUser: List[String] = unsolutions.getOrElse(user, List[String]())
     unsolutions(user) = unsolution :: unsolutionsForUser
 
-    NoResponse()
+    UnsolutionAdded()
   }
 
   def listUnsolutions(user: User): Response = {

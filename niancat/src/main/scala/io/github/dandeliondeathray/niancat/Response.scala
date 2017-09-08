@@ -82,6 +82,10 @@ case class NoUnsolutions() extends Reply {
   override def toResponse = "Inga olösningar sparade."
 }
 
+case class UnsolutionAdded() extends Reply {
+  override def toResponse = "Sparat."
+}
+
 case class AllUnsolutions(unsolutionsForEachUser: Map[User, List[String]]) extends Notification {
   private def usersUnsolutionToString(entry: (User, List[String])): String = {
     val name = entry._1.name
