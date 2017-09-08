@@ -438,14 +438,14 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   it should "not send a response when adding an unsolution" in {
     val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
 
-    val response = AddUnsolution("Some unsolution", User("foo"))(engine)
+    val response = AddUnsolution(s"Some ${defaultPuzzle.letters}", User("foo"))(engine)
 
     response shouldBe UnsolutionAdded()
   }
 
   it should "store an unsolution for later listing" in {
     val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
-    val unsolutionText = "Some unsolution"
+    val unsolutionText = s"Unsolution ${defaultPuzzle.letters}"
 
     AddUnsolution(unsolutionText, User("foo"))(engine)
     val response = ListUnsolutions(User("foo"))(engine)
@@ -456,7 +456,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   it should "separate unsolutions based on users" in {
     val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
 
-    AddUnsolution("Some unsolution", User("foo"))(engine)
+    AddUnsolution(s"Some ${defaultPuzzle.letters}", User("foo"))(engine)
     val response = ListUnsolutions(User("otheruser"))(engine)
 
     response shouldBe NoUnsolutions()
@@ -464,8 +464,8 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "be able to store multiple unsolutions, in order" in {
     val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
-    val unsolutionText1 = "Some unsolution"
-    val unsolutionText2 = "Other unsolution"
+    val unsolutionText1 = s"Some ${defaultPuzzle.letters}"
+    val unsolutionText2 = s"Other ${defaultPuzzle.letters}"
 
     AddUnsolution(unsolutionText1, User("foo"))(engine)
     AddUnsolution(unsolutionText2, User("foo"))(engine)
@@ -477,7 +477,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   it should "clear all unsolutions when a new puzzle is set" in {
     val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
 
-    AddUnsolution("Some unsolution", User("foo"))(engine)
+    AddUnsolution(s"Some ${defaultPuzzle.letters}", User("foo"))(engine)
     SetPuzzle(Puzzle("DATORSPEL"))(engine)
 
     val response = ListUnsolutions(User("foo"))(engine)
@@ -487,9 +487,9 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "reply with all unsolutions if a new puzzle is set" in {
     val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
-    val textFoo1 = "Some text"
-    val textFoo2 = "Some other text"
-    val textBar1 = "Some text for another user"
+    val textFoo1 = s"Some ${defaultPuzzle.letters}"
+    val textFoo2 = s"Some other ${defaultPuzzle.letters}"
+    val textBar1 = s"Some ${defaultPuzzle.letters} for another user"
 
     AddUnsolution(textFoo1, User("foo"))(engine)
     AddUnsolution(textFoo2, User("foo"))(engine)
@@ -508,5 +508,35 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val response = SetPuzzle(Puzzle("DATORSPEL"))(engine)
 
     response shouldNot containResponseOfType(classTag[AllUnsolutions].runtimeClass)
+  }
+
+  it should "reply with unconfirmed unsolutions if no word matches the puzzle" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+    val unsolutionText = s"No word matches the puzzle"
+
+    val response = AddUnsolution(unsolutionText, User("foo"))(engine)
+
+    response shouldBe UnsolutionNeedsConfirmation(defaultPuzzle)
+  }
+
+  it should "save an unconfirmed unsolutions if it's saved a second time" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+    val unsolutionText = s"No word matches the puzzle"
+
+    AddUnsolution(unsolutionText, User("foo"))(engine)
+    val response = AddUnsolution(unsolutionText, User("foo"))(engine)
+
+    response shouldBe UnsolutionAdded()
+  }
+
+  it should "forget the unconfirmed unsolution if another unsolution comes before a confirmation" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+    val unsolutionText = s"No word matches the puzzle"
+
+    AddUnsolution(unsolutionText, User("foo"))(engine)
+    AddUnsolution(s"${defaultPuzzle.letters}", User("foo"))(engine)
+    val response = AddUnsolution(unsolutionText, User("foo"))(engine)
+
+    response shouldBe UnsolutionNeedsConfirmation(defaultPuzzle)
   }
 }

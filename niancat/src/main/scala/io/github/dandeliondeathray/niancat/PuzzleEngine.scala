@@ -47,6 +47,7 @@ class PuzzleEngine(val dictionary: Dictionary,
                    val puzzleSolution: PuzzleSolution,
                    var puzzle: Option[Puzzle] = None) {
 
+  val unconfirmedUnsolutions: mutable.Map[User, String] = mutable.Map()
   val unsolutions: mutable.Map[User, List[String]] = mutable.Map()
 
   def set(nonNormalizedPuzzle: Puzzle): Response = {
@@ -75,6 +76,7 @@ class PuzzleEngine(val dictionary: Dictionary,
 
     puzzleSolution.reset(p)
     unsolutions.clear()
+    unconfirmedUnsolutions.clear()
 
     CompositeResponse(responses.flatten)
   }
@@ -98,8 +100,26 @@ class PuzzleEngine(val dictionary: Dictionary,
       return NoPuzzleSet()
     }
 
+    if (!anyWordMatchesPuzzle(puzzle.get, unsolution)) {
+      val unconfirmedUnsolution = unconfirmedUnsolutions.get(user)
+      unconfirmedUnsolution match {
+        case None => {
+          unconfirmedUnsolutions(user) = unsolution
+          return UnsolutionNeedsConfirmation(puzzle.get)
+        }
+        case Some(text) if text != unsolution => {
+          unconfirmedUnsolutions(user) = unsolution
+          return UnsolutionNeedsConfirmation(puzzle.get)
+        }
+        case default => {
+
+        }
+      }
+    }
+
     val unsolutionsForUser: List[String] = unsolutions.getOrElse(user, List[String]())
     unsolutions(user) = unsolution :: unsolutionsForUser
+    unconfirmedUnsolutions.remove(user)
 
     UnsolutionAdded()
   }
@@ -137,6 +157,11 @@ class PuzzleEngine(val dictionary: Dictionary,
     } else {
       NotInTheDictionary(word)
     }
+  }
+
+  private def anyWordMatchesPuzzle(puzzle: Puzzle, unsolution: String): Boolean = {
+    val words = unsolution.split(" ") map (Word(_))
+    words exists (_ matches puzzle)
   }
 }
 

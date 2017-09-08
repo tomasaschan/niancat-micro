@@ -86,6 +86,10 @@ case class UnsolutionAdded() extends Reply {
   override def toResponse = "Sparat."
 }
 
+case class UnsolutionNeedsConfirmation(puzzle: Puzzle) extends Reply {
+  override def toResponse = s"Inget ord i olösningen matchar pusslet ${puzzle show}. Spara igen för att bekräfta."
+}
+
 case class AllUnsolutions(unsolutionsForEachUser: Map[User, List[String]]) extends Notification {
   private def usersUnsolutionToString(entry: (User, List[String])): String = {
     val name = entry._1.name
