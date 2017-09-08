@@ -117,7 +117,9 @@ class PuzzleEngine(val dictionary: Dictionary,
     import WritingSystemHelper._
 
     if (!(word isNineLetters)) {
-      return IncorrectLength(word)
+      val tooMany: Option[String] = Some(word.letters.norm diff puzzle.letters.norm) filter(s => !s.isEmpty)
+      val tooFew: Option[String] = Some(puzzle.letters.norm diff word.letters.norm) filter(s => !s.isEmpty)
+      return IncorrectLength(word, tooMany, tooFew)
     }
 
     if (!(word matches puzzle)) {

@@ -47,8 +47,16 @@ case class WordAndPuzzleMismatch(word: Word, puzzle: Puzzle, tooMany: String, to
     s"För många $tooMany. För få $tooFew"
 
 }
-case class IncorrectLength(word: Word) extends Reply {
-  override def toResponse: String = s"${word.letters} är inte nio tecken långt."
+case class IncorrectLength(word: Word, tooMany: Option[String], tooFew: Option[String]) extends Reply {
+  override def toResponse: String = {
+    val parts = List(
+      Some(s"${word.letters} är inte nio tecken långt."),
+      tooMany map (t => s" För många $t."),
+      tooFew map (t => s" För få $t.")
+    )
+    parts.flatten.mkString
+  }
+
 }
 case class InvalidPuzzle(puzzle: Puzzle) extends Reply {
   override def toResponse: String = s"Pusslet ${puzzle show} är inte giltigt!"

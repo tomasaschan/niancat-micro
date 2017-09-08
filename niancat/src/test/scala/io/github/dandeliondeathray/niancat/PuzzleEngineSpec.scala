@@ -210,14 +210,15 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
       'tooFew  ("BC"))
   }
 
-  it should "reply with incorrect length if the word is not nine letters long" in {
+  it should "reply with mismatch if the word is not nine letters long" in {
+    val puzzle = Puzzle("ABCDEFGHI")
     val dictionary = rejectingDictionary
-    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
+    val engine = makePuzzleEngine(dictionary, Some(puzzle))
 
     val wordIsWrongLength = Word("ABCDEF")
     val response = CheckSolution(wordIsWrongLength, User("foo"))(engine)
 
-    response shouldBe IncorrectLength(wordIsWrongLength)
+    response shouldBe IncorrectLength(wordIsWrongLength, None, Some("GHI"))
   }
 
   it should "notify the channel about yesterdays puzzle when a new one is set" in {
