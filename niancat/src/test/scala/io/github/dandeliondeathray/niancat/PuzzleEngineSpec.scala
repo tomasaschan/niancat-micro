@@ -539,4 +539,14 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     response shouldBe UnsolutionNeedsConfirmation(defaultPuzzle)
   }
+
+  it should "save an unconfirmed solution when we receive an empty unsolution" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+    val unsolutionText = "No word matches the puzzle"
+
+    AddUnsolution(unsolutionText, User("foo"))(engine)
+    val response = AddUnsolution("", User("foo"))(engine)
+
+    response shouldBe UnsolutionAdded()
+  }
 }

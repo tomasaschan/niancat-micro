@@ -107,7 +107,7 @@ class PuzzleEngine(val dictionary: Dictionary,
           unconfirmedUnsolutions(user) = unsolution
           return UnsolutionNeedsConfirmation(puzzle.get)
         }
-        case Some(text) if text != unsolution => {
+        case Some(text) if text != unsolution && unsolution != "" => {
           unconfirmedUnsolutions(user) = unsolution
           return UnsolutionNeedsConfirmation(puzzle.get)
         }
