@@ -11,6 +11,14 @@ class FooCommand:
     method = Method.GET
 
 
+class FooWithParameter:
+    pattern = '!foo {bar}'
+    url_format = '/foo/bar'
+    visibility = Visibility.Any
+    body = None
+    method = Method.GET
+
+
 class TestCommand(unittest.TestCase):
     def test_ChannelVisibility_ChannelStartingWithC_ChannelIsPublic(self):
         self.assertEqual(Visibility.Public, Visibility.parse("C0123456"))
@@ -48,3 +56,13 @@ class TestCommand(unittest.TestCase):
         self_name = "mybotname"
         command = command_parser.parse(text_with_trailing_whitespace, channel_id, user_id, user_name, self_name, Visibility.Public)
         self.assertIsNotNone(command)
+
+    def test_ParseCommand_CommandHasNoParameter_NonParameterVersionIsFound(self):
+        command_parser = CommandParser([FooWithParameter, FooCommand])
+        no_param_text = "!foo"
+        channel_id = "C1"
+        user_id = "U1"
+        user_name = "user"
+        self_name = "mybotname"
+        command = command_parser.parse(no_param_text, channel_id, user_id, user_name, self_name, Visibility.Public)
+        self.assertEqual(command.url, "/foo")

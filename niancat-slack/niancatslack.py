@@ -44,6 +44,17 @@ class AddUnsolution:
         return json.dumps({'unsolution': unsolution})
 
 
+class ConfirmUnsolution:
+    pattern = '!olösning'
+    url_format = '/unsolution/{user_name}'
+    visibility = Visibility.Private
+    method = Method.POST
+
+    @classmethod
+    def body(cls, **kwargs):
+        return json.dumps({'unsolution': ''})
+
+
 class CheckSolution:
     pattern = '{solution}'
     url_format = '/solution'
@@ -57,7 +68,7 @@ class CheckSolution:
 
 class NiancatSlack(SlackrestApp):
     def __init__(self, base_url, notification_channel_id):
-        commands = [GetPuzzle, SetPuzzle, ListUnsolution, AddUnsolution, CheckSolution]
+        commands = [GetPuzzle, SetPuzzle, ListUnsolution, AddUnsolution, ConfirmUnsolution, CheckSolution]
         SlackrestApp.__init__(self, base_url, commands, notification_channel_id)
 
 
