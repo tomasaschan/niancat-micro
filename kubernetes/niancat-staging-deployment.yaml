@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: niancat-chat
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+  selector:
+    app: niancat
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: niancat-chat-deployment
+spec:
+  template:
+    metadata:
+      labels:
+        app: niancat
+    spec:
+      containers:
+      - name: niancat
+        image: erikedin/niancat:staging
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+          initialDelaySeconds: 60
+          timeoutSeconds: 1
+        env:
+        - name: DICTIONARY_FILE
+          value: /data/dictionary.txt
+        volumeMounts:
+        - name: niancat-config-vol
+          mountPath: /data
+      volumes:
+      - name: niancat-config-vol
+        configMap:
+          name: niancat-config
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: niancat-slack-deployment
+spec:
+  template:
+    metadata:
+      labels:
+        app: niancat-slack
+    spec:
+      containers:
+      - name: niancat-slack
+        image: erikedin/niancat-slack:staging
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        env:
+        - name: SLACK_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: slack-token
+              key: tiancat.token
+        - name: NIANCAT_CHAT_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: tiancat-slack-config
+              key: base_url
+        - name: NOTIFICATION_CHANNEL
+          valueFrom:
+            configMapKeyRef:
+              name: tiancat-slack-config
+              key: notification_channel
