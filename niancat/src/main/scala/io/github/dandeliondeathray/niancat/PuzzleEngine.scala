@@ -104,26 +104,34 @@ class PuzzleEngine(val dictionary: Dictionary,
       val unconfirmedUnsolution = unconfirmedUnsolutions.get(user)
       unconfirmedUnsolution match {
         case None if unsolution == "" => {
+          // The user used an empty add unsolution command, but there's no unconfirmed unsolution.
           return NoUnsolutionToConfirm()
         }
         case None => {
+          // The user added an unsolution, but no words matches the puzzle. There is no previous unconfirmed
+          // unsolution.
           unconfirmedUnsolutions(user) = unsolution
           return UnsolutionNeedsConfirmation(puzzle.get)
         }
         case Some(text) if text != unsolution && unsolution != "" => {
+          // The user added an unsolution, but no words matches the puzzle. There _is_ a previous unconfirmed
+          // unsolution. We're overwriting it.
           unconfirmedUnsolutions(user) = unsolution
           return UnsolutionNeedsConfirmation(puzzle.get)
         }
+        case Some(text) if unsolution == "" => {
+          // The user confirmed an unsolution using the empty add unsolution command. Store the previously saved
+          // unconfirmed unsolution.
+          storeUnsolution(text, user)
+          return UnsolutionAdded()
+        }
         case default => {
-
+          // In this case the user confirmed an unsolution by repeating it.
         }
       }
     }
 
-    val unsolutionsForUser: List[String] = unsolutions.getOrElse(user, List[String]())
-    unsolutions(user) = unsolution :: unsolutionsForUser
-    unconfirmedUnsolutions.remove(user)
-
+    storeUnsolution(unsolution, user)
     UnsolutionAdded()
   }
 
@@ -134,6 +142,12 @@ class PuzzleEngine(val dictionary: Dictionary,
       case Some(texts) => Unsolutions(texts reverse)
       case None => NoUnsolutions()
     }
+  }
+
+  private def storeUnsolution(unsolution: String, user: User) = {
+    val unsolutionsForUser: List[String] = unsolutions.getOrElse(user, List[String]())
+    unsolutions(user) = unsolution :: unsolutionsForUser
+    unconfirmedUnsolutions.remove(user)
   }
 
   private def checkSolution(user: User, word: Word, puzzle: Puzzle): Response = {
