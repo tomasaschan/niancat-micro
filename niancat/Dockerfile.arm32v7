@@ -1,10 +1,12 @@
 FROM arm32v7/openjdk:8u131-jre
 LABEL maintainer="Erik Edin <erikedin.name@gmail.com>"
 
+ARG NIANCAT_JAR
+
 RUN useradd -m user
 USER user
 WORKDIR /app
 
-COPY target/scala-2.12/niancat-assembly-1.0rc1.jar /app/niancat.jar
+COPY ${NIANCAT_JAR} /app/niancat.jar
 
 CMD ["java", "-jar", "/app/niancat.jar"]
