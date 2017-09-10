@@ -549,4 +549,12 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     response shouldBe UnsolutionAdded()
   }
+
+  it should "state that there is no unsolution to confirm for an emty unsolution command" in {
+    val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
+
+    val response = AddUnsolution("", User("foo"))(engine)
+
+    response shouldBe NoUnsolutionToConfirm()
+  }
 }

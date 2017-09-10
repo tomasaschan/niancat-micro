@@ -103,6 +103,9 @@ class PuzzleEngine(val dictionary: Dictionary,
     if (!anyWordMatchesPuzzle(puzzle.get, unsolution)) {
       val unconfirmedUnsolution = unconfirmedUnsolutions.get(user)
       unconfirmedUnsolution match {
+        case None if unsolution == "" => {
+          return NoUnsolutionToConfirm()
+        }
         case None => {
           unconfirmedUnsolutions(user) = unsolution
           return UnsolutionNeedsConfirmation(puzzle.get)
