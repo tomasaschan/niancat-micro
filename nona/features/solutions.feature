@@ -11,7 +11,12 @@ Feature: Solve a puzzle
 		 Then the response is a nine letter word
 
 	Scenario: All users have the same chain of words
-		 Given Erik has gotten five puzzles
-		  When Johan has gotten five puzzles
-		  Then Erik and Johan have received the same puzzles
+		Given Erik has gotten five puzzles
+		 When Johan has gotten five puzzles
+		 Then Erik and Johan have received the same puzzles
 
+	Scenario: Next puzzle
+		Given Erik has requested the puzzle
+		  And he has solved the puzzle
+		 When Erik has requested a new puzzle
+		 Then the response is a different puzzle
