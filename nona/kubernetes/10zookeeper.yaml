@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper
+spec:
+  ports:
+    - name: TCP
+      port: 2180
+      targetPort: 2180
+  selector:
+    app: zookeeper
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: zookeeper-deployment
+spec:
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+      - name: niancat
+        image: erikedin/zookeeper-arm:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          tcpSocket:
+            port: 2180
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 2180
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        volumeMounts:
+        - name: zookeeper-config-vol
+          mountPath: /config
+      volumes:
+      - name: zookeeper-config-vol
+        configMap:
+          name: zookeeper-config
