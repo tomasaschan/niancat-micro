@@ -1,4 +1,4 @@
-FROM arm32v7/python:3.6.1
+FROM python:3.6.1
 
 WORKDIR /slackrest
 COPY requirements.txt /slackrest/requirements.txt

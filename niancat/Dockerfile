@@ -1,4 +1,4 @@
-FROM arm32v7/openjdk:8u131-jre
+FROM openjdk:8u131-jre
 LABEL maintainer="Erik Edin <erikedin.name@gmail.com>"
 
 ARG NIANCAT_JAR
