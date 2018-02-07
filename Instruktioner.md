@@ -1,3 +1,24 @@
+# Snabb-instruktioner
+Till niancat, skriv
+
+    !nian
+
+för att få dagens ordpussel. Till niancat kan du också skriva in lösningsförslag, bara genom att
+skriva in ordet. Niancat tar hand om att ta bort mellanslag och bindestreck, och du kan skriva det
+med stora eller små bokstäver. Löser du pusslet så skrivs det ut i #konsulatet-kanalen.
+Skriver du in fel bokstäver så får du veta vilka som blev fel.
+
+Exempel-dialog mellan niancat och @erike:
+
+    erike: !nian
+    niancat: GRUKASSUP
+    erike: GRUSSKUPA
+    niancat: Ordet GRUSSKUPA finns inte med i SAOL.
+    erike: RUSSKUPA
+    niancat: För få G.
+    erike: PUSSGURKA
+    niancat: Ordet PUSSGURKA är korrekt!
+
 # Instruktioner på svenska
 Svenska Dagbladet publicerar varje dag ett ord-pussel vid namn Dagens Nia. Man ges nio bokstäver, som omkastade bildar
 ett svenskt ord på nio bokstäver. Pusslet går ut på att hitta vilket ord det är, eller vilka ord, då det kan finnas fler
@@ -45,28 +66,28 @@ stora bokstäver, och mellanslag och bindestreck kommer automatiskt tas bort inn
     + Antalet lösningar till dagens pussel, om det finns mer än en lösning.
     + Gårdagens lösning(ar) och vilka som löste den.
     + En lista på alla sparade olösningar.
-     
+
     Exempel: !sättnian STOPLEDAR
 
 - !olösning \<fritext\>
 
     Spara rolig text som publiceras automatiskt nästa dag.
     Niancat svarar att olösningen är sparad.
-    
+
     Används bara i privatmeddelande till niancat.
-    
+
     Fritexten kan vara vad som helst, men om inget ord i fritexten matchar dagens pussel så kommer du behöva bekräfta
     olösningen. Du kan bekräfta den genom att direkt:
     + Skriva in samma olösning igen, eller
     + Använda kommandot !olösning utan någon fritext.
-    
+
     Exempel: !olösning LEDARPOST fanns med i ordlistan, men gör inte det längre.
 
 - !olösning
 
     Använd detta kommando, utan någon fritext för att bekräfta en tidigare olösning. Om du inte har någon tidigare
     olösning som behöver bekräftas så kommer niancat svara det.
-    
+
     Används bara i privatmeddelande till niancat.
 
 - !olösningar
@@ -74,7 +95,3 @@ stora bokstäver, och mellanslag och bindestreck kommer automatiskt tas bort inn
     Skriv ut vilka olösningar du har sparat.
 
     Används bara i privatmeddelande till niancat.
-
-## Beta-version
-Ibland uppdaterar vi boten, och då kopplar den upp sig som boten tiancat istället, och sitter i kanalen #betacat
-istället för #konsulatet. Där testar vi nya features.
