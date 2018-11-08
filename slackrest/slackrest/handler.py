@@ -27,7 +27,7 @@ class MessageHandler:
     def handle_if_message(self, m, users):
         if 'type' in m and m['type'] == 'message' and 'channel' in m and 'user' in m:
             channel_id = m['channel']
-            user_id = m['user']
+            user_id = m['display_name']
             try:
                 user_name = users[user_id].name
             except KeyError:
