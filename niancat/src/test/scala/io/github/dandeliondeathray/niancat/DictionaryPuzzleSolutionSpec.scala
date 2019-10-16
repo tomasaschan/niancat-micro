@@ -57,7 +57,7 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
 
     solution.solved(User("foo"), Word("VANTRIVAS"))
 
-    solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo")))))
+    solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo"))), Map(User("foo") -> 1)))
   }
 
   it should "return solutions in the order in which they are found" in {
@@ -69,7 +69,7 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
     solution.solved(User("baz"), Word("VANTRIVAS"))
 
     solution.result shouldBe
-      Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo"), User("bar"), User("baz")))))
+      Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo"), User("bar"), User("baz"))), Map(User("foo") -> 1, User("bar") -> 1, User("baz") -> 1)))
   }
 
   it should "only list one solution if a user solves the same word several times" in {
@@ -79,7 +79,7 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
     solution.solved(User("foo"), Word("VANTRIVAS"))
     solution.solved(User("foo"), Word("VANTRIVAS"))
 
-    solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo")))))
+    solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo"))), Map(User("foo") -> 1)))
   }
 
   it should "forget solutions when a new puzzle is set" in {
@@ -91,7 +91,7 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
 
     solution.reset(Puzzle("VANTRIVAS"))
 
-    solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq())))
+    solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq()), Map(User("foo") -> 1, User("bar") -> 1)))
   }
 
   it should "normalize the puzzle on reset" in {
@@ -110,7 +110,7 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
     val word = Word("pikétröja")
     solution.solved(User("foo"), word)
 
-    solution.result shouldBe Some(SolutionResult(Map(word.norm -> Seq(User("foo")))))
+    solution.result shouldBe Some(SolutionResult(Map(word.norm -> Seq(User("foo"))), Map(User("foo") -> 1)))
   }
 
   it should "find a single solution even for a non-normalized puzzle" in {
@@ -134,7 +134,10 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
       Map(Word("DATORSPEL") -> Seq(User("foo"), User("bar")),
           Word("SPELDATOR") -> Seq(User("foo")),
           Word("LEDARPOST") -> Seq(User("baz")),
-          Word("REPSOLDAT") -> Seq())))
+          Word("REPSOLDAT") -> Seq()),
+      Map(User("foo") -> 2,
+          User("bar") -> 1,
+          User("baz") -> 1)))
   }
 
   it should "return the same solution id for a given word every time" in {
