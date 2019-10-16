@@ -31,7 +31,11 @@ object WordNormalizer {
   */
 
 /** A Puzzle is a String of exactly nine characters. */
-case class Puzzle(letters: String)
+case class Puzzle(letters: String) {
+  def matches(p: Puzzle): Boolean = {
+    letters.norm.sorted == p.letters.norm.sorted
+  }
+}
 
 /** A Word is a potential solution to a Puzzle, but can be any length. */
 case class Word(letters: String) {
@@ -52,7 +56,7 @@ class PuzzleEngine(val dictionary: Dictionary,
 
   def set(nonNormalizedPuzzle: Puzzle): Response = {
     val p = nonNormalizedPuzzle.norm
-    if (Some(p) == puzzle) {
+    if (puzzle.map(_ matches p) getOrElse false) {
       return SamePuzzle(p)
     }
 
