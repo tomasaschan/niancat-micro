@@ -84,14 +84,31 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
 
   it should "forget solutions when a new puzzle is set" in {
     val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("GURKPUSSA"))
+    solution.solved(User("foo"), Word("PUSSGURKA"))
+    solution.solved(User("baz"), Word("PUSSGURKA"))
+
     solution.reset(Puzzle("DATORLESP")) //
 
     solution.solved(User("foo"), Word("DATORSPEL"))
     solution.solved(User("bar"), Word("DATORSPEL"))
 
+    solution.result shouldBe Some(SolutionResult(
+      Map(
+        Word("DATORSPEL") -> Seq(User("foo"), User("bar")),
+        Word("SPELDATOR") -> Seq(),
+        Word("REPSOLDAT") -> Seq(),
+        Word("LEDARPOST") -> Seq()
+      ),
+      Map(User("foo") -> 2, User("bar") -> 1, User("baz") -> 1)
+    ))
+
     solution.reset(Puzzle("VANTRIVAS"))
 
-    solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq()), Map(User("foo") -> 1, User("bar") -> 1)))
+    solution.result shouldBe Some(SolutionResult(
+      Map(Word("VANTRIVAS") -> Seq()),
+      Map(User("foo") -> 2, User("bar") -> 1)
+    ))
   }
 
   it should "normalize the puzzle on reset" in {

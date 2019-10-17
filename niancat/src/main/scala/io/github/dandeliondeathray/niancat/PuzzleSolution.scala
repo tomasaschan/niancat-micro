@@ -31,6 +31,7 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
 
   override def reset(p: Puzzle): Unit = {
     puzzle = Some(p.norm)
+    streaks = streaks filter { case (user,_) => solvedList.map(_._2) contains user }
     solvedList = Seq()
   }
 
