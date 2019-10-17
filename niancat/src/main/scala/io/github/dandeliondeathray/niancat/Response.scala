@@ -6,11 +6,18 @@ object DisplayHelper {
   }
 
   implicit class SolutionResultDisplay(s: SolutionResult) {
-    def display: Seq[String] = s.wordsAndSolvers.map(kv => showWordAndSolution(kv._1, kv._2)) toSeq
+    def display: Seq[String] = {
+      val wordsAndSolvers = s.wordsAndSolvers.map(kv => showWordAndSolution(kv._1, kv._2))
+      val streaks = s.streaks.toList.filter(_._2 > 1).sortBy(-_._2).take(3).map(showStreak)
+
+      Seq("*Gårdagens lösningar:*") ++ wordsAndSolvers.toSeq ++ Seq("*Längsta obrutna serier:*") ++ streaks.toSeq
+    }
 
     private def showWordAndSolution(w: Word, solvers: Seq[User]): String = {
       s"*${w.letters}*: " ++ solvers.map(_.name).mkString(", ")
     }
+
+    private def showStreak(streak: (User, Int)): String = s"${streak._1.name}: ${streak._2}"
   }
 }
 
@@ -114,8 +121,7 @@ case class NewPuzzle(puzzle: Puzzle) extends Notification {
 }
 case class YesterdaysPuzzle(result: SolutionResult) extends Notification {
   override def toResponse: String = {
-    val lines = Seq("*Gårdagens lösningar:*") ++ result.display
-    lines mkString("\n")
+    result.display mkString("\n")
   }
 }
 case class MultipleSolutions(n: Int) extends Notification {

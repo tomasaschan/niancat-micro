@@ -15,11 +15,17 @@ class ResponseSpec extends FlatSpec with Matchers {
     CorrectSolution(Word("DEF GHI")).toResponse should include ("DEF GHI är korrekt")
   }
 
-  "YesterdaysPuzzle" should "list all solutions and user names" in {
-    val solutionResult = SolutionResult(Map(
-      Word("ABCDEFGHI") -> Seq(User("foo"), User("bar")),
-      Word("DEFGHIABC") -> Seq(User("baz"))
-    ))
+  "YesterdaysPuzzle" should "list all solutions, user names and running streaks for users with streak > 1" in {
+    val solutionResult = SolutionResult(
+      Map(
+        Word("ABCDEFGHI") -> Seq(User("foo"), User("bar")),
+        Word("DEFGHIABC") -> Seq(User("baz"))
+      ),
+      Map(
+        User("foo") -> 1,
+        User("bar") -> 3,
+        User("baz") -> 2
+      ))
 
     val yesterdaysAsString = YesterdaysPuzzle(solutionResult).toResponse
 
@@ -27,6 +33,9 @@ class ResponseSpec extends FlatSpec with Matchers {
     yesterdaysAsString should include ("*DEFGHIABC*:")
     yesterdaysAsString should include ("foo, bar")
     yesterdaysAsString should include ("baz")
+    yesterdaysAsString should include ("bar: 3")
+    yesterdaysAsString should include ("baz: 2")
+    yesterdaysAsString should not include ("foo: 1")
   }
 
   "MultipleSolutions" should "show the number of solutions" in {
