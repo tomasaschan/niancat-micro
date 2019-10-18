@@ -50,6 +50,7 @@ trait ResponseMatchers {
   */
 class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with ResponseMatchers {
   val defaultPuzzle = Puzzle("VIVANSART")
+  val shuffledPuzzle = Puzzle("ARTSVIVAN")
   val defaultWord = Word("VANTRIVAS")
 
   def defaultSolutionResult = SolutionResult()
@@ -367,6 +368,21 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
     SetPuzzle(defaultPuzzle)(engine)
+  }
+
+  it should "respond with SamePuzzle if the new puzzle is an anagram of the old" in {
+    val dictionary = acceptingDictionary
+
+    val puzzleSolution = stub[PuzzleSolution]
+    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
+    (puzzleSolution.result _) when() returns(Some(SolutionResult())) anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val response = SetPuzzle(shuffledPuzzle)(engine)
+
+    response shouldBe SamePuzzle(shuffledPuzzle)
   }
 
   it should "respond with SamePuzzle if the new puzzle is the same as the old" in {
