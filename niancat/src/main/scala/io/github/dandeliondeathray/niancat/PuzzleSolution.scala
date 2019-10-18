@@ -5,7 +5,7 @@ import NormMethods._
 import WordNormalizer._
 import StringNormalizer._
 
-case class SolutionResult(wordsAndSolvers: Map[Word, Seq[User]] = Map())
+case class SolutionResult(wordsAndSolvers: Map[Word, Seq[User]] = Map(), streaks: Map[User,Int] = Map())
 
 trait PuzzleSolution {
   def result: Option[SolutionResult]
@@ -18,6 +18,7 @@ trait PuzzleSolution {
 class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolution {
   val solutions: Map[String, Seq[String]] = dictionary.toSeq map (_.letters) groupBy sortByCodePoints
   var solvedList: Seq[(Word, User)] = Seq()
+  var streaks: Map[User,Int] = Map()
   var puzzle: Option[Puzzle] = None
 
   override def result: Option[SolutionResult] = {
@@ -25,18 +26,22 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
     val allSolutions: Seq[String] = puzzle map (p => solutions.getOrElse(sortByCodePoints(p.letters), Seq())) getOrElse(Seq())
     val allSolutionsMap: Map[Word, Seq[User]] = (allSolutions map (Word(_) -> Seq[User]())).toMap
     val resultMap = allSolutionsMap ++ (solvedList.distinct groupBy (_._1) mapValues (_.map(_._2)))
-    Some(SolutionResult(resultMap))
+    Some(SolutionResult(resultMap, streaks))
   }
 
   override def reset(p: Puzzle): Unit = {
     puzzle = Some(p.norm)
+    streaks = streaks filter { case (user,_) => solvedList.map(_._2) contains user }
     solvedList = Seq()
   }
 
   override def noOfSolutions(puzzle: Puzzle): Int =
     solutions.getOrElse(sortByCodePoints(puzzle.norm.letters), Seq()).size
 
-  override def solved(user: User, word: Word): Unit = solvedList = solvedList :+ (word.norm, user)
+  override def solved(user: User, word: Word): Unit = {
+    streaks = streaks + (user -> ((streaks getOrElse (user, 0)) + (if (solvedList contains (word.norm, user)) 0 else 1)))
+    solvedList = solvedList :+ (word.norm, user)
+  }
 
   override def solutionId(word: Word): Option[Int] = {
     val allSolutionsForThisWord = solutions.getOrElse(sortByCodePoints(word.norm.letters), Seq())
