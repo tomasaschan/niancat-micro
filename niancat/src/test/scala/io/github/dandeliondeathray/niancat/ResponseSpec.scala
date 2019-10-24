@@ -42,11 +42,15 @@ class ResponseSpec extends FlatSpec with Matchers {
   }
 
   "Solution notification" should "not include a solution id if not set" in {
-    SolutionNotification(User("foo"), None).toResponse should not (include ("ord "))
+    SolutionNotification(User("foo"), 1, None).toResponse should not (include ("ord "))
   }
 
   it should "include id if set" in {
-    SolutionNotification(User("foo"), Some(42)).toResponse should include ("ord 42")
+    SolutionNotification(User("foo"), 1, Some(42)).toResponse should include ("ord 42")
+  }
+
+  it should "repeat :niancat: as many times as the current streak" in {
+    SolutionNotification(User("foo"), 4, None).toResponse should include(":niancat: :niancat: :niancat: :niancat:")
   }
 
   "All unsolutions" should "contain the names of users and the texts" in {

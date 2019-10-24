@@ -128,12 +128,13 @@ case class MultipleSolutions(n: Int) extends Notification {
   override def toResponse = s":bangbang: Dagens nian har $n lösningar. :bangbang:"
 }
 
-case class SolutionNotification(user: User, solutionId: Option[Int] = None) extends Notification {
+case class SolutionNotification(user: User, streak: Int, solutionId: Option[Int] = None) extends Notification {
   override def toResponse = {
     val parts = List(
-      Some(s":niancat: :niancat: :niancat: ${user.name} löste nian"),
-      solutionId map(n => s", ord $n"),
-      Some("! :niancat: :niancat: :niancat:")
+      Some(s"${user.name} löste nian"),
+      solutionId map (n => s", ord $n"),
+      Some("!"),
+      Some(" :niancat:" * streak)
     )
     parts.flatten.mkString
   }
