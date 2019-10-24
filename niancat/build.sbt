@@ -1,4 +1,4 @@
-import Dependencies._
+// import Dependencies._
 
 val Http4sVersion = "0.15.11a"
 
@@ -12,9 +12,9 @@ lazy val root = (project in file(".")).
     name := "niancat",
     exportJars := true,
     retrieveManaged := true,
-    libraryDependencies += scalaTest,
-    libraryDependencies += scalactic,
-    libraryDependencies += scalaMock,
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+    libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1",
+    libraryDependencies += "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % "test",
     libraryDependencies ++= Seq(
       "org.http4s"     %% "http4s-blaze-server" % Http4sVersion,
       "org.http4s"     %% "http4s-circe"        % Http4sVersion,
