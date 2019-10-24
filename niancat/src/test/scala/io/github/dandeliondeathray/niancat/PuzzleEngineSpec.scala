@@ -342,6 +342,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     (puzzleSolution.noOfSolutions _) expects(*) returns (1) anyNumberOfTimes()
     (puzzleSolution.solutionId _) expects(*) returns(Some(1)) anyNumberOfTimes()
     (puzzleSolution.streak _) expects(User("foo")) returns(1) anyNumberOfTimes()
+    (puzzleSolution.hasSolved _) expects(User("foo"), defaultWord) returning(false) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
@@ -424,6 +425,31 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val response = CheckSolution(defaultWord, User("foo"))(engine)
 
     response should containResponse (SolutionNotification(User("foo"), 1, None))
+  }
+
+  it should "not notify the main channel if a user solves the puzzle again" in {
+    val dictionary = acceptingDictionary
+    val puzzleSolution = stub[PuzzleSolution]
+    (puzzleSolution.result _) when() returns(None) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
+    (puzzleSolution.solved _) when(*, *) anyNumberOfTimes()
+    (puzzleSolution.solutionId _) when (*) returns(Some(1)) anyNumberOfTimes()
+    inSequence {
+      (puzzleSolution.hasSolved _) when(*,*) returns(false) once()
+      (puzzleSolution.hasSolved _) when(*,*) returns(true) anyNumberOfTimes()
+    } anyNumberOfTimes()
+
+    val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
+
+    val firstResponse = CheckSolution(defaultWord, User("foo"))(engine)
+
+    firstResponse should containResponse (CorrectSolution(defaultWord))
+    firstResponse should containResponse (SolutionNotification(User("foo"), 1, None))
+
+    val secondResponse = CheckSolution(defaultWord, User("foo"))(engine)
+
+    secondResponse shouldBe CorrectSolution(defaultWord)
   }
 
   it should "not include solution id in the solution notification is there is only one solution" in {
