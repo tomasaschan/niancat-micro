@@ -1,0 +1,22 @@
+{
+    "dockerFile": "Dockerfile",
+    "runArgs": [
+        "-v",
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "-v",
+        "~/.ssh:/home/dev/.ssh-localhost:ro",
+        "-v",
+        "${localWorkspaceFolder}/.devcontainer/.bashrc.d:/home/dev/.bashrc.d:ro",
+        "-v",
+        "niancat-vscode-server:/home/dev/.vscode-server-insiders",
+        "-v",
+        "niancat-sbt:/home/dev/.sbt",
+        "-v",
+        "${localWorkspaceFolder}/.devcontainer/.config-baseline:/home/dev/.config-baseline:ro"
+    ],
+    "extensions": [
+        "lightbend.vscode-sbt-scala",
+        "ms-azuretools.vscode-docker",
+        "scalameta.metals"
+    ]
+}

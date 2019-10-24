@@ -22,3 +22,9 @@ project/plugins/project/
 # IntelliJ
 .idea
 niancatscala.iml
+
+# VS Code
+.metals
+
+# Secrets
+*.credentials
