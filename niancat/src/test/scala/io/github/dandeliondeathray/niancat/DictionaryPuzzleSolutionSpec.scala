@@ -60,6 +60,15 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
     solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo"))), Map(User("foo") -> 1)))
   }
 
+  it should "not increase streak on weekends" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("TRIVASVAN"), true) // VANTRIVAS
+
+    solution.solved(User("foo"), Word("VANTRIVAS"), false)
+
+    solution.result shouldBe Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo"))), Map()))
+  }
+
   it should "return solutions in the order in which they are found" in {
     val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
     solution.reset(Puzzle("TRIVASVAN"), true) // VANTRIVAS
@@ -111,6 +120,39 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
       SolutionResult(
         Map(Word("VANTRIVAS") -> Seq()),
         Map(User("foo") -> 2, User("bar") -> 1)
+      )
+    )
+  }
+
+  it should "not forget streaks when new puzzle is set on weekends" in {
+    val solution = new DictionaryPuzzleSolution(defaultDictionaryStub)
+    solution.reset(Puzzle("GURKPUSSA"), true)
+    solution.solved(User("foo"), Word("PUSSGURKA"), true)
+    solution.solved(User("baz"), Word("PUSSGURKA"), true)
+
+    solution.reset(Puzzle("DATORLESP"), true)
+
+    solution.solved(User("foo"), Word("DATORSPEL"), true)
+    solution.solved(User("bar"), Word("DATORSPEL"), true)
+
+    solution.result shouldBe Some(
+      SolutionResult(
+        Map(
+          Word("DATORSPEL") -> Seq(User("foo"), User("bar")),
+          Word("SPELDATOR") -> Seq(),
+          Word("REPSOLDAT") -> Seq(),
+          Word("LEDARPOST") -> Seq()
+        ),
+        Map(User("foo") -> 2, User("bar") -> 1, User("baz") -> 1)
+      )
+    )
+
+    solution.reset(Puzzle("VANTRIVAS"), false)
+
+    solution.result shouldBe Some(
+      SolutionResult(
+        Map(Word("VANTRIVAS") -> Seq()),
+        Map(User("foo") -> 2, User("bar") -> 1, User("baz") -> 1)
       )
     )
   }

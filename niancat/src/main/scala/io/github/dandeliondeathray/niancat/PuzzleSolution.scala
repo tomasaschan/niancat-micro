@@ -33,7 +33,9 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
 
   override def reset(p: Puzzle, isWeekday: Boolean): Unit = {
     puzzle = Some(p.norm)
-    streaks = streaks filter { case (user,_) => solvedList.map(_._2) contains user }
+    if (isWeekday) {
+      streaks = streaks filter { case (user, _) => solvedList.map(_._2) contains user }
+    }
     solvedList = Seq()
   }
 
@@ -41,7 +43,10 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
     solutions.getOrElse(sortByCodePoints(puzzle.norm.letters), Seq()).size
 
   override def solved(user: User, word: Word, isWeekday: Boolean): Unit = {
-    streaks = streaks + (user -> ((streaks getOrElse (user, 0)) + (if (solvedList contains (word.norm, user)) 0 else 1)))
+    val userHasFoundThisSolutionBefore = solvedList contains (word.norm, user)
+    if (!userHasFoundThisSolutionBefore && isWeekday) {
+      streaks = streaks + (user -> ((streaks getOrElse (user, 0)) + 1))
+    }
     solvedList = solvedList :+ (word.norm, user)
   }
 
