@@ -70,9 +70,9 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   def emptyPuzzleSolution: PuzzleSolution = {
     val puzzleSolution = stub[PuzzleSolution]
     (puzzleSolution.result _) when() returns(None) anyNumberOfTimes()
-    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*, *) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
-    (puzzleSolution.solved _) when(*, *) anyNumberOfTimes()
+    (puzzleSolution.solved _) when(*, *, *) anyNumberOfTimes()
     (puzzleSolution.solutionId _) when (*) returns(Some(1)) anyNumberOfTimes()
 
     puzzleSolution
@@ -99,7 +99,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "notify that a new puzzle is set" in {
     val engine = makeAcceptingPuzzleEngine()
-    val response = SetPuzzle(defaultPuzzle)(engine)
+    val response = SetPuzzle(defaultPuzzle, true)(engine)
 
     response should containResponse (NewPuzzle(defaultPuzzle))
   }
@@ -107,14 +107,14 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   it should "normalize the puzzle when notifying that a new one is set" in {
     val engine = makeAcceptingPuzzleEngine()
     val puzzle = Puzzle("pikétröja")
-    val response = SetPuzzle(puzzle)(engine)
+    val response = SetPuzzle(puzzle, true)(engine)
 
     response should containResponse (NewPuzzle(puzzle.norm))
   }
 
   it should "store the new puzzle" in {
     val engine = makeAcceptingPuzzleEngine()
-    SetPuzzle(defaultPuzzle)(engine)
+    SetPuzzle(defaultPuzzle, true)(engine)
 
     engine.puzzle shouldBe Some(defaultPuzzle)
   }
@@ -122,7 +122,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   it should "normalize the puzzle when storing it" in {
     val engine = makeAcceptingPuzzleEngine()
     val puzzle = Puzzle("pikétröja")
-    SetPuzzle(puzzle)(engine)
+    SetPuzzle(puzzle, true)(engine)
 
     engine.puzzle shouldBe Some(puzzle.norm)
   }
@@ -130,7 +130,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   it should "reply that no puzzle is set, when a user checks a solution" in {
     val engine = makeAcceptingPuzzleEngine()
 
-    val response = CheckSolution(defaultWord, User("foo"))(engine)
+    val response = CheckSolution(defaultWord, User("foo"), true)(engine)
 
     response shouldBe NoPuzzleSet()
   }
@@ -138,7 +138,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   it should "not reply with a previous puzzle when a new one is set" in {
     val engine = makeAcceptingPuzzleEngine()
 
-    val response = SetPuzzle(defaultPuzzle)(engine)
+    val response = SetPuzzle(defaultPuzzle, true)(engine)
 
     response should not (containResponseOfType (classTag[YesterdaysPuzzle].runtimeClass))
   }
@@ -161,7 +161,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = rejectingDictionary
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
 
-    val response = CheckSolution(defaultWord, User("foo"))(engine)
+    val response = CheckSolution(defaultWord, User("foo"), true)(engine)
 
     response shouldBe NotInTheDictionary(defaultWord)
   }
@@ -170,7 +170,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = acceptingDictionary
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
 
-    val response = CheckSolution(defaultWord, User("foo"))(engine)
+    val response = CheckSolution(defaultWord, User("foo"), true)(engine)
 
     response should containResponse (CorrectSolution(defaultWord))
   }
@@ -180,7 +180,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
 
     val mismatchingWord = Word("NOTRIGHTX")
-    val response = CheckSolution(mismatchingWord, User("foo"))(engine)
+    val response = CheckSolution(mismatchingWord, User("foo"), true)(engine)
 
     response shouldBe a [WordAndPuzzleMismatch]
   }
@@ -191,7 +191,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = acceptingDictionary
     val engine = makePuzzleEngine(dictionary, Some(puzzle))
 
-    val response = CheckSolution(mismatchingWord, User("foo"))(engine)
+    val response = CheckSolution(mismatchingWord, User("foo"), true)(engine)
 
     response should have (
       'tooMany ("JKL"),
@@ -204,7 +204,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = acceptingDictionary
     val engine = makePuzzleEngine(dictionary, Some(puzzle))
 
-    val response = CheckSolution(mismatchingWord, User("foo"))(engine)
+    val response = CheckSolution(mismatchingWord, User("foo"), true)(engine)
 
     response should have (
       'tooMany ("AA"),
@@ -217,7 +217,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val engine = makePuzzleEngine(dictionary, Some(puzzle))
 
     val wordIsWrongLength = Word("ABCDEF")
-    val response = CheckSolution(wordIsWrongLength, User("foo"))(engine)
+    val response = CheckSolution(wordIsWrongLength, User("foo"), true)(engine)
 
     response shouldBe IncorrectLength(wordIsWrongLength, None, Some("GHI"))
   }
@@ -232,7 +232,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val response = SetPuzzle(Puzzle("ABCDEFGHI"))(engine)
+    val response = SetPuzzle(Puzzle("ABCDEFGHI"), true)(engine)
 
     response should containResponseOfType (classTag[YesterdaysPuzzle].runtimeClass)
   }
@@ -243,12 +243,12 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val puzzleSolution = mock[PuzzleSolution]
     (puzzleSolution.result _) expects() returning(Some(defaultSolutionResult)) anyNumberOfTimes()
-    (puzzleSolution.reset _) expects (newPuzzle)
+    (puzzleSolution.reset _) expects (newPuzzle, true)
     (puzzleSolution.noOfSolutions _) expects(*) returning(1) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    SetPuzzle(newPuzzle)(engine)
+    SetPuzzle(newPuzzle, true)(engine)
   }
 
   it should "respond that a puzzle is invalid if there are no solutions for it" in {
@@ -263,7 +263,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val response = SetPuzzle(invalidPuzzle)(engine)
+    val response = SetPuzzle(invalidPuzzle, true)(engine)
 
     response shouldBe InvalidPuzzle(invalidPuzzle)
   }
@@ -276,12 +276,12 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     // PuzzleSolution.result should be a non-mutable method, so it doesn't matter if
     // it's being called or not.
     (puzzleSolution.result _) expects() returning(Some(SolutionResult())) anyNumberOfTimes()
-    (puzzleSolution.reset _) expects(invalidPuzzle) never()
+    (puzzleSolution.reset _) expects(invalidPuzzle, true) never()
     (puzzleSolution.noOfSolutions _) expects(*) returning(0) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    SetPuzzle(invalidPuzzle)(engine)
+    SetPuzzle(invalidPuzzle, true)(engine)
   }
 
   it should "not set the puzzle if the puzzle has no solutions" in {
@@ -292,12 +292,12 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     // PuzzleSolution.result should be a non-mutable method, so it doesn't matter if
     // it's being called or not.
     (puzzleSolution.result _) expects() returning(Some(SolutionResult())) anyNumberOfTimes()
-    (puzzleSolution.reset _) expects(invalidPuzzle) never()
+    (puzzleSolution.reset _) expects(invalidPuzzle, true) never()
     (puzzleSolution.noOfSolutions _) expects(*) returning(0) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    SetPuzzle(invalidPuzzle)(engine)
+    SetPuzzle(invalidPuzzle, true)(engine)
 
     engine.puzzle shouldBe Some(defaultPuzzle)
   }
@@ -308,12 +308,12 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val puzzleSolution = stub[PuzzleSolution]
     (puzzleSolution.result _) when() returns(Some(defaultSolutionResult)) anyNumberOfTimes()
-    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*, *) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(newPuzzle) returning(7) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val response = SetPuzzle(newPuzzle)(engine)
+    val response = SetPuzzle(newPuzzle, true)(engine)
 
     response should containResponse (MultipleSolutions(7))
   }
@@ -324,12 +324,12 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val puzzleSolution = stub[PuzzleSolution]
     (puzzleSolution.result _) when() returns(Some(defaultSolutionResult)) anyNumberOfTimes()
-    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*, *) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(newPuzzle) returning(1) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val response = SetPuzzle(newPuzzle)(engine)
+    val response = SetPuzzle(newPuzzle, true)(engine)
 
     response should not (containResponseOfType (classTag[MultipleSolutions].runtimeClass))
   }
@@ -338,7 +338,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = acceptingDictionary
 
     val puzzleSolution = mock[PuzzleSolution]
-    (puzzleSolution.solved _) expects(User("foo"), defaultWord)
+    (puzzleSolution.solved _) expects(User("foo"), defaultWord, true)
     (puzzleSolution.noOfSolutions _) expects(*) returns (1) anyNumberOfTimes()
     (puzzleSolution.solutionId _) expects(*) returns(Some(1)) anyNumberOfTimes()
     (puzzleSolution.streak _) expects(User("foo")) returns(1) anyNumberOfTimes()
@@ -346,43 +346,43 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val response = CheckSolution(defaultWord, User("foo"))(engine)
+    val response = CheckSolution(defaultWord, User("foo"), true)(engine)
   }
 
   it should "not store an invalid solution" in {
     val dictionary = rejectingDictionary
 
     val puzzleSolution = mock[PuzzleSolution]
-    (puzzleSolution.solved _) expects(User("foo"), defaultWord) never()
+    (puzzleSolution.solved _) expects(User("foo"), defaultWord, true) never()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val response = CheckSolution(defaultWord, User("foo"))(engine)
+    val response = CheckSolution(defaultWord, User("foo"), true)(engine)
   }
 
   it should "not reset the puzzle if the new puzzle is the same as the old" in {
     val dictionary = acceptingDictionary
 
     val puzzleSolution = mock[PuzzleSolution]
-    (puzzleSolution.reset _) expects(*) never()
+    (puzzleSolution.reset _) expects(*, *) never()
     (puzzleSolution.noOfSolutions _) expects(*) never()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    SetPuzzle(defaultPuzzle)(engine)
+    SetPuzzle(defaultPuzzle, true)(engine)
   }
 
   it should "respond with SamePuzzle if the new puzzle is an anagram of the old" in {
     val dictionary = acceptingDictionary
 
     val puzzleSolution = stub[PuzzleSolution]
-    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*, *) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
     (puzzleSolution.result _) when() returns(Some(SolutionResult())) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val response = SetPuzzle(shuffledPuzzle)(engine)
+    val response = SetPuzzle(shuffledPuzzle, true)(engine)
 
     response shouldBe SamePuzzle(shuffledPuzzle)
   }
@@ -391,13 +391,13 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = acceptingDictionary
 
     val puzzleSolution = stub[PuzzleSolution]
-    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*, *) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
     (puzzleSolution.result _) when() returns(Some(SolutionResult())) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val response = SetPuzzle(defaultPuzzle)(engine)
+    val response = SetPuzzle(defaultPuzzle, true)(engine)
 
     response shouldBe SamePuzzle(defaultPuzzle)
   }
@@ -407,13 +407,13 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val puzzle = Puzzle("PIKETRÖJA")
 
     val puzzleSolution = stub[PuzzleSolution]
-    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*, *) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
     (puzzleSolution.result _) when() returns(Some(SolutionResult())) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(puzzle), Some(puzzleSolution))
 
-    val response = SetPuzzle(Puzzle("pikétröja"))(engine)
+    val response = SetPuzzle(Puzzle("pikétröja"), true)(engine)
 
     response shouldBe SamePuzzle(puzzle)
   }
@@ -422,7 +422,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = acceptingDictionary
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
 
-    val response = CheckSolution(defaultWord, User("foo"))(engine)
+    val response = CheckSolution(defaultWord, User("foo"), true)(engine)
 
     response should containResponse (SolutionNotification(User("foo"), 1, None))
   }
@@ -431,9 +431,9 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = acceptingDictionary
     val puzzleSolution = stub[PuzzleSolution]
     (puzzleSolution.result _) when() returns(None) anyNumberOfTimes()
-    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*, *) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(*) returns(1) anyNumberOfTimes()
-    (puzzleSolution.solved _) when(*, *) anyNumberOfTimes()
+    (puzzleSolution.solved _) when(*, *, *) anyNumberOfTimes()
     (puzzleSolution.solutionId _) when (*) returns(Some(1)) anyNumberOfTimes()
     inSequence {
       (puzzleSolution.hasSolved _) when(*,*) returns(false) once()
@@ -442,12 +442,12 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val firstResponse = CheckSolution(defaultWord, User("foo"))(engine)
+    val firstResponse = CheckSolution(defaultWord, User("foo"), true)(engine)
 
     firstResponse should containResponse (CorrectSolution(defaultWord))
     firstResponse should containResponse (SolutionNotification(User("foo"), 1, None))
 
-    val secondResponse = CheckSolution(defaultWord, User("foo"))(engine)
+    val secondResponse = CheckSolution(defaultWord, User("foo"), true)(engine)
 
     secondResponse shouldBe CorrectSolution(defaultWord)
   }
@@ -456,7 +456,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = acceptingDictionary
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle))
 
-    val response = CheckSolution(defaultWord, User("foo"))(engine)
+    val response = CheckSolution(defaultWord, User("foo"), true)(engine)
 
     response should containResponse (SolutionNotification(User("foo"), 1, None))
   }
@@ -467,13 +467,13 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val puzzleSolution = stub[PuzzleSolution]
     (puzzleSolution.result _) when() returns(Some(defaultSolutionResult)) anyNumberOfTimes()
-    (puzzleSolution.reset _) when(*) anyNumberOfTimes()
+    (puzzleSolution.reset _) when(*, *) anyNumberOfTimes()
     (puzzleSolution.noOfSolutions _) when(*) returning(7) anyNumberOfTimes()
     (puzzleSolution.solutionId _) when(*) returning(Some(solutionId)) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
-    val response = CheckSolution(defaultWord, User("foo"))(engine)
+    val response = CheckSolution(defaultWord, User("foo"), true)(engine)
 
     response should containResponse (SolutionNotification(User("foo"), 1, Some(solutionId)))
   }
@@ -521,7 +521,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
 
     AddUnsolution(s"Some ${defaultPuzzle.letters}", User("foo"))(engine)
-    SetPuzzle(Puzzle("DATORSPEL"))(engine)
+    SetPuzzle(Puzzle("DATORSPEL"), true)(engine)
 
     val response = ListUnsolutions(User("foo"))(engine)
 
@@ -538,7 +538,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     AddUnsolution(textFoo2, User("foo"))(engine)
     AddUnsolution(textBar1, User("bar"))(engine)
 
-    val response = SetPuzzle(Puzzle("DATORSPEL"))(engine)
+    val response = SetPuzzle(Puzzle("DATORSPEL"), true)(engine)
 
     response should containResponse (AllUnsolutions(
       Map(User("foo") -> List(textFoo1, textFoo2),
@@ -548,7 +548,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   it should "not mention unsolutions when a new puzzle is set, if there are no unsolutions" in {
     val engine = makeAcceptingPuzzleEngine(Some(defaultPuzzle))
 
-    val response = SetPuzzle(Puzzle("DATORSPEL"))(engine)
+    val response = SetPuzzle(Puzzle("DATORSPEL"), true)(engine)
 
     response shouldNot containResponseOfType(classTag[AllUnsolutions].runtimeClass)
   }

@@ -54,7 +54,7 @@ class PuzzleEngine(val dictionary: Dictionary,
   val unconfirmedUnsolutions: mutable.Map[User, String] = mutable.Map()
   val unsolutions: mutable.Map[User, List[String]] = mutable.Map()
 
-  def set(nonNormalizedPuzzle: Puzzle): Response = {
+  def set(nonNormalizedPuzzle: Puzzle, isWeekday: Boolean): Response = {
     val p = nonNormalizedPuzzle.norm
     if (puzzle.map(_ matches p) getOrElse false) {
       return SamePuzzle(p)
@@ -78,7 +78,7 @@ class PuzzleEngine(val dictionary: Dictionary,
       maybeUnsolutions map (AllUnsolutions(_))
     )
 
-    puzzleSolution.reset(p)
+    puzzleSolution.reset(p, isWeekday)
     unsolutions.clear()
     unconfirmedUnsolutions.clear()
 
@@ -92,10 +92,10 @@ class PuzzleEngine(val dictionary: Dictionary,
     }
   }
 
-  def check(user: User, word: Word): Response = {
+  def check(user: User, word: Word, isWeekday: Boolean): Response = {
     puzzle match {
       case None => NoPuzzleSet()
-      case Some(p: Puzzle) => checkSolution(user, word, p)
+      case Some(p: Puzzle) => checkSolution(user, word, p, isWeekday)
     }
   }
 
@@ -154,7 +154,7 @@ class PuzzleEngine(val dictionary: Dictionary,
     unconfirmedUnsolutions.remove(user)
   }
 
-  private def checkSolution(user: User, word: Word, puzzle: Puzzle): Response = {
+  private def checkSolution(user: User, word: Word, puzzle: Puzzle, isWeekday: Boolean): Response = {
     import WritingSystemHelper._
 
     if (!(word isNineLetters)) {
@@ -169,7 +169,7 @@ class PuzzleEngine(val dictionary: Dictionary,
       return WordAndPuzzleMismatch(word, puzzle, tooMany, tooFew)
     }
     if (dictionary has word) {
-      puzzleSolution.solved(user, word)
+      puzzleSolution.solved(user, word, isWeekday)
       val noOfSolutions = puzzleSolution.noOfSolutions(puzzle)
       val solutionId: Option[Int] = puzzleSolution.solutionId(word) filter(_ => noOfSolutions > 1)
       if (! puzzleSolution.hasSolved(user, word))

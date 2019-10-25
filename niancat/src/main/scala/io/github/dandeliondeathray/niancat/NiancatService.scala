@@ -26,7 +26,8 @@ object NiancatService {
       }
       case req @ POST -> Root / "v1" / "puzzle" => {
         req.as(jsonOf[SetPuzzleBody]) flatMap { setPuzzleBody =>
-          val command = SetPuzzle(Puzzle(setPuzzleBody.puzzle))
+          val isWeekday = true
+          val command = SetPuzzle(Puzzle(setPuzzleBody.puzzle), isWeekday)
           val response = command(engine)
           val messageResponses = responder.messageResponses(response)
           Ok(Json.fromValues(messageResponses map (_.toJSON)))
@@ -34,7 +35,8 @@ object NiancatService {
       }
       case req @ POST -> Root / "v1" / "solution" => {
         req.as(jsonOf[CheckSolutionBody]) flatMap { checkSolutionBody =>
-          val command = CheckSolution(Word(checkSolutionBody.solution), User(checkSolutionBody.user))
+          val isWeekday = true
+          val command = CheckSolution(Word(checkSolutionBody.solution), User(checkSolutionBody.user), isWeekday)
           val response = command(engine)
           val messageResponses = responder.messageResponses(response)
           Ok(Json.fromValues(messageResponses map (_.toJSON)))
