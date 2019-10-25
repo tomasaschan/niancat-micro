@@ -32,5 +32,5 @@ fi
 # Create global .gitconfig
 
 if ! [ -f ~/.gitconfig ] && [ -d ~/.config-baseline/git ]; then
-    cat ~/.config-baseline/git/* > ~/.gitconfig
+    cat ~/.config-baseline/git/.git* > ~/.gitconfig
 fi
