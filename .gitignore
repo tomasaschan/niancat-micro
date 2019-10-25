@@ -25,6 +25,7 @@ niancatscala.iml
 
 # VS Code
 .metals
+.bloop
 
 # Secrets
 *.credentials
