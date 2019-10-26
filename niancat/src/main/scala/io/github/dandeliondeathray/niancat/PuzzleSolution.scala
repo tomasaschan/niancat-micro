@@ -9,9 +9,9 @@ case class SolutionResult(wordsAndSolvers: Map[Word, Seq[User]] = Map(), streaks
 
 trait PuzzleSolution {
   def result: Option[SolutionResult]
-  def reset(puzzle: Puzzle)
+  def reset(puzzle: Puzzle, isWeekday: Boolean)
   def noOfSolutions(puzzle: Puzzle): Int
-  def solved(user: User, word: Word)
+  def solved(user: User, word: Word, isWeekday: Boolean)
   def hasSolved(user: User, word: Word): Boolean
   def solutionId(word: Word): Option[Int]
   def streak(user: User): Int
@@ -31,17 +31,22 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
     Some(SolutionResult(resultMap, streaks))
   }
 
-  override def reset(p: Puzzle): Unit = {
+  override def reset(p: Puzzle, isWeekday: Boolean): Unit = {
     puzzle = Some(p.norm)
-    streaks = streaks filter { case (user,_) => solvedList.map(_._2) contains user }
+    if (isWeekday) {
+      streaks = streaks filter { case (user, _) => solvedList.map(_._2) contains user }
+    }
     solvedList = Seq()
   }
 
   override def noOfSolutions(puzzle: Puzzle): Int =
     solutions.getOrElse(sortByCodePoints(puzzle.norm.letters), Seq()).size
 
-  override def solved(user: User, word: Word): Unit = {
-    streaks = streaks + (user -> ((streaks getOrElse (user, 0)) + (if (solvedList contains (word.norm, user)) 0 else 1)))
+  override def solved(user: User, word: Word, isWeekday: Boolean): Unit = {
+    val userHasFoundThisSolutionBefore = solvedList contains (word.norm, user)
+    if (!userHasFoundThisSolutionBefore && isWeekday) {
+      streaks = streaks + (user -> ((streaks getOrElse (user, 0)) + 1))
+    }
     solvedList = solvedList :+ (word.norm, user)
   }
 

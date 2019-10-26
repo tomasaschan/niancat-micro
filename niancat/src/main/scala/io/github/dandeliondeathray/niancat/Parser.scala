@@ -5,9 +5,9 @@ sealed trait PuzzleCommand {
   def apply(engine: PuzzleEngine): Response
 }
 
-case class SetPuzzle(puzzle: Puzzle) extends PuzzleCommand {
+case class SetPuzzle(puzzle: Puzzle, isWeekday: Boolean) extends PuzzleCommand {
   def apply(engine: PuzzleEngine): Response = {
-    engine.set(puzzle)
+    engine.set(puzzle, isWeekday)
   }
 }
 
@@ -15,9 +15,9 @@ case class Get() extends PuzzleCommand {
   def apply(engine: PuzzleEngine): Response = engine.get()
 }
 
-case class CheckSolution(word: Word, user: User) extends PuzzleCommand {
+case class CheckSolution(word: Word, user: User, isWeekday: Boolean) extends PuzzleCommand {
   def apply(engine: PuzzleEngine): Response = {
-    engine.check(user, word)
+    engine.check(user, word, isWeekday)
   }
 }
 
@@ -45,13 +45,13 @@ case class PrivateChannel() extends ChannelVisibility
 case class PublicChannel() extends ChannelVisibility
 
 trait Parser {
-  def parse(msg: String, user: User, visibility: ChannelVisibility): PuzzleCommand
+  def parse(msg: String, user: User, visibility: ChannelVisibility, isWeekday: Boolean): PuzzleCommand
 }
 
 class SlackParser extends Parser {
-  def parse(msg: String, user: User, visibility: ChannelVisibility): PuzzleCommand = {
+  def parse(msg: String, user: User, visibility: ChannelVisibility, isWeekday: Boolean): PuzzleCommand = {
     if (!msg.startsWith("!")) {
-      if (visibility == PrivateChannel()) return CheckSolution(Word(msg), user)
+      if (visibility == PrivateChannel()) return CheckSolution(Word(msg), user, isWeekday)
 
       return Ignored()
     }
@@ -63,7 +63,7 @@ class SlackParser extends Parser {
 
     if (words(0) == "!sättnian") {
       if (words.size != 2) return InvalidCommand(msg, WrongArguments(words.size - 1, 1))
-      return SetPuzzle(Puzzle(words(1)))
+      return SetPuzzle(Puzzle(words(1)), isWeekday)
     }
 
     if (words(0) == "!olösning") {
