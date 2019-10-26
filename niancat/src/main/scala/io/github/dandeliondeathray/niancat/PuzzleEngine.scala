@@ -172,9 +172,12 @@ class PuzzleEngine(val dictionary: Dictionary,
       puzzleSolution.solved(user, word)
       val noOfSolutions = puzzleSolution.noOfSolutions(puzzle)
       val solutionId: Option[Int] = puzzleSolution.solutionId(word) filter(_ => noOfSolutions > 1)
-      CompositeResponse(Vector(
-        CorrectSolution(word),
-        SolutionNotification(user, 1 + puzzleSolution.streak(user), solutionId)))
+      if (! puzzleSolution.hasSolved(user, word))
+        CompositeResponse(Vector(
+          CorrectSolution(word),
+          SolutionNotification(user, 1 + puzzleSolution.streak(user), solutionId)))
+      else
+        CorrectSolution(word)
     } else {
       NotInTheDictionary(word)
     }

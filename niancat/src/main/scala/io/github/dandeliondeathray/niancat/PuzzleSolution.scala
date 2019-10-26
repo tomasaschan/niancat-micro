@@ -12,6 +12,7 @@ trait PuzzleSolution {
   def reset(puzzle: Puzzle)
   def noOfSolutions(puzzle: Puzzle): Int
   def solved(user: User, word: Word)
+  def hasSolved(user: User, word: Word): Boolean
   def solutionId(word: Word): Option[Int]
   def streak(user: User): Int
 }
@@ -42,6 +43,10 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
   override def solved(user: User, word: Word): Unit = {
     streaks = streaks + (user -> ((streaks getOrElse (user, 0)) + (if (solvedList contains (word.norm, user)) 0 else 1)))
     solvedList = solvedList :+ (word.norm, user)
+  }
+
+  override def hasSolved(user: User, word: Word): Boolean = {
+    solvedList contains (word.norm, user)
   }
 
   override def solutionId(word: Word): Option[Int] = {
