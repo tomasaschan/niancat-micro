@@ -18,24 +18,23 @@ class ResponseSpec extends FlatSpec with Matchers {
   "YesterdaysPuzzle" should "list all solutions, user names and running streaks for users with streak > 1" in {
     val solutionResult = SolutionResult(
       Map(
-        Word("ABCDEFGHI") -> Seq(User("foo"), User("bar")),
+        Word("ABCDEFGHI") -> Seq(User("foo"), User("bar"), User("qux")),
         Word("DEFGHIABC") -> Seq(User("baz"))
       ),
       Map(
         User("foo") -> 1,
         User("bar") -> 3,
-        User("baz") -> 2
+        User("baz") -> 2,
+        User("qux") -> 2
       ))
 
     val yesterdaysAsString = YesterdaysPuzzle(solutionResult).toResponse
 
-    yesterdaysAsString should include ("*ABCDEFGHI*:")
-    yesterdaysAsString should include ("*DEFGHIABC*:")
-    yesterdaysAsString should include ("foo, bar")
-    yesterdaysAsString should include ("baz")
-    yesterdaysAsString should include ("bar: 3")
-    yesterdaysAsString should include ("baz: 2")
-    yesterdaysAsString should not include ("foo: 1")
+    yesterdaysAsString should include ("*ABCDEFGHI*: foo, bar, qux")
+    yesterdaysAsString should include ("*DEFGHIABC*: baz")
+    yesterdaysAsString should include ("3: bar")
+    yesterdaysAsString should include ("2: baz, qux")
+    yesterdaysAsString should not include ("1: foo")
   }
 
   "MultipleSolutions" should "show the number of solutions" in {
@@ -43,11 +42,15 @@ class ResponseSpec extends FlatSpec with Matchers {
   }
 
   "Solution notification" should "not include a solution id if not set" in {
-    SolutionNotification(User("foo"), None).toResponse should not (include ("ord "))
+    SolutionNotification(User("foo"), 1, None).toResponse should not (include ("ord "))
   }
 
   it should "include id if set" in {
-    SolutionNotification(User("foo"), Some(42)).toResponse should include ("ord 42")
+    SolutionNotification(User("foo"), 1, Some(42)).toResponse should include ("ord 42")
+  }
+
+  it should "repeat :niancat: as many times as the current streak" in {
+    SolutionNotification(User("foo"), 4, None).toResponse should include(":niancat: :niancat: :niancat: :niancat:")
   }
 
   "All unsolutions" should "contain the names of users and the texts" in {

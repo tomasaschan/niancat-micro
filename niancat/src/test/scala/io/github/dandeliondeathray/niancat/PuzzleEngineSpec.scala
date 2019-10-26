@@ -341,6 +341,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     (puzzleSolution.solved _) expects(User("foo"), defaultWord)
     (puzzleSolution.noOfSolutions _) expects(*) returns (1) anyNumberOfTimes()
     (puzzleSolution.solutionId _) expects(*) returns(Some(1)) anyNumberOfTimes()
+    (puzzleSolution.streak _) expects(User("foo")) returns(1) anyNumberOfTimes()
 
     val engine = makePuzzleEngine(dictionary, Some(defaultPuzzle), Some(puzzleSolution))
 
@@ -422,7 +423,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val response = CheckSolution(defaultWord, User("foo"))(engine)
 
-    response should containResponse (SolutionNotification(User("foo"), None))
+    response should containResponse (SolutionNotification(User("foo"), 1, None))
   }
 
   it should "not include solution id in the solution notification is there is only one solution" in {
@@ -431,7 +432,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val response = CheckSolution(defaultWord, User("foo"))(engine)
 
-    response should containResponse (SolutionNotification(User("foo"), None))
+    response should containResponse (SolutionNotification(User("foo"), 1, None))
   }
 
   it should "include the solution if there are multiple solutions" in {
@@ -448,7 +449,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val response = CheckSolution(defaultWord, User("foo"))(engine)
 
-    response should containResponse (SolutionNotification(User("foo"), Some(solutionId)))
+    response should containResponse (SolutionNotification(User("foo"), 1, Some(solutionId)))
   }
 
   it should "not send a response when adding an unsolution" in {

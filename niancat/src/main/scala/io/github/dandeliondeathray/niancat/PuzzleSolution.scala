@@ -13,6 +13,7 @@ trait PuzzleSolution {
   def noOfSolutions(puzzle: Puzzle): Int
   def solved(user: User, word: Word)
   def solutionId(word: Word): Option[Int]
+  def streak(user: User): Int
 }
 
 class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolution {
@@ -47,6 +48,8 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
     val allSolutionsForThisWord = solutions.getOrElse(sortByCodePoints(word.norm.letters), Seq())
     Some(allSolutionsForThisWord indexOf (word.norm.letters)) filter (_ != -1) map (_ + 1)
   }
+
+  override def streak(user: User): Int = streaks getOrElse (user, 0)
 
   private def sortByCodePoints(s: String): String = {
     val codePoints = s.codePoints() sorted() toArray

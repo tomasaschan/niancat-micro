@@ -8,16 +8,16 @@ object DisplayHelper {
   implicit class SolutionResultDisplay(s: SolutionResult) {
     def display: Seq[String] = {
       val wordsAndSolvers = s.wordsAndSolvers.map(kv => showWordAndSolution(kv._1, kv._2))
-      val streaks = s.streaks.toList.filter(_._2 > 1).sortBy(-_._2).take(3).map(showStreak)
+      val streaks = s.streaks.toList.filter(_._2 > 1).groupBy(_._2).toList.map(showStreak)
 
-      Seq("*Gårdagens lösningar:*") ++ wordsAndSolvers.toSeq ++ Seq("*Längsta obrutna serier:*") ++ streaks.toSeq
+      Seq("*Gårdagens lösningar:*") ++ wordsAndSolvers.toSeq ++ Seq("*Obrutna serier:*") ++ streaks.toSeq
     }
 
     private def showWordAndSolution(w: Word, solvers: Seq[User]): String = {
       s"*${w.letters}*: " ++ solvers.map(_.name).mkString(", ")
     }
 
-    private def showStreak(streak: (User, Int)): String = s"${streak._1.name}: ${streak._2}"
+    private def showStreak(streak: (Int,Seq[(User,Int)])): String = s"${streak._1}: ${streak._2.map(_._1.name).mkString(", ")}"
   }
 }
 
@@ -128,12 +128,13 @@ case class MultipleSolutions(n: Int) extends Notification {
   override def toResponse = s":bangbang: Dagens nian har $n lösningar. :bangbang:"
 }
 
-case class SolutionNotification(user: User, solutionId: Option[Int] = None) extends Notification {
+case class SolutionNotification(user: User, streak: Int, solutionId: Option[Int] = None) extends Notification {
   override def toResponse = {
     val parts = List(
-      Some(s":niancat: :niancat: :niancat: ${user.name} löste nian"),
-      solutionId map(n => s", ord $n"),
-      Some("! :niancat: :niancat: :niancat:")
+      Some(s"${user.name} löste nian"),
+      solutionId map (n => s", ord $n"),
+      Some("!"),
+      Some(" :niancat:" * streak)
     )
     parts.flatten.mkString
   }
