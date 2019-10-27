@@ -14,8 +14,8 @@ case class AddUnsolutionBody(unsolution: String)
 
 object NiancatService {
   def service(dictionary: Dictionary) = {
-    val puzzleSolution = new DictionaryPuzzleSolution(dictionary)
-    val engine = new PuzzleEngine(dictionary, puzzleSolution)
+    val state = new NiancatState()
+    val engine = new PuzzleEngine(state, dictionary)
     val responder = new NiancatApiResponder()
 
     HttpService {
