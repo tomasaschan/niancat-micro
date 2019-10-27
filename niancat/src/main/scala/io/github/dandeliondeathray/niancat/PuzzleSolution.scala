@@ -5,7 +5,7 @@ import NormMethods._
 import WordNormalizer._
 import StringNormalizer._
 
-case class SolutionResult(wordsAndSolvers: Map[Word, Seq[User]] = Map(), streaks: Map[User,Int] = Map())
+case class SolutionResult(wordsAndSolvers: Map[Word, Seq[User]] = Map(), streaks: Map[User, Int] = Map())
 
 trait PuzzleSolution {
   def result: Option[SolutionResult]
@@ -20,12 +20,13 @@ trait PuzzleSolution {
 class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolution {
   val solutions: Map[String, Seq[String]] = dictionary.toSeq map (_.letters) groupBy sortByCodePoints
   var solvedList: Seq[(Word, User)] = Seq()
-  var streaks: Map[User,Int] = Map()
+  var streaks: Map[User, Int] = Map()
   var puzzle: Option[Puzzle] = None
 
   override def result: Option[SolutionResult] = {
     if (puzzle == None) return None;
-    val allSolutions: Seq[String] = puzzle map (p => solutions.getOrElse(sortByCodePoints(p.letters), Seq())) getOrElse(Seq())
+    val allSolutions
+        : Seq[String] = puzzle map (p => solutions.getOrElse(sortByCodePoints(p.letters), Seq())) getOrElse (Seq())
     val allSolutionsMap: Map[Word, Seq[User]] = (allSolutions map (Word(_) -> Seq[User]())).toMap
     val resultMap = allSolutionsMap ++ (solvedList.distinct groupBy (_._1) mapValues (_.map(_._2)))
     Some(SolutionResult(resultMap, streaks))
@@ -62,7 +63,7 @@ class DictionaryPuzzleSolution(val dictionary: Dictionary) extends PuzzleSolutio
   override def streak(user: User): Int = streaks getOrElse (user, 0)
 
   private def sortByCodePoints(s: String): String = {
-    val codePoints = s.codePoints() sorted() toArray
+    val codePoints = s.codePoints() sorted () toArray
     val sb = new java.lang.StringBuilder()
     codePoints foreach (sb.appendCodePoint(_))
     sb.toString()

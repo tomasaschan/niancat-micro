@@ -29,7 +29,6 @@ object WordNormalizer {
 /**
   * Created by Erik Edin on 2017-04-30.
   */
-
 /** A Puzzle is a String of exactly nine characters. */
 case class Puzzle(letters: String) {
   def matches(p: Puzzle): Boolean = {
@@ -47,9 +46,7 @@ case class Word(letters: String) {
 /** A User is of course a user in the chat room. */
 case class User(name: String)
 
-class PuzzleEngine(val dictionary: Dictionary,
-                   val puzzleSolution: PuzzleSolution,
-                   var puzzle: Option[Puzzle] = None) {
+class PuzzleEngine(val dictionary: Dictionary, val puzzleSolution: PuzzleSolution, var puzzle: Option[Puzzle] = None) {
 
   val unconfirmedUnsolutions: mutable.Map[User, String] = mutable.Map()
   val unsolutions: mutable.Map[User, List[String]] = mutable.Map()
@@ -87,14 +84,14 @@ class PuzzleEngine(val dictionary: Dictionary,
 
   def get(): Response = {
     puzzle match {
-      case None => NoPuzzleSet()
+      case None            => NoPuzzleSet()
       case Some(p: Puzzle) => GetReply(p)
     }
   }
 
   def check(user: User, word: Word, isWeekday: Boolean): Response = {
     puzzle match {
-      case None => NoPuzzleSet()
+      case None            => NoPuzzleSet()
       case Some(p: Puzzle) => checkSolution(user, word, p, isWeekday)
     }
   }
@@ -144,7 +141,7 @@ class PuzzleEngine(val dictionary: Dictionary,
 
     unsolutionsForUser match {
       case Some(texts) => Unsolutions(texts reverse)
-      case None => NoUnsolutions()
+      case None        => NoUnsolutions()
     }
   }
 
@@ -158,8 +155,8 @@ class PuzzleEngine(val dictionary: Dictionary,
     import WritingSystemHelper._
 
     if (!(word isNineLetters)) {
-      val tooMany: Option[String] = Some(word.letters.norm diff puzzle.letters.norm) filter(s => !s.isEmpty)
-      val tooFew: Option[String] = Some(puzzle.letters.norm diff word.letters.norm) filter(s => !s.isEmpty)
+      val tooMany: Option[String] = Some(word.letters.norm diff puzzle.letters.norm) filter (s => !s.isEmpty)
+      val tooFew: Option[String] = Some(puzzle.letters.norm diff word.letters.norm) filter (s => !s.isEmpty)
       return IncorrectLength(word, tooMany, tooFew)
     }
 
@@ -171,11 +168,11 @@ class PuzzleEngine(val dictionary: Dictionary,
     if (dictionary has word) {
       puzzleSolution.solved(user, word, isWeekday)
       val noOfSolutions = puzzleSolution.noOfSolutions(puzzle)
-      val solutionId: Option[Int] = puzzleSolution.solutionId(word) filter(_ => noOfSolutions > 1)
-      if (! puzzleSolution.hasSolved(user, word))
-        CompositeResponse(Vector(
-          CorrectSolution(word),
-          SolutionNotification(user, 1 + puzzleSolution.streak(user), solutionId)))
+      val solutionId: Option[Int] = puzzleSolution.solutionId(word) filter (_ => noOfSolutions > 1)
+      if (!puzzleSolution.hasSolved(user, word))
+        CompositeResponse(
+          Vector(CorrectSolution(word), SolutionNotification(user, 1 + puzzleSolution.streak(user), solutionId))
+        )
       else
         CorrectSolution(word)
     } else {
@@ -188,4 +185,3 @@ class PuzzleEngine(val dictionary: Dictionary,
     words exists (_ matches puzzle)
   }
 }
-

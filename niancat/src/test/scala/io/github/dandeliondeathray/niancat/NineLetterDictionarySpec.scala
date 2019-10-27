@@ -7,9 +7,15 @@ import org.scalatest._
   */
 class NineLetterDictionarySpec extends FlatSpec with Matchers {
   def dictionary = NineLetterDictionary(
-    "A", "AB", "ABC",
-    "ABCDEFGHI", "BCDEFGHIJ", "PIKÉTRÖJA", "VANTRIVAS",
-    "ABCDEFGHIJKL", "BCDEFGHIJKLM"
+    "A",
+    "AB",
+    "ABC",
+    "ABCDEFGHI",
+    "BCDEFGHIJ",
+    "PIKÉTRÖJA",
+    "VANTRIVAS",
+    "ABCDEFGHIJKL",
+    "BCDEFGHIJKLM"
   )
 
   "the dictionary" should "contain ABCDEFGHI" in {

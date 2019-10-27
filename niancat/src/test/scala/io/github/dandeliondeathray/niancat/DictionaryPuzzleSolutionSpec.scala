@@ -13,22 +13,27 @@ import WordNormalizer._
   */
 class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFactory {
   val defaultWordSeq = Seq(
-    Word("VANTRIVAS"), Word("PIKÉTRÖJA"), Word("ABCDEFGHI"),
-    Word("DATORSPEL"), Word("SPELDATOR"), Word("LEDARPOST"), Word("REPSOLDAT")
+    Word("VANTRIVAS"),
+    Word("PIKÉTRÖJA"),
+    Word("ABCDEFGHI"),
+    Word("DATORSPEL"),
+    Word("SPELDATOR"),
+    Word("LEDARPOST"),
+    Word("REPSOLDAT")
   )
 
   def emptyDictionaryStub: Dictionary = {
     val dictionary = stub[Dictionary]
-    (dictionary.toSeq _) when() returns(Seq[Word]()) anyNumberOfTimes()
-    (dictionary.has _) when(*) returns(false) anyNumberOfTimes()
+    (dictionary.toSeq _) when () returns (Seq[Word]()) anyNumberOfTimes ()
+    (dictionary.has _) when (*) returns (false) anyNumberOfTimes ()
 
     dictionary
   }
 
   def defaultDictionaryStub: Dictionary = {
     val dictionary = stub[Dictionary]
-    (dictionary.has _) when(*) returns(false) never()
-    (dictionary.toSeq _) when() returns(defaultWordSeq map (_.norm))
+    (dictionary.has _) when (*) returns (false) never ()
+    (dictionary.toSeq _) when () returns (defaultWordSeq map (_.norm))
 
     dictionary
   }
@@ -78,7 +83,12 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
     solution.solved(User("baz"), Word("VANTRIVAS"), true)
 
     solution.result shouldBe
-      Some(SolutionResult(Map(Word("VANTRIVAS") -> Seq(User("foo"), User("bar"), User("baz"))), Map(User("foo") -> 1, User("bar") -> 1, User("baz") -> 1)))
+      Some(
+        SolutionResult(
+          Map(Word("VANTRIVAS") -> Seq(User("foo"), User("bar"), User("baz"))),
+          Map(User("foo") -> 1, User("bar") -> 1, User("baz") -> 1)
+        )
+      )
   }
 
   it should "only list one solution if a user solves the same word several times" in {
@@ -193,14 +203,17 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
     solution.solved(User("foo"), Word("SPELDATOR"), true)
     solution.solved(User("baz"), Word("LEDARPOST"), true)
 
-    solution.result shouldBe Some(SolutionResult(
-      Map(Word("DATORSPEL") -> Seq(User("foo"), User("bar")),
+    solution.result shouldBe Some(
+      SolutionResult(
+        Map(
+          Word("DATORSPEL") -> Seq(User("foo"), User("bar")),
           Word("SPELDATOR") -> Seq(User("foo")),
           Word("LEDARPOST") -> Seq(User("baz")),
-          Word("REPSOLDAT") -> Seq()),
-      Map(User("foo") -> 2,
-          User("bar") -> 1,
-          User("baz") -> 1)))
+          Word("REPSOLDAT") -> Seq()
+        ),
+        Map(User("foo") -> 2, User("bar") -> 1, User("baz") -> 1)
+      )
+    )
   }
 
   it should "return the same solution id for a given word every time" in {
@@ -211,7 +224,7 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
     val solutionIds = 1 until 10 map (_ => solution.solutionId(word))
     val first = solutionIds.head
 
-    assert (solutionIds forall (_ == first))
+    assert(solutionIds forall (_ == first))
   }
 
   it should "return solution ids 1-4 in some order, if it has four solutions" in {
@@ -221,7 +234,7 @@ class DictionaryPuzzleSolutionSpec extends FlatSpec with Matchers with MockFacto
     val words = List(Word("DATORSPEL"), Word("SPELDATOR"), Word("LEDARPOST"), Word("REPSOLDAT"))
     val solutionIds = words map (solution.solutionId(_)) flatten
 
-    assert (Set(solutionIds: _*) == Set(1, 2, 3, 4))
+    assert(Set(solutionIds: _*) == Set(1, 2, 3, 4))
   }
 
   it should "return the solution id even if there is only one solution" in {

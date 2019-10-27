@@ -28,12 +28,12 @@ object NiancatService {
       }
       case req @ POST -> Root / "v1" / "puzzle" => {
         val yesterdayWasWeeekday = List(
-            DayOfWeek.TUESDAY,
-            DayOfWeek.WEDNESDAY,
-            DayOfWeek.THURSDAY,
-            DayOfWeek.FRIDAY,
-            DayOfWeek.SATURDAY
-          ) contains LocalDate.now().getDayOfWeek()
+          DayOfWeek.TUESDAY,
+          DayOfWeek.WEDNESDAY,
+          DayOfWeek.THURSDAY,
+          DayOfWeek.FRIDAY,
+          DayOfWeek.SATURDAY
+        ) contains LocalDate.now().getDayOfWeek()
 
         req.as(jsonOf[SetPuzzleBody]) flatMap { setPuzzleBody =>
           val command = SetPuzzle(Puzzle(setPuzzleBody.puzzle), yesterdayWasWeeekday)
