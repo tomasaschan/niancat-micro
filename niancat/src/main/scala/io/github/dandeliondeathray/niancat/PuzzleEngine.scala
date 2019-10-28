@@ -38,9 +38,7 @@ class PuzzleEngine(val state: State, val dictionary: Dictionary) {
       return InvalidPuzzle(p)
     }
 
-    val orderedUnsolutions = state.unsolutions mapValues (_ reverse)
-    val maybeUnsolutions: Option[Map[User, List[String]]] =
-      if (orderedUnsolutions.isEmpty) None else Some(orderedUnsolutions)
+    val maybeUnsolutions = if (state unsolutions () isEmpty) None else Some(state unsolutions ())
 
     val responses: Vector[Option[Response]] = Vector(
       Some(NewPuzzle { p }),
@@ -55,26 +53,26 @@ class PuzzleEngine(val state: State, val dictionary: Dictionary) {
   }
 
   def get(): Response = {
-    state.puzzle match {
+    state.puzzle() match {
       case None            => NoPuzzleSet()
       case Some(p: Puzzle) => GetReply(p)
     }
   }
 
   def check(user: User, word: Word, isWeekday: Boolean): Response = {
-    state.puzzle match {
+    state.puzzle() match {
       case None            => NoPuzzleSet()
       case Some(p: Puzzle) => checkSolution(user, word, p, isWeekday)
     }
   }
 
   def addUnsolution(unsolution: String, user: User): Response = {
-    if (state.puzzle.isEmpty) {
+    if (state.puzzle().isEmpty) {
       return NoPuzzleSet()
     }
 
-    if (!anyWordMatchesPuzzle(state.puzzle.get, unsolution)) {
-      val unconfirmedUnsolution = state.unconfirmedUnsolutions.get(user)
+    if (!anyWordMatchesPuzzle(state.puzzle().get, unsolution)) {
+      val unconfirmedUnsolution = state.unconfirmedUnsolutions().get(user)
       unconfirmedUnsolution match {
         case None if unsolution == "" => {
           // The user used an empty add unsolution command, but there's no unconfirmed unsolution.
@@ -109,12 +107,9 @@ class PuzzleEngine(val state: State, val dictionary: Dictionary) {
   }
 
   def listUnsolutions(user: User): Response = {
-    val unsolutionsForUser = state.unsolutions.get(user)
+    val unsolutionsForUser = state.unsolutions().get(user)
 
-    unsolutionsForUser match {
-      case Some(texts) => Unsolutions(texts reverse)
-      case None        => NoUnsolutions()
-    }
+    unsolutionsForUser map (Unsolutions(_)) getOrElse NoUnsolutions()
   }
 
   private def checkSolution(user: User, word: Word, puzzle: Puzzle, isWeekday: Boolean): Response = {
@@ -134,7 +129,7 @@ class PuzzleEngine(val state: State, val dictionary: Dictionary) {
     if (dictionary has word) {
       state.solved(user, word, isWeekday)
       val noOfSolutions = dictionary.solutions(puzzle).size
-      val solutionId: Option[Int] = dictionary.solutionId(state.puzzle, word) filter (_ => noOfSolutions > 1)
+      val solutionId: Option[Int] = dictionary.solutionId(state.puzzle(), word) filter (_ => noOfSolutions > 1)
       if (!state.hasSolved(user, word))
         CompositeResponse(
           Vector(CorrectSolution(word), SolutionNotification(user, 1 + state.streak(user), solutionId))

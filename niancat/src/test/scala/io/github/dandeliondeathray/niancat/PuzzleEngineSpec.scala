@@ -59,12 +59,15 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val dictionary = stub[Dictionary]
     (dictionary.has _) when (*) returns (true) anyNumberOfTimes ()
     (dictionary.solutions _) when (*) returns (Seq(Word("VANTRIVAS"))) anyNumberOfTimes ()
+    (dictionary.solutionId _) when (*, *) returns Some(1) anyNumberOfTimes ()
     dictionary
   }
 
   def rejectingDictionary: Dictionary = {
     val dictionary = stub[Dictionary]
     (dictionary.has _) when (*) returns (false) anyNumberOfTimes ()
+    (dictionary.solutions _) when (*) returns Seq() anyNumberOfTimes ()
+    (dictionary.solutionId _) when (*, *) returns None anyNumberOfTimes ()
     dictionary
   }
 
@@ -81,18 +84,25 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     dictionary
   }
 
-  def emptyState: State = {
-    val puzzleSolution = stub[State]
-    (puzzleSolution.result _) when (*) returns (None) anyNumberOfTimes ()
-    (puzzleSolution.reset _) when (*, *) anyNumberOfTimes ()
-    (puzzleSolution.solved _) when (*, *, *) anyNumberOfTimes ()
-
-    puzzleSolution
+  trait EmptyState extends State {
+    def puzzle(): Option[Puzzle] = None
+    def result(allSolutions: Seq[Word]): Option[SolutionResult] = None
+    def reset(p: Puzzle, isWeekday: Boolean): Unit = ()
+    def solved(user: User, word: Word, isWeekday: Boolean): Unit = ()
+    def storeUnconfirmedUnsolution(user: User, text: String): Unit = ()
+    def storeUnsolution(user: User, text: String): Unit = ()
+    def streak(user: User): Int = 0
+    def unsolutions(): Map[User, Seq[String]] = Map()
+    def unconfirmedUnsolutions(): Map[User, String] = Map()
+    def hasSolved(user: User, word: Word): Boolean = false
   }
 
-  def engineWithPuzzle(puzzle: Puzzle, dictionary: Dictionary = acceptingDictionary): PuzzleEngine = {
-    val state = emptyState
-    state.reset(puzzle, true)
+  val emptyState: State = new EmptyState() {}
+
+  def engineWithPuzzle(p: Puzzle, dictionary: Dictionary = acceptingDictionary): PuzzleEngine = {
+    val state: State = new State() with EmptyState {
+      override def puzzle(): Option[Puzzle] = Some(p)
+    }
     new PuzzleEngine(state, dictionary)
   }
 
@@ -205,7 +215,9 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   it should "notify the channel about yesterdays puzzle when a new one is set" in {
     // Return defaultWord as the solution to defaultPuzzle
     val state = stub[State]
+    (state.puzzle _) when () returns None anyNumberOfTimes ()
     (state.result _) when (*) returns (Some(defaultSolutionResult)) anyNumberOfTimes ()
+    (state.unsolutions _) when () returns Map()
 
     val engine = new PuzzleEngine(state, acceptingDictionary)
 
@@ -218,8 +230,10 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val newPuzzle = Puzzle("ABCDEFGHI")
 
     val state = mock[State]
+    (state.puzzle _) expects () returning None anyNumberOfTimes ()
     (state.result _) expects (*) returning (Some(defaultSolutionResult)) anyNumberOfTimes ()
     (state.reset _) expects (newPuzzle, true)
+    (state.unsolutions _) expects () returning Map() anyNumberOfTimes ()
 
     val engine = new PuzzleEngine(state, acceptingDictionary)
 
@@ -240,6 +254,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val invalidPuzzle = Puzzle("ABCDEFGHI")
 
     val state = mock[State]
+    (state.puzzle _) expects () returning None anyNumberOfTimes ()
     (state.reset _) expects (invalidPuzzle, true) never ()
 
     val engine = new PuzzleEngine(state, rejectingDictionary)
@@ -252,6 +267,9 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val newPuzzle = Puzzle("ABCDEFGHI")
 
     val state = stub[State]
+    (state.puzzle _) when () returns Some(Puzzle("DATORSPLE")) anyNumberOfTimes ()
+    (state.unsolutions _) when () returns Map() anyNumberOfTimes ()
+    (state.result _) when (*) returns None
     (state.reset _) when (*, *) anyNumberOfTimes ()
 
     val engine = new PuzzleEngine(state, dictionary)
@@ -273,6 +291,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "store a solution" in {
     val state = mock[State]
+    (state.puzzle _) expects () returning Some(defaultPuzzle) anyNumberOfTimes ()
     (state.solved _) expects (User("foo"), defaultWord, true)
     (state.streak _) expects (User("foo")) returns (1) anyNumberOfTimes ()
     (state.hasSolved _) expects (User("foo"), defaultWord) returning (false) anyNumberOfTimes ()
@@ -284,6 +303,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "not store an invalid solution" in {
     val state = mock[State]
+    (state.puzzle _) expects () returning Some(defaultPuzzle) anyNumberOfTimes ()
     (state.solved _) expects (User("foo"), defaultWord, true) never ()
 
     val engine = new PuzzleEngine(state, rejectingDictionary)
@@ -293,6 +313,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "not reset the puzzle if the new puzzle is the same as the old" in {
     val state = mock[State]
+    (state.puzzle _) expects () returning Some(defaultPuzzle) anyNumberOfTimes ()
     (state.reset _) expects (*, *) never ()
 
     val engine = new PuzzleEngine(state, acceptingDictionary)
@@ -302,6 +323,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "respond with SamePuzzle if the new puzzle is an anagram of the old" in {
     val state = stub[State]
+    (state.puzzle _) when () returns Some(defaultPuzzle) anyNumberOfTimes ()
     (state.reset _) when (*, *) anyNumberOfTimes ()
     (state.result _) when (*) returns (Some(SolutionResult())) anyNumberOfTimes ()
 
@@ -314,6 +336,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "respond with SamePuzzle if the new puzzle is the same as the old" in {
     val state = stub[State]
+    (state.puzzle _) when () returns Some(defaultPuzzle) anyNumberOfTimes ()
     (state.reset _) when (*, *) anyNumberOfTimes ()
     (state.result _) when (*) returns (Some(SolutionResult())) anyNumberOfTimes ()
 
@@ -328,6 +351,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val puzzle = Puzzle("PIKETRÖJA")
 
     val state = stub[State]
+    (state.puzzle _) when () returns Some(puzzle) anyNumberOfTimes ()
     (state.reset _) when (*, *) anyNumberOfTimes ()
     (state.result _) when (*) returns (Some(SolutionResult())) anyNumberOfTimes ()
 
@@ -336,6 +360,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val response = SetPuzzle(Puzzle("pikétröja"), true)(engine)
 
     response shouldBe SamePuzzle(puzzle)
+    (state.reset _) verify (*, *) never ()
   }
 
   it should "notify the main channel if a user solves the puzzle" in {
@@ -348,6 +373,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
   it should "not notify the main channel if a user solves the puzzle again" in {
     val state = stub[State]
+    (state.puzzle _) when () returns Some(defaultPuzzle) anyNumberOfTimes ()
     (state.result _) when (*) returns (None) anyNumberOfTimes ()
     (state.reset _) when (*, *) anyNumberOfTimes ()
     (state.solved _) when (*, *, *) anyNumberOfTimes ()
@@ -376,7 +402,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     response should containResponse(SolutionNotification(User("foo"), 1, None))
   }
 
-  it should "include the solution if there are multiple solutions" in {
+  it should "include the solution id if there are multiple solutions" in {
     val solutionId = 3
     val dictionary = stub[Dictionary]
     (dictionary.solutions _) when (*) returns (Seq(
@@ -386,14 +412,15 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
       Word("REPSOLDAT")
     )) anyNumberOfTimes ()
     (dictionary.solutionId _) when (*, *) returns (Some(solutionId)) anyNumberOfTimes ()
+    (dictionary.has _) when (*) returns true
 
     val state = stub[State]
     (state.result _) when (*) returns (Some(defaultSolutionResult)) anyNumberOfTimes ()
     (state.reset _) when (*, *) anyNumberOfTimes ()
 
-    val engine = engineWithPuzzle(defaultPuzzle, dictionary)
+    val engine = engineWithPuzzle(Puzzle("DATORSPLE"), dictionary)
 
-    val response = CheckSolution(defaultWord, User("foo"), true)(engine)
+    val response = CheckSolution(Word("DATORSPEL"), User("foo"), true)(engine)
 
     response should containResponse(SolutionNotification(User("foo"), 1, Some(solutionId)))
   }
@@ -406,16 +433,6 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     response shouldBe UnsolutionAdded()
   }
 
-  it should "store an unsolution for later listing" in {
-    val engine = engineWithPuzzle(defaultPuzzle)
-    val unsolutionText = s"Unsolution ${defaultPuzzle.letters}"
-
-    AddUnsolution(unsolutionText, User("foo"))(engine)
-    val response = ListUnsolutions(User("foo"))(engine)
-
-    response shouldBe Unsolutions(List(unsolutionText))
-  }
-
   it should "separate unsolutions based on users" in {
     val engine = engineWithPuzzle(defaultPuzzle)
 
@@ -423,18 +440,6 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val response = ListUnsolutions(User("otheruser"))(engine)
 
     response shouldBe NoUnsolutions()
-  }
-
-  it should "be able to store multiple unsolutions, in order" in {
-    val engine = engineWithPuzzle(defaultPuzzle)
-    val unsolutionText1 = s"Some ${defaultPuzzle.letters}"
-    val unsolutionText2 = s"Other ${defaultPuzzle.letters}"
-
-    AddUnsolution(unsolutionText1, User("foo"))(engine)
-    AddUnsolution(unsolutionText2, User("foo"))(engine)
-    val response = ListUnsolutions(User("foo"))(engine)
-
-    response should have('texts (List(unsolutionText1, unsolutionText2)))
   }
 
   it should "clear all unsolutions when a new puzzle is set" in {
@@ -449,14 +454,14 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   }
 
   it should "reply with all unsolutions if a new puzzle is set" in {
-    val engine = engineWithPuzzle(defaultPuzzle)
     val textFoo1 = s"Some ${defaultPuzzle.letters}"
     val textFoo2 = s"Some other ${defaultPuzzle.letters}"
     val textBar1 = s"Some ${defaultPuzzle.letters} for another user"
 
-    AddUnsolution(textFoo1, User("foo"))(engine)
-    AddUnsolution(textFoo2, User("foo"))(engine)
-    AddUnsolution(textBar1, User("bar"))(engine)
+    val engine = new PuzzleEngine(new State with EmptyState {
+      override def puzzle() = Some(defaultPuzzle)
+      override def unsolutions() = Map(User("foo") -> List(textFoo1, textFoo2), User("bar") -> List(textBar1))
+    }, acceptingDictionary)
 
     val response = SetPuzzle(Puzzle("DATORSPEL"), true)(engine)
 
@@ -483,53 +488,52 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   }
 
   it should "save an unconfirmed unsolutions if it's saved a second time" in {
-    val engine = engineWithPuzzle(defaultPuzzle)
-    val unsolutionText = s"No word matches the puzzle"
-
-    AddUnsolution(unsolutionText, User("foo"))(engine)
-    val response = AddUnsolution(unsolutionText, User("foo"))(engine)
-
-    response shouldBe UnsolutionAdded()
-  }
-
-  it should "forget the unconfirmed unsolution if another unsolution comes before a confirmation" in {
-    val engine = engineWithPuzzle(defaultPuzzle)
-    val unsolutionText = s"No word matches the puzzle"
-
-    AddUnsolution(unsolutionText, User("foo"))(engine)
-    AddUnsolution(s"${defaultPuzzle.letters}", User("foo"))(engine)
-    val response = AddUnsolution(unsolutionText, User("foo"))(engine)
-
-    response shouldBe UnsolutionNeedsConfirmation(defaultPuzzle)
-  }
-
-  it should "save an unconfirmed solution when we receive an empty unsolution" in {
-    val engine = engineWithPuzzle(defaultPuzzle)
     val unsolutionText = "No word matches the puzzle"
+    val user = User("foo")
 
-    AddUnsolution(unsolutionText, User("foo"))(engine)
-    val response = AddUnsolution("", User("foo"))(engine)
+    val state = stub[State]
+    (state.puzzle _) when () returns Some(defaultPuzzle)
+    (state.unconfirmedUnsolutions _) when () returns Map(user -> unsolutionText) once ()
+    (state.storeUnsolution _) when (user, unsolutionText) returning () once ()
+
+    val engine = new PuzzleEngine(state, acceptingDictionary)
+
+    val response = AddUnsolution(unsolutionText, User("foo"))(engine)
 
     response shouldBe UnsolutionAdded()
   }
 
   it should "state that there is no unsolution to confirm for an emty unsolution command" in {
-    val engine = engineWithPuzzle(defaultPuzzle)
+    val unsolutionText = "No word matches the puzzle"
+    val user = User("foo")
+
+    val state = stub[State]
+    (state.puzzle _) when () returns Some(defaultPuzzle)
+    (state.unconfirmedUnsolutions _) when () returns Map() anyNumberOfTimes ()
+
+    val engine = new PuzzleEngine(state, acceptingDictionary)
 
     val response = AddUnsolution("", User("foo"))(engine)
 
     response shouldBe NoUnsolutionToConfirm()
+
+    (state.storeUnsolution _) verify (*, *) never ()
   }
 
   it should "save the unconfirmed unsolution in case you use the empty add unsolution command" in {
-    val engine = engineWithPuzzle(defaultPuzzle)
     val unsolutionText = "No word matches the puzzle"
+    val user = User("foo")
 
-    AddUnsolution(unsolutionText, User("foo"))(engine)
-    AddUnsolution("", User("foo"))(engine)
+    val state = stub[State]
+    (state.puzzle _) when () returns Some(defaultPuzzle)
+    (state.unconfirmedUnsolutions _) when () returns Map(user -> unsolutionText) once ()
+    (state.storeUnsolution _) when (user, unsolutionText) returning () once ()
 
-    val response = ListUnsolutions(User("foo"))(engine)
+    val engine = new PuzzleEngine(state, acceptingDictionary)
 
-    response should have('texts (List(unsolutionText)))
+    val response = AddUnsolution("", User("foo"))(engine)
+
+    response shouldBe UnsolutionAdded()
+    (state.storeUnsolution _) verify (user, unsolutionText) once ()
   }
 }

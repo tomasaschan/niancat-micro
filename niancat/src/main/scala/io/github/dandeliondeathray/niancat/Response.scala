@@ -82,7 +82,7 @@ case class SamePuzzle(puzzle: Puzzle) extends Reply {
   override def toResponse = s"Pusslet ${puzzle show} är redan satt!"
 }
 
-case class Unsolutions(texts: List[String]) extends Reply {
+case class Unsolutions(texts: Seq[String]) extends Reply {
   override def toResponse = texts mkString ("\n")
 }
 
@@ -102,8 +102,8 @@ case class NoUnsolutionToConfirm() extends Reply {
   override def toResponse = s"Det finns ingen olösning att bekräfta."
 }
 
-case class AllUnsolutions(unsolutionsForEachUser: Map[User, List[String]]) extends Notification {
-  private def usersUnsolutionToString(entry: (User, List[String])): String = {
+case class AllUnsolutions(unsolutionsForEachUser: Map[User, Seq[String]]) extends Notification {
+  private def usersUnsolutionToString(entry: (User, Seq[String])): String = {
     val name = entry._1.name
     val unsolutions = "\n • " ++ entry._2.mkString("\n • ")
     s"$name: $unsolutions"

@@ -26,8 +26,8 @@ class NineLetterDictionarySpec extends FlatSpec with Matchers {
     dictionary.has(Word("ABCDEFGHI")) shouldBe true
   }
 
-  it should "not contain missing word DATORSPEL" in {
-    dictionary.has(Word("DATORSPEL")) shouldBe false
+  it should "not contain missing word PUSSGURKA" in {
+    dictionary.has(Word("PUSSGURKA")) shouldBe false
   }
 
   it should "contain special word PIKÉTRÖJA" in {

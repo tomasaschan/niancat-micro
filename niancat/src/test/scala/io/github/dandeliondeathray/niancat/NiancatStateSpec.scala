@@ -26,7 +26,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
     state.puzzle shouldBe Some(puzzle.norm)
   }
 
-  "a state with a puzzle set" should "store a solution" in {
+  "A state with a puzzle set" should "store a solution" in {
     val state = new NiancatState()
     state.reset(Puzzle("TRIVASVAN"), true) // VANTRIVAS
 
@@ -159,7 +159,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
     val word = Word("pikétröja")
     state.solved(User("foo"), word, true)
 
-    state.result(Seq(Word("PIKÉTRÖJA"))) shouldBe Some(
+    state.result(Seq(Word("PIKÉTRÖJA").norm)) shouldBe Some(
       SolutionResult(Map(word.norm -> Seq(User("foo"))), Map(User("foo") -> 1))
     )
   }
@@ -184,5 +184,29 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
         Map(User("foo") -> 2, User("bar") -> 1, User("baz") -> 1)
       )
     )
+  }
+
+  it should "forget any unconfirmed unsolution when setting an unsolution for the same user" in {
+    val state = new NiancatState()
+
+    state.reset(Puzzle("VIVANSART"), true)
+    state.storeUnconfirmedUnsolution(User("foo"), "an unconfirmed unsolution")
+
+    state.storeUnsolution(User("foo"), Puzzle("VIVANSART").letters)
+
+    val stored = state.unconfirmedUnsolutions() get User("foo")
+
+    stored shouldBe None
+  }
+
+  it should "list unsolutions in the order they were added" in {
+    val state = new NiancatState()
+    val puzzle = Puzzle("VIVANSART")
+    state.reset(puzzle, true)
+
+    state.storeUnsolution(User("foo"), s"${puzzle.letters} 1")
+    state.storeUnsolution(User("foo"), s"${puzzle.letters} 2")
+
+    state.unsolutions() shouldBe Map(User("foo") -> Seq(s"${puzzle.letters} 1", s"${puzzle.letters} 2"))
   }
 }
