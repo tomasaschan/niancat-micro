@@ -127,10 +127,11 @@ class PuzzleEngine(val state: State, val dictionary: Dictionary) {
       return WordAndPuzzleMismatch(word, puzzle, tooMany, tooFew)
     }
     if (dictionary has word) {
+      val userHasSolvedThisBefore = state.hasSolved(user, word)
       state.solved(user, word, isWeekday)
       val noOfSolutions = dictionary.solutions(puzzle).size
       val solutionId: Option[Int] = dictionary.solutionId(state.puzzle(), word) filter (_ => noOfSolutions > 1)
-      if (!state.hasSolved(user, word))
+      if (!userHasSolvedThisBefore)
         CompositeResponse(
           Vector(CorrectSolution(word), SolutionNotification(user, 1 + state.streak(user), solutionId))
         )

@@ -100,9 +100,8 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
   val emptyState: State = new EmptyState() {}
 
   def engineWithPuzzle(p: Puzzle, dictionary: Dictionary = acceptingDictionary): PuzzleEngine = {
-    val state: State = new State() with EmptyState {
-      override def puzzle(): Option[Puzzle] = Some(p)
-    }
+    val state = new NiancatState(new InMemoryState())
+    state.reset(p, true)
     new PuzzleEngine(state, dictionary)
   }
 
@@ -367,6 +366,14 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     val engine = engineWithPuzzle(defaultPuzzle)
 
     val response = CheckSolution(defaultWord, User("foo"), true)(engine)
+
+    response should containResponse(SolutionNotification(User("foo"), 1, None))
+  }
+
+  it should "notify the main channel if a user solves the puzzle on the weekend" in {
+    val engine = engineWithPuzzle(defaultPuzzle)
+
+    val response = CheckSolution(defaultWord, User("foo"), false)(engine)
 
     response should containResponse(SolutionNotification(User("foo"), 1, None))
   }

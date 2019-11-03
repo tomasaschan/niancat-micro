@@ -57,7 +57,7 @@ class NiancatState(var repr: StateRepr) extends State {
     repr.unconfirmedUnsolutions = Map()
   }
   override def solved(user: User, word: Word, isWeekday: Boolean): Unit = {
-    val userHasFoundThisSolutionBefore = repr.solutions contains ((word.norm, user))
+    val userHasFoundThisSolutionBefore = repr.solutions contains (word.norm, user)
     if (!userHasFoundThisSolutionBefore) {
       repr.solutions :+= (word.norm, user)
       if (isWeekday) {
@@ -67,7 +67,7 @@ class NiancatState(var repr: StateRepr) extends State {
   }
 
   override def hasSolved(user: User, word: Word): Boolean = {
-    repr.solutions contains ((word.norm, user))
+    repr.solutions contains (word.norm, user)
   }
   override def streak(user: User): Int = repr.streaks getOrElse (user, 0)
 
