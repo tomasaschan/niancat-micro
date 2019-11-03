@@ -9,25 +9,25 @@ import PuzzleNormalizer._
 
 class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   "A default state" should "not have a result set" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     state.result(Seq()) shouldBe None
   }
 
   it should "store the new puzzle" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     state.reset(Puzzle("VANTRIVSA"), true)
     state.puzzle shouldBe Some(Puzzle("VANTRIVSA"))
   }
 
   it should "normalize the puzzle when storing it" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     val puzzle = Puzzle("pikétröja")
     state.reset(puzzle, true)
     state.puzzle shouldBe Some(puzzle.norm)
   }
 
   "A state with a puzzle set" should "store a solution" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     state.reset(Puzzle("TRIVASVAN"), true) // VANTRIVAS
 
     state.solved(User("foo"), Word("VANTRIVAS"), true)
@@ -38,7 +38,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   }
 
   it should "not increase streak on weekends" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     state.reset(Puzzle("TRIVASVAN"), true) // VANTRIVAS
 
     state.solved(User("foo"), Word("VANTRIVAS"), false)
@@ -49,7 +49,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   }
 
   it should "return solutions in the order in which they are found" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     state.reset(Puzzle("TRIVASVAN"), true) // VANTRIVAS
 
     state.solved(User("foo"), Word("VANTRIVAS"), true)
@@ -66,7 +66,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   }
 
   it should "only list one solution if a user solves the same word several times" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     state.reset(Puzzle("TRIVASVAN"), true) // VANTRIVAS
 
     state.solved(User("foo"), Word("VANTRIVAS"), true)
@@ -78,7 +78,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   }
 
   it should "forget solutions when a new puzzle is set" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     state.reset(Puzzle("GURKPUSSA"), true)
     state.solved(User("foo"), Word("PUSSGURKA"), true)
     state.solved(User("baz"), Word("PUSSGURKA"), true)
@@ -111,7 +111,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   }
 
   it should "not forget streaks when new puzzle is set on weekends" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     state.reset(Puzzle("GURKPUSSA"), true)
     state.solved(User("foo"), Word("PUSSGURKA"), true)
     state.solved(User("baz"), Word("PUSSGURKA"), true)
@@ -144,7 +144,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   }
 
   it should "normalize the puzzle on reset" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     val puzzle = Puzzle("piketröja")
 
     state.reset(puzzle, true)
@@ -153,7 +153,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   }
 
   it should "normalize words that users solve" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
 
     state.reset(Puzzle("PIKÉTRÖJA"), true)
     val word = Word("pikétröja")
@@ -165,7 +165,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   }
 
   "a state with several solutions" should "return all of them" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     state.reset(Puzzle("DATORLESP"), true) // DATORSPEL, SPELDATOR, LEDARPOST, REPSOLDAT
 
     state.solved(User("foo"), Word("DATORSPEL"), true)
@@ -187,7 +187,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   }
 
   it should "forget any unconfirmed unsolution when setting an unsolution for the same user" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
 
     state.reset(Puzzle("VIVANSART"), true)
     state.storeUnconfirmedUnsolution(User("foo"), "an unconfirmed unsolution")
@@ -200,7 +200,7 @@ class NiancatStateSpec extends FlatSpec with Matchers with MockFactory {
   }
 
   it should "list unsolutions in the order they were added" in {
-    val state = new NiancatState()
+    val state = new NiancatState(new InMemoryState())
     val puzzle = Puzzle("VIVANSART")
     state.reset(puzzle, true)
 
