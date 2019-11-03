@@ -375,7 +375,20 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val response = CheckSolution(defaultWord, User("foo"), false)(engine)
 
-    response should containResponse(SolutionNotification(User("foo"), 1, None))
+    response should containResponse(SolutionNotification(User("foo"), 0, None))
+  }
+
+  it should "notify with a streak of two if the user has previously solved exactly one puzzle" in {
+    val state = new NiancatState(new InMemoryState())
+    state.reset(defaultPuzzle, true)
+    val engine = new PuzzleEngine(state, acceptingDictionary)
+
+    CheckSolution(defaultWord, User("foo"), true)(engine)
+
+    state.reset(Puzzle("DATORSPLE"), true)
+    val response = CheckSolution(Word("DATORSPEL"), User("foo"), true)(engine)
+
+    response should containResponse(SolutionNotification(User("foo"), 2, None))
   }
 
   it should "not notify the main channel if a user solves the puzzle again" in {
@@ -391,10 +404,7 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
 
     val engine = new PuzzleEngine(state, acceptingDictionary)
 
-    val firstResponse = CheckSolution(defaultWord, User("foo"), true)(engine)
-
-    firstResponse should containResponse(CorrectSolution(defaultWord))
-    firstResponse should containResponse(SolutionNotification(User("foo"), 1, None))
+    CheckSolution(defaultWord, User("foo"), true)(engine)
 
     val secondResponse = CheckSolution(defaultWord, User("foo"), true)(engine)
 

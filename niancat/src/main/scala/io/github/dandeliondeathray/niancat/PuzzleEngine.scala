@@ -133,7 +133,7 @@ class PuzzleEngine(val state: State, val dictionary: Dictionary) {
       val solutionId: Option[Int] = dictionary.solutionId(state.puzzle(), word) filter (_ => noOfSolutions > 1)
       if (!userHasSolvedThisBefore)
         CompositeResponse(
-          Vector(CorrectSolution(word), SolutionNotification(user, 1 + state.streak(user), solutionId))
+          Vector(CorrectSolution(word), SolutionNotification(user, state.streak(user), solutionId))
         )
       else
         CorrectSolution(word)
