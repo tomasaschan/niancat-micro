@@ -13,9 +13,8 @@ case class CheckSolutionBody(user: String, solution: String)
 case class AddUnsolutionBody(unsolution: String)
 
 object NiancatService {
-  def service(dictionary: Dictionary) = {
-    val state = new NiancatState()
-    val engine = new PuzzleEngine(state, dictionary)
+  def service(dictionary: Dictionary, stateRepr: StateRepr with StorableState) = {
+    val engine = new PuzzleEngine(new NiancatState(stateRepr), dictionary)
     val responder = new NiancatApiResponder()
 
     HttpService {
@@ -38,6 +37,7 @@ object NiancatService {
         req.as(jsonOf[SetPuzzleBody]) flatMap { setPuzzleBody =>
           val command = SetPuzzle(Puzzle(setPuzzleBody.puzzle), yesterdayWasWeeekday)
           val response = command(engine)
+          stateRepr.save()
           val messageResponses = responder.messageResponses(response)
           Ok(Json.fromValues(messageResponses map (_.toJSON)))
         }
@@ -54,6 +54,7 @@ object NiancatService {
         req.as(jsonOf[CheckSolutionBody]) flatMap { checkSolutionBody =>
           val command = CheckSolution(Word(checkSolutionBody.solution), User(checkSolutionBody.user), isWeekday)
           val response = command(engine)
+          stateRepr.save()
           val messageResponses = responder.messageResponses(response)
           Ok(Json.fromValues(messageResponses map (_.toJSON)))
         }
@@ -68,6 +69,7 @@ object NiancatService {
         req.as(jsonOf[AddUnsolutionBody]) flatMap { addUnsolutionBody =>
           val command = AddUnsolution(addUnsolutionBody.unsolution, User(user))
           val response = command(engine)
+          stateRepr.save()
           val messageResponses = responder.messageResponses(response)
           Ok(Json.fromValues(messageResponses map (_.toJSON)))
         }

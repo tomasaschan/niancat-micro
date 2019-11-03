@@ -48,9 +48,25 @@ object NiancatSlackApp extends ServerApp {
       case Success(d: Dictionary) => d
     }
 
+    val state = sys.env
+      .get("STATE_FILE")
+      .map(path => new JsonFileBackedState(path))
+      .flatMap(state => {
+        Try({
+          state.load()
+          state
+        }) match {
+          case Success(s) => Some(s)
+          case Failure(e) =>
+            println("Could not load state, falling back to in-memory state management.\n%s" format e)
+            None
+        }
+      })
+      .getOrElse(new InMemoryState())
+
     BlazeBuilder
       .bindHttp(port, ip)
-      .mountService(NiancatService.service(dictionary))
+      .mountService(NiancatService.service(dictionary, state))
       .withServiceExecutor(pool)
       .start
   }
