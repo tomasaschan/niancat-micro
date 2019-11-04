@@ -225,6 +225,33 @@ class PuzzleEngineSpec extends FlatSpec with Matchers with MockFactory with Resp
     response should containResponseOfType(classTag[YesterdaysPuzzle].runtimeClass)
   }
 
+  it should "not include the new puzzles solution when it is set" in {
+    val dictionary = stub[Dictionary]
+    (dictionary.has _) when (*) returns (true) anyNumberOfTimes ()
+    (dictionary.solutions _) when (Puzzle("DATORSPLE")) returns (Seq(
+      Word("DATORSPEL"),
+    )) anyNumberOfTimes ()
+    (dictionary.solutions _) when (Puzzle("VANTRIVSA")) returns (Seq(
+      Word("VANTRIVAS"),
+    )) anyNumberOfTimes ()
+    (dictionary.solutionId _) when (*, *) returns (Some(1)) anyNumberOfTimes ()
+
+    val state = new NiancatState(new InMemoryState())
+    val engine = new PuzzleEngine(state, dictionary)
+
+    SetPuzzle(Puzzle("DATORSPLE"), true)(engine)
+    val response = SetPuzzle(Puzzle("VANTRIVSA"), true)(engine).asInstanceOf[CompositeResponse]
+
+    val maybeYesterdaysPuzzle: Option[YesterdaysPuzzle] = response.responses.collectFirst({ case x: YesterdaysPuzzle => x })
+
+    maybeYesterdaysPuzzle match {
+      case Some(YesterdaysPuzzle(solutionResult)) =>
+        assert(!solutionResult.wordsAndSolvers.contains(Word("VANTRIVAS")))
+      case None =>
+        fail("Response had no YesterdaysPuzzle")
+    }
+  }
+
   it should "reset the puzzle solution when a new one is set" in {
     val newPuzzle = Puzzle("ABCDEFGHI")
 

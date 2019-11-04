@@ -27,6 +27,10 @@ case class Word(letters: String) {
 case class User(name: String)
 
 class PuzzleEngine(val state: State, val dictionary: Dictionary) {
+  def findAllSolutions(p: Option[Puzzle]): Seq[Word] = {
+    (p map (dictionary.solutions(_))) getOrElse Seq[Word]()
+  }
+
   def set(nonNormalizedPuzzle: Puzzle, isWeekday: Boolean): Response = {
     val p = nonNormalizedPuzzle.norm
     if (state.puzzle.map(_ matches p) getOrElse false) {
@@ -40,9 +44,10 @@ class PuzzleEngine(val state: State, val dictionary: Dictionary) {
 
     val maybeUnsolutions = if (state unsolutions () isEmpty) None else Some(state unsolutions ())
 
+    val allYesterdaysSolutions = findAllSolutions(state.puzzle)
     val responses: Vector[Option[Response]] = Vector(
       Some(NewPuzzle { p }),
-      state.result(allSolutions) map (YesterdaysPuzzle(_)),
+      state.result(allYesterdaysSolutions) map (YesterdaysPuzzle(_)),
       Some(allSolutions.size) filter (_ > 1) map (MultipleSolutions(_)),
       maybeUnsolutions map (AllUnsolutions(_))
     )
